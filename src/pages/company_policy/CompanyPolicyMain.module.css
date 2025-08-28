@@ -1,0 +1,20 @@
+.company-policy-main main {
+    display: flex;
+    flex-direction: column;
+    margin: 30px;
+    align-items: center;
+}
+
+.title {
+    font-size: xx-large;
+    text-align: center;
+    width: 800px;
+}
+
+.content {
+    margin: 20px;
+    font-size: large;
+    width: 1280px;
+    height: 500px;
+    resize: none;
+}
