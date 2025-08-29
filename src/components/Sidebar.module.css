@@ -1,0 +1,33 @@
+.sidebar {
+  width: 200px;
+  background: #333;
+  color: #fff;
+  padding: 20px;
+}
+
+.home {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.parent {
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.subMenu {
+  margin-left: 15px;
+  margin-top: 5px;
+}
+
+.subMenu li {
+  font-size: 14px;
+  margin: 5px 0;
+  cursor: pointer;
+}
