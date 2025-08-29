@@ -1,10 +1,11 @@
 import './App.css'
+import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain'
 
 function App() {
 
   return (
     <div className="container">
-        초기 상태
+        <CompanyPolicyMain/>
     </div>
   )
 }
