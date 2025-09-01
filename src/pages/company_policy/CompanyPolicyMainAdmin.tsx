@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import style from "./CompanyPolicyMain.module.css"
-import { addPolicy, getPolicies, updatePolicy } from "../../api/companyPolicyApi";
+import { addPolicy, deletePolicy, getPolicies, updatePolicy } from "../../api/companyPolicyApi";
 import ComPolPaginator from "../../components/company_policy/ComPolPaginator";
 import { type CompanyPolicy } from "../../types/companyPolicy";
+import { useParams } from "react-router-dom";
+import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
 
 export default function CompanyPolicyMainAdmin() {
     const [title, setTitle] = useState("");
@@ -12,6 +14,8 @@ export default function CompanyPolicyMainAdmin() {
     const [policyId, setPolicyId] = useState(0);
     const [titleDisabled, setTitleDisabled] = useState(true);
     const [policyList, setPolicyList] = useState<CompanyPolicy[]>([]);
+    const {policyNo} = useParams();
+    const [showAi, setShowAi] = useState(false);
 
     const handleTitleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
@@ -20,21 +24,20 @@ export default function CompanyPolicyMainAdmin() {
         setContent(e.target.value);
     };
     const handleAddClick = () => {
-        const bool = confirm("새 규정을 추가하시겠습니까? 저장을 꼭 하고 확인을 눌러주세요.");
+        const bool = confirm("새 규정을 추가하시겠습니까? 꼭 저장하고 확인을 눌러주세요.");
         if (bool) {
             setTitleDisabled(false);
             setTitle("");
             setContent("");
             setPolicyId(0);
         }
-    }
+    };
     const handleSave = () => {
         const bool = confirm("저장하시겠습니까?");
         if (bool) {
             if (policyId === 0) {
                 addPolicy(title, content)
                 .then(res => {
-                    console.log(res.data);
                     setPolicyId(res.data.policyId);
                 })
                 .catch(err => console.log(err))
@@ -42,6 +45,9 @@ export default function CompanyPolicyMainAdmin() {
                     setOriginalTitle(title);
                     setOriginalContent(content);
                     setTitleDisabled(true);
+                    getPolicies()
+                    .then(data => setPolicyList(data))
+                    .catch(err => console.log(err));
                 });
             } else {
                 updatePolicy(policyId, content)
@@ -50,24 +56,49 @@ export default function CompanyPolicyMainAdmin() {
                 .finally(() => {
                     setOriginalTitle(title);
                     setOriginalContent(content);
+                    getPolicies()
+                    .then(data => setPolicyList(data))
+                    .catch(err => console.log(err));
                 });
             }
         }
-    }
+    };
+    const handleDelete = () => {
+        const bool = confirm("정말 삭제하시겠습니까?");
+        if (bool) {
+            deletePolicy(policyId)
+            .then(res => console.log(res))
+            .catch(err => console.log(err))
+            .finally(() => {
+                location.href = `/admin/cpolicies`;
+            });
+        }
+    };
+    const toggleAi = () => {
+        setShowAi(!showAi);
+    };
 
     useEffect(() => {
         getPolicies()
         .then(data => {
-            console.log(data);
-            setTitle(data[0].title);
-            setContent(data[0].content);
-            setOriginalTitle(data[0].title);
-            setOriginalContent(data[0].content);
-            setPolicyId(data[0].policyId);
-            setPolicyList(data);
+            if (policyNo) {
+                setTitle(data[Number(policyNo)-1].title);
+                setContent(data[Number(policyNo)-1].content);
+                setOriginalTitle(data[Number(policyNo)-1].title);
+                setOriginalContent(data[Number(policyNo)-1].content);
+                setPolicyId(data[Number(policyNo)-1].policyId);
+                setPolicyList(data);
+            } else {
+                setTitle(data[0].title);
+                setContent(data[0].content);
+                setOriginalTitle(data[0].title);
+                setOriginalContent(data[0].content);
+                setPolicyId(data[0].policyId);
+                setPolicyList(data);
+            }
         })
         .catch(err => console.log(err));
-    }, [])
+    }, [policyNo]);
 
     return (
         <div className={style["company-policy-main"]}>
@@ -78,10 +109,15 @@ export default function CompanyPolicyMainAdmin() {
                 <input type="text" name="title" id="title" className={style.title} placeholder="제목" value={title} onChange={handleTitleChange} disabled={titleDisabled} />
                 <p>*제목은 수정할 수 없습니다.</p>
                 <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} onChange={handleContentChange}></textarea>
+                {
+                    showAi && <CoreFlowAi setShowModal={setShowAi}/>
+                    // showAi && <iframe src="/faqServiceFront.html" width="100%" height="500px" />
+                }
             </main>
             <footer>
                 <div className={style["footer-left"]}>
-                    <p>a</p>
+                    <button type="button">목차</button>
+                    <button type="button" style={{"marginLeft":"20px"}} onClick={toggleAi}>AI</button>
                 </div>
                 <div className={style["footer-center"]}>
                     <ComPolPaginator policyList={policyList} />
@@ -91,9 +127,9 @@ export default function CompanyPolicyMainAdmin() {
                         (title != originalTitle) || (content != originalContent) ? <button type="button" onClick={handleSave}>저장</button> : <></>
                     }
                     <button type="button" onClick={handleAddClick} className={style["margin-btn"]}>규정 추가</button>
-                    <button type="button" className={style["margin-btn"]}>규정 삭제</button>
+                    <button type="button" onClick={handleDelete} className={style["margin-btn"]}>규정 삭제</button>
                 </div>
             </footer>
         </div>
-    )
+    );
 }

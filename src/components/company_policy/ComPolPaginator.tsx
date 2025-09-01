@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { CompanyPolicy } from "../../types/companyPolicy";
+import { useNavigate } from "react-router-dom";
 
 export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]}) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -8,6 +9,7 @@ export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]
     const endIndex = startIndex + itemsPerPage;
     const currentItems = policyList.slice(startIndex, endIndex);
     const totalPages = Math.ceil(policyList.length / itemsPerPage);
+    const navigate = useNavigate();
 
     // 이전 페이지로
     const goToPrevious = () => {
@@ -21,8 +23,8 @@ export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]
             setCurrentPage(currentPage + 1);
         }
     };
-    const handleLiClick = () => {
-        console.log()
+    const handleLiClick = (policyNo:number) => {
+        navigate(`/admin/cpolicies/${policyNo}`);
     };
 
 
@@ -31,7 +33,9 @@ export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]
             <button type="button" onClick={goToPrevious} disabled={currentPage === 1}>{"<이전"}</button>
             <ol style={{"display":"flex", "justifyContent":"space-evenly", "padding":0, "margin":0, "listStyle":"none"}}>
                 {
-                    currentItems && currentItems.map((policy, index) => (<li key={policy.policyId} style={{"margin":"5px"}} onClick={handleLiClick}>{startIndex + index + 1}</li>))
+                    currentItems && currentItems.map((policy, index) => (
+                    <li key={policy.policyId} style={{"margin":"5px", "cursor":"pointer"}} onClick={() => handleLiClick(startIndex + index + 1)}>{startIndex + index + 1}</li>
+                ))
                 }
             </ol>
             <button type="button" onClick={goToNext} disabled={currentPage === totalPages}>{"다음>"}</button>

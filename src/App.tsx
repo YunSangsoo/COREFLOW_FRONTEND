@@ -6,31 +6,37 @@ import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
+import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
+import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 
 function App() {
+    const dispatch = useDispatch();
 
-  const dispatch = useDispatch();
+    useEffect(() => {
+        api.post("/auth/refresh")
+            .then(res => {
+                dispatch(loginSuccess(res.data));
+            })
+            .catch(err => {
+                dispatch(logout(err.data));
+            })
+    }, [])
 
-  useEffect(() => {
-    api.post("/auth/refresh")
-    .then(res => {
-      dispatch(loginSuccess(res.data));
-    })
-    .catch(err => {
-      dispatch(logout(err.data));
-    })
-  },[])
-
-  return (
-    <div className="container">
-      <Routes>
-        <Route path="/"  element={<MainPage/>}/>
-        <Route path="/auth">
-          <Route path="login" element={<Login/>}/>
-        </Route>
-      </Routes>
-    </div>
-  )
+    return (
+        <div className="container">
+            <Routes>
+                <Route path="/" element={<MainPage />} />
+                <Route path="/auth">
+                    <Route path="login" element={<Login />} />
+                </Route>
+                <Route path="/cpolicies" element={<CompanyPolicyMain/>} />
+                <Route path="/admin/cpolicies">
+                    <Route path="" element={<CompanyPolicyMainAdmin/>} />
+                    <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                </Route>
+            </Routes>
+        </div>
+    )
 }
 
 export default App
