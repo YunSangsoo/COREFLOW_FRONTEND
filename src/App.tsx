@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import Login from './login/Login'
-import MainPage from './mainPage/mainPage'
+import MainPage from './mainPage/MainPage'
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
