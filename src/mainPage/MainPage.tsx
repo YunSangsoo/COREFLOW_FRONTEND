@@ -20,37 +20,44 @@ export default function MainPage(){
     return (
         <>
             {
-                    auth.isAuthenticated ? (
-                        <>
-                        <div className="nav-item">
-                            <span style={{fontWeight:"bold"}}>
-                                {auth.user?.name} {auth.user?.email}
-                            </span>
-                        </div>
-                        <div id="logout-button" className="nav-item">
-                            <button
-                                onClick={handleLogout}
-                                style={{
-                                    padding: "8px 16px",
-                                    backgroundColor: "#DC3545",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                로그아웃
-                            </button>
-                        </div>
-                        </>
-                        ) : (
-                        <div id="login-button">
-                            <button>
-                                <Link to="/auth/login" className="nav-login">로그인</Link>
-                            </button>
-                        </div>
-                        )
-                    }
+            auth.isAuthenticated ? (
+                <>
+                <div className="nav-item">
+                    <span style={{fontWeight:"bold"}}>
+                        {auth.user?.name} {auth.user?.email}
+                    </span>
+                </div>
+                <div id="logout-button" className="nav-item">
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            padding: "8px 16px",
+                            backgroundColor: "#DC3545",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer"
+                        }}
+                    >
+                    로그아웃
+                    </button>
+                    <button>마이페이지</button>
+                </div>
+                </>
+                ) : (
+                <div id="login-button">
+                    <button>
+                        <Link to="/auth/login" className="nav-login">로그인</Link>
+                    </button>
+                    <button>
+                        <Link to="/auth/find-id" className="nav-find-id">아이디 찾기</Link>
+                    </button>
+                    <button>
+                        <Link to="/auth/find-pwd" className="nav-find-pwd">비밀번호 찾기</Link>
+                    </button>
+                </div>
+                )
+            }
         </>
     )
 }

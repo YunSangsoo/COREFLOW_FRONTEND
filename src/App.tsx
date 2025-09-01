@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
+import FindId from './login/Find-id';
+import FindPwd from './login/Find-pwd';
 
 function App() {
 
@@ -27,6 +29,8 @@ function App() {
         <Route path="/"  element={<MainPage/>}/>
         <Route path="/auth">
           <Route path="login" element={<Login/>}/>
+          <Route path="find-id" element={<FindId/>}/>
+          <Route path="find-pwd" element={<FindPwd/>}/>
         </Route>
       </Routes>
     </div>
