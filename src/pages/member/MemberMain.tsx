@@ -7,7 +7,7 @@ import MemberDetail from "./MemberDetail";
 
 export default function MemberMain() {
     /*
-        사원 조회 및 검색
+        사원 조회 및 검색용 훅
     */
     const [searchValues, setSearchValues] = useState({
         userName : '',
@@ -20,19 +20,24 @@ export default function MemberMain() {
         depName : null,
         posName : null
     });
-    
-    // 사원 목록 조회
+    /*
+        사원 상세 조회용 훅
+    */
+    const [isModal, setIsModal] = useState(false);
+    const [selectedUser,setSelectedUser] = useState<number|null>(null);
+
+    // 사원 목록 조회용 훅
     const {data:members, isLoading, isError, error} = useQuery<MemberResponse[]>({
         queryKey : ['members',searchParams],
         queryFn : () => memberList(searchParams)
     })
 
-    // 부서 목록 조회
+    // 부서 목록 조회용 훅
     const {data:department} = useQuery<Department[]>({
         queryKey : ['departments'],
         queryFn : depList
     })
-    // 직위 목록 조회
+    // 직위 목록 조회용 훅
     const {data:position} = useQuery<Position[]>({
         queryKey : ['positions'],
         queryFn : posList
@@ -62,15 +67,7 @@ export default function MemberMain() {
         })
     }
 
-    if(isLoading) return <div>Loading...</div>
-    if(isError) return <div>{error.message}</div>
-
-    /*
-        사원 상세 조회
-    */
-    const [isModal, setIsModal] = useState(false);
-    const [selectedUser,setSelectedUser] = useState<number|null>(null);
-
+    // 사원 상세 조회
     const handleDetailOpen = (userNo:number) => {
         setSelectedUser(userNo);
         setIsModal(true);
@@ -80,6 +77,9 @@ export default function MemberMain() {
         setSelectedUser(null);
         setIsModal(false);
     }
+
+    if(isLoading) return <div>Loading...</div>
+    if(isError) return <div>{error.message}</div>
 
     return(
         <div className={styles.container}>

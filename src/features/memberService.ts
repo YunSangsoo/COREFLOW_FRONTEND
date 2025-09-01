@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Department, MemberDetail, MemberResponse, Position } from "../types/member";
+import type { Department, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -24,7 +24,14 @@ export const memberList = async function(searchParams:{userName:string|null,depN
     return response.data;
 }
 
+// 사원 상세 조회
 export const memberDetail = async (userNo:number) => {
     const response = await api.get<MemberDetail>(`/members/${userNo}`)
     return response.data;
-} 
+}
+
+// 사원 정보 수정
+export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => {
+    const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
+    return response.data;
+}

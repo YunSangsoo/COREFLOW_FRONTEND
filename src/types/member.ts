@@ -42,3 +42,17 @@ export interface MemberDetail{
     address : string;
     addressDetail : string;
 }
+
+// 사원 정보 수정
+export interface MemberPatch{
+    userName? : string;
+    email? : string;
+    phone? : string;
+    hireDate? : string
+    depName? : string;
+    posName? : string;
+    extention? : number;
+    address? : string;
+    addressDetail? : string;
+}
+
