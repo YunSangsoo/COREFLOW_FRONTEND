@@ -1,7 +1,15 @@
-// 부서 조회
+// 부모 부서 조회
 export interface Department{
     depId : number;
     depName : string;
+    parentId : null;
+}
+
+// 자식 부서 조회
+export interface DepartmentDetail{
+    depId : number;
+    depName : string;
+    parentId : number;
 }
 
 // 직위 조회

@@ -1,14 +1,20 @@
 import axios from "axios";
-import type { Department, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
+import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
     // withCredentials : true
 });
 
-// 부서 목록 조회
+// 부모 부서 조회
 export const depList = async () => {
     const response = await api.get<Department[]>("/departments");
+    return response.data;
+}
+
+// 자식 부서 조회
+export const depDetailList = async (parentId:number) => {
+    const response = await api.get<DepartmentDetail[]>(`/departments/${parentId}`);
     return response.data;
 }
 
