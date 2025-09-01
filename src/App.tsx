@@ -1,11 +1,15 @@
 import './App.css'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import CalendarPage from './pages/CalendarPage'
 
 function App() {
 
   return (
-    <div className="container">
-        초기 상태
-    </div>
+      <Routes>
+        <Route path='/' element={<CalendarPage/>}/>
+      </Routes>
+    
+      
   )
 }
 
