@@ -23,3 +23,19 @@ footer {
     display: flex;
     justify-content: space-between;
 }
+
+.footer-center {
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+.footer-right {
+    /* width: 500px; */
+    display: flex;
+    /* justify-content: space-between; */
+}
+
+.margin-btn {
+    margin-left: 20px;
+}
