@@ -3,18 +3,18 @@ import type { Department, MemberDetail, MemberResponse, Position } from "../type
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
-    withCredentials : true
+    // withCredentials : true
 });
 
 // 부서 목록 조회
 export const depList = async () => {
-    const response = await api.get<Department[]>("/department");
+    const response = await api.get<Department[]>("/departments");
     return response.data;
 }
 
 // 직위 목록 조회
 export const posList = async () => {
-    const response = await api.get<Position[]>("/position");
+    const response = await api.get<Position[]>("/positions");
     return response.data;
 }
 

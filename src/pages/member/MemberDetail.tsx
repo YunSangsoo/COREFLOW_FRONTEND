@@ -83,44 +83,6 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
     );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // src/pages/MemberDetail.tsx
 
 // import styles from './MemberDetail.module.css';
