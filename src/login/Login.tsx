@@ -31,7 +31,7 @@ export default function Login() {
         .then(res => {
             console.log(res);
             dispatch(loginSuccess(res.data));
-            navigate("/home", {state:{flash:"로그인 성공"}});
+            navigate("/", {state:{flash:"로그인 성공"}});
         })
         .catch((err:AxiosError) => {
             if(err.response?.status === 404){
@@ -46,7 +46,7 @@ export default function Login() {
                 .then(res => {
                     console.log(res);
                     dispatch(loginSuccess(res.data));
-                    navigate("/home", {state:{flash:"로그인 성공"}});
+                    navigate("/", {state:{flash:"로그인 성공"}});
                 })
                 .catch(err => {
                     setError("회원가입에 실패했습니다 나중에 다시 실행해 주세요");
