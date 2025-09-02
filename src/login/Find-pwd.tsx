@@ -1,62 +1,40 @@
 import { useState } from "react";
-import axios from "axios";
+import { api } from "../api/coreflowApi";
 
 const FindPwd = () => {
-    const [userId, setUserId] = useState("");
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [resetToken, setResetToken] = useState<string | null>(null);
-    const [newPassword, setNewPassword] = useState("");
-    const [success, setSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const requestReset = async () => {
+    const sendTempPwd = async () => {
         try {
-            const res = await axios.post("/auth/reset-password", { userId, email });
-            setResetToken(res.data.resetToken);
+            const res = await api.post("/auth/find-pwd", { name, email });
+            setSuccessMessage(res.data);
+            setErrorMessage("");
         } catch (err: any) {
-            console.error(err);
-        }
-    };
-
-    const changePassword = async () => {
-        if (!resetToken) return;
-        try {
-            await axios.post("/auth/change-password", { resetToken, newPassword });
-            setSuccess(true);
-        } catch (err: any) {
-            console.error(err);
+            setErrorMessage(err.response?.data || "오류가 발생했습니다.");
+            setSuccessMessage("");
         }
     };
 
     return (
         <div>
             <h2>비밀번호 찾기</h2>
-            {!resetToken ? (
-                <>
-                <input
-                    placeholder="아이디"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                />
-                <input
-                    placeholder="이메일"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <button onClick={requestReset}>비밀번호 재설정 요청</button>
-            </>
-        ) : (
-            <>
-                <input
-                    placeholder="새 비밀번호"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <button onClick={changePassword}>비밀번호 변경</button>
-            </>
-        )}
+            <input
+                placeholder="이름"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
+            <input
+                placeholder="이메일"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            />
+            <button onClick={sendTempPwd}>임시 비밀번호 발송</button>
 
-        {success && <p>비밀번호가 성공적으로 변경되었습니다.</p>}
+        {successMessage && <p>{successMessage}</p>}
+        {errorMessage && <p>{errorMessage}</p>}
         </div>
     );
 };
