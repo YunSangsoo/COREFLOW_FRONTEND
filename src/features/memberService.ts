@@ -25,7 +25,7 @@ export const posList = async () => {
 }
 
 // 사원 목록 조회
-export const memberList = async function(searchParams:{userName:string|null,depName:string|null,posName:string|null}) {
+export const memberList = async function(searchParams:{userName:string,depName:string,posName:string}) {
     const response = await api.get<MemberResponse[]>("/members",{params : searchParams});
     return response.data;
 }
@@ -39,5 +39,5 @@ export const memberDetail = async (userNo:number) => {
 // 사원 정보 수정
 export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => {
     const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
-    return response.data;
+    return response.status;
 }
