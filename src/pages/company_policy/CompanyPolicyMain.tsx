@@ -15,7 +15,7 @@ export default function CompanyPolicyMain() {
     const [originalContent, setOriginalContent] = useState("");
     const [policyId, setPolicyId] = useState(0);
     const [policyList, setPolicyList] = useState<CompanyPolicy[]>([]);
-    const { policyNo } = useParams();
+    let { policyNo } = useParams();
     const [showAi, setShowAi] = useState(false);
     const [showToC, setShowToC] = useState(false);
 
@@ -72,7 +72,7 @@ export default function CompanyPolicyMain() {
                         <button type="button" style={{ "marginLeft": "20px" }} onClick={toggleAi}>AI</button>
                     </div>
                     <div className={style["footer-center"]}>
-                        <ComPolPaginator policyList={policyList} />
+                        <ComPolPaginator policyList={policyList} policyNo={policyNo} />
                     </div>
                     <div className={style["footer-right"]}>
                     </div>

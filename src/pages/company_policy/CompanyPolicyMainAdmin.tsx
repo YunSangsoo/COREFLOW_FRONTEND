@@ -130,7 +130,7 @@ export default function CompanyPolicyMainAdmin() {
                         <button type="button" style={{ "marginLeft": "20px" }} onClick={toggleAi}>AI</button>
                     </div>
                     <div className={style["footer-center"]}>
-                        <ComPolPaginatorAdmin policyList={policyList} />
+                        <ComPolPaginatorAdmin policyNo={policyNo} policyList={policyList} />
                     </div>
                     <div className={style["footer-right"]}>
                         {
