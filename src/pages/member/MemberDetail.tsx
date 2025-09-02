@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './MemberDetail.module.css';
 import { memberDetail, memberUpdate, posList } from '../../features/memberService';
 import type { MemberDetail, MemberPatch, Position } from '../../types/member';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import DepartmentMap from '../../components/DepartmentMap';
 
 export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:()=> void}) {
     const queryClient = useQueryClient();
@@ -22,8 +23,27 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
     // 수정할 데이터용 훅
     const [updateData, setUpdateData] = useState<MemberPatch|undefined>(data);
 
-    // 부서 목록 조회용 훅
+    // departmentMap 컴포넌트 렌더링(부서 목록 조회용 훅)
     const [isDepartmentMap, setIsDepartment] = useState(false);
+
+    // 외부 클릭시 departmentMap 컴포넌트 닫기기능(지피티 help)
+    const depMapRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event:MouseEvent) => {
+            if(depMapRef.current && !depMapRef.current.contains(event.target as Node)){
+                setIsDepartment(false);
+            }
+        };
+
+        if(isDepartmentMap){
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown',handleClickOutside);
+        }
+    },[isDepartmentMap]);
+
 
     useEffect(() => {
         setUpdateData(data)
@@ -49,21 +69,17 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         setUpdateData(prev => ({...(prev||{}),[name]:value}));
     }
 
-    // 부서 선택 핸들러 (DepartmentMap에서부터 받아올 예정)
-    const handleDepSelect = (depName:string) => {
-        setUpdateData
+    // 부서 선택창 핸들러
+    const handleDepOpen = () => {
+        setIsDepartment(true)
     }
 
-
-
-
-
-
-
-
-
-
-
+    // 부서 선택 데이터 (DepartmentMap에서부터 받아올 예정)
+    const handleDepSelect = (depName:string) => {
+        setUpdateData(prev => ({...(prev || {}), depName}));
+        setIsDepartment(false)
+    }
+    
     // 수정 버튼
     const handleUpdate = () => {
         if(updateData){
@@ -100,7 +116,15 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>소속</span>
-                        <input type="text" name='depName' value={updateData.depName} onChange={handleChange}/>
+                        <div className={styles.depInputContainer} ref={depMapRef}>
+                            <input type="text" name='depName' value={updateData.depName} onClick={handleDepOpen} readOnly/>
+                            {isDepartmentMap && (
+                                <div className={styles.depTreeContainer}>
+                                    {/* DepartmentMap 렌더링 후 부서 선택 시 호출할 함수 전달 */}
+                                    <DepartmentMap departmentSelect={handleDepSelect} />
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className={styles.infoRow}>
                         <span>이메일</span>
