@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { CompanyPolicy } from "../../types/companyPolicy";
-import { useNavigate } from "react-router-dom";
 
 export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPolicy[]}) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -9,7 +8,6 @@ export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPol
     const endIndex = startIndex + itemsPerPage;
     const currentItems = policyList.slice(startIndex, endIndex);
     const totalPages = Math.ceil(policyList.length / itemsPerPage);
-    const navigate = useNavigate();
 
     // 이전 페이지로
     const goToPrevious = () => {
@@ -24,7 +22,7 @@ export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPol
         }
     };
     const handleLiClick = (policyNo:number) => {
-        navigate(`/admin/cpolicies/${policyNo}`);
+        location.href = `/admin/cpolicies/${policyNo}`;
     };
 
 
