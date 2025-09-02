@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { CompanyPolicy } from "../../types/companyPolicy";
 import { useNavigate } from "react-router-dom";
 
-export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]}) {
+export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPolicy[]}) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -24,7 +24,7 @@ export default function ComPolPaginator({policyList}:{policyList:CompanyPolicy[]
         }
     };
     const handleLiClick = (policyNo:number) => {
-        navigate(`/cpolicies/${policyNo}`);
+        navigate(`/admin/cpolicies/${policyNo}`);
     };
 
 

@@ -29,7 +29,10 @@ function App() {
                 <Route path="/auth">
                     <Route path="login" element={<Login />} />
                 </Route>
-                <Route path="/cpolicies" element={<CompanyPolicyMain/>} />
+                <Route path="/cpolicies">
+                    <Route path="" element={<CompanyPolicyMain/>} />
+                    <Route path=":policyNo" element={<CompanyPolicyMain/>} />
+                </Route>
                 <Route path="/admin/cpolicies">
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />

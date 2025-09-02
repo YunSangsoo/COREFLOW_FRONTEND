@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import style from "./CompanyPolicyMain.module.css"
 import { addPolicy, deletePolicy, getPolicies, updatePolicy } from "../../api/companyPolicyApi";
-import ComPolPaginator from "../../components/company_policy/ComPolPaginator";
 import { type CompanyPolicy } from "../../types/companyPolicy";
 import { useParams } from "react-router-dom";
 import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
+import TableOfContentsAdmin from "../../components/company_policy/TableOfContentsAdmin";
+import ComPolPaginatorAdmin from "../../components/company_policy/ComPolPaginatorAdmin";
 
 export default function CompanyPolicyMainAdmin() {
     const [title, setTitle] = useState("");
@@ -16,6 +17,7 @@ export default function CompanyPolicyMainAdmin() {
     const [policyList, setPolicyList] = useState<CompanyPolicy[]>([]);
     const {policyNo} = useParams();
     const [showAi, setShowAi] = useState(false);
+    const [showToC, setShowToC] = useState(false);
 
     const handleTitleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
@@ -77,6 +79,9 @@ export default function CompanyPolicyMainAdmin() {
     const toggleAi = () => {
         setShowAi(!showAi);
     };
+    const toggleToC = () => {
+        setShowToC(!showToC);
+    };
 
     useEffect(() => {
         getPolicies()
@@ -111,16 +116,18 @@ export default function CompanyPolicyMainAdmin() {
                 <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} onChange={handleContentChange}></textarea>
                 {
                     showAi && <CoreFlowAi setShowModal={setShowAi}/>
-                    // showAi && <iframe src="/faqServiceFront.html" width="100%" height="500px" />
+                }
+                {
+                    showToC && <TableOfContentsAdmin policyList={policyList} setShowToC={setShowToC} />
                 }
             </main>
             <footer>
                 <div className={style["footer-left"]}>
-                    <button type="button">목차</button>
+                    <button type="button" onClick={toggleToC}>목차</button>
                     <button type="button" style={{"marginLeft":"20px"}} onClick={toggleAi}>AI</button>
                 </div>
                 <div className={style["footer-center"]}>
-                    <ComPolPaginator policyList={policyList} />
+                    <ComPolPaginatorAdmin policyList={policyList} />
                 </div>
                 <div className={style["footer-right"]}>
                     {
