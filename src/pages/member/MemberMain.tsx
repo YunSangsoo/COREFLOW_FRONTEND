@@ -6,9 +6,8 @@ import { depDetailList, depList, memberList, posList } from "../../features/memb
 import MemberDetail from "./MemberDetail";
 
 export default function MemberMain() {
-    /*
-        사원 조회 및 검색용 훅
-    */
+    
+    // 사원 조회 및 검색용 훅
     const [searchValues, setSearchValues] = useState({
         userName : '',
         parentDepId : null as number | null,
@@ -21,9 +20,8 @@ export default function MemberMain() {
         depName : '',
         posName : ''
     });
-    /*
-        사원 상세 조회용 훅
-    */
+
+    // 사원 상세 조회용 훅
     const [isModal, setIsModal] = useState(false);
     const [selectedUser,setSelectedUser] = useState<number|null>(null);
 
@@ -83,11 +81,22 @@ export default function MemberMain() {
 
     // 검색 버튼
     const handleSearch = () => {
-        // 검색 파라미터를 설정할 때 부모 부서 또는 자식 부서의 이름으로 설정
-        const selectedParentDep = parentDep?.find(dep => dep.depId === searchValues.parentDepId);
-        const selectedChildDep = childDep?.find(dep => dep.depId === searchValues.childDepId);
+        let finalDepName = '';
 
-        const finalDepName = selectedChildDep ? selectedChildDep.depName : (selectedParentDep ? selectedParentDep.depName : '');
+        // 자식 부서가 선택되었으면 자식 부서 이름을 사용
+        if (searchValues.childDepId) {
+            const selectedChildDep = childDep?.find(dep => dep.depId === searchValues.childDepId);
+            if (selectedChildDep) {
+                finalDepName = selectedChildDep.depName;
+            }
+        } 
+        // 자식 부서가 선택되지 않았고 부모 부서만 선택되었으면 부모 부서 이름을 사용
+        else if (searchValues.parentDepId) {
+            const selectedParentDep = parentDep?.find(dep => dep.depId === searchValues.parentDepId);
+            if (selectedParentDep) {
+                finalDepName = selectedParentDep.depName;
+            }
+        }
         
         setSearchParams({
             userName: searchValues.userName,
@@ -134,7 +143,7 @@ export default function MemberMain() {
                 </span>
                 <span>부서
                     <select name="parentDepId" value={searchValues.parentDepId || ''} onChange={handleChange}>
-                        <option value="">부모 부서 전체</option>
+                        <option value="">전체</option>
                         {parentDep?.map(dep => (
                             <option key={dep.depId} value={dep.depId}>
                                 {dep.depName}
@@ -142,18 +151,16 @@ export default function MemberMain() {
                         ))}
                     </select>
                 </span>
-                {searchValues.parentDepId && (
-                    <span>
-                        <select name="childDepId" value={searchValues.childDepId || ''} onChange={handleChange}>
-                            <option value="">자식 부서 전체</option>
-                            {childDep?.map(dep => (
-                                <option key={dep.depId} value={dep.depId}>
-                                    {dep.depName}
-                                </option>
-                            ))}
-                        </select>
-                    </span>
-                )}
+                <span>상세 부서
+                    <select name="childDepId" value={searchValues.childDepId || ''} onChange={handleChange} disabled={!searchValues.parentDepId}>
+                        <option value="">전체</option>
+                        {childDep?.map(dep => (
+                            <option key={dep.depId} value={dep.depId}>
+                                {dep.depName}
+                            </option>
+                        ))}
+                    </select>
+                </span>
                 <span>직위
                     <select name="posName" value={searchValues.posName} onChange={handleChange}>
                         <option value="">전체</option>
@@ -179,7 +186,7 @@ export default function MemberMain() {
                             <th>사원명</th>
                             <th>이메일</th>
                             <th>입사일</th>
-                            <th>부서</th>
+                            <th>소속</th>
                             <th>직위</th>
                             <th>전화번호</th>
                         </tr>

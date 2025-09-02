@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './MemberDetail.module.css';
-import { memberDetail, memberUpdate } from '../../features/memberService';
-import type { MemberDetail, MemberPatch } from '../../types/member';
+import { memberDetail, memberUpdate, posList } from '../../features/memberService';
+import type { MemberDetail, MemberPatch, Position } from '../../types/member';
 import React, { useEffect, useState } from 'react';
 
 export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:()=> void}) {
@@ -13,11 +13,19 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         queryFn : () => memberDetail(userNo)
     });
 
+    // 직위 조회용 훅
+    const {data:position} = useQuery<Position[]>({
+        queryKey:['positions'],
+        queryFn:posList
+    })
+
     // 수정할 데이터용 훅
     const [updateData, setUpdateData] = useState<MemberPatch|undefined>(data);
 
+    // 부서 목록 조회용 훅
+    const [isDepartmentMap, setIsDepartment] = useState(false);
+
     useEffect(() => {
-        
         setUpdateData(data)
     },[data]);
 
@@ -35,11 +43,26 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         }
     });
 
-    // input태그 수정
-    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    // 입력 필드 수정 핸들러
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
         const {name,value} = e.target;
         setUpdateData(prev => ({...(prev||{}),[name]:value}));
     }
+
+    // 부서 선택 핸들러 (DepartmentMap에서부터 받아올 예정)
+    const handleDepSelect = (depName:string) => {
+        setUpdateData
+    }
+
+
+
+
+
+
+
+
+
+
 
     // 수정 버튼
     const handleUpdate = () => {
@@ -50,7 +73,7 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
 
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
-    if(!data || !updateData) return <div>해당 사원 정보를 찾을 수 없습니다.</div>
+    if(!data || !updateData) return <div>사원 정보를 찾을 수 없습니다.</div>
 
     return (
         <div className={styles.modalOverlay}>
@@ -64,19 +87,19 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
 
                 <div className={styles.infoGrid}>
                     <div className={styles.infoRow}>
-                        <span>사원명</span>
-                        <input type="text" name='userName' value={updateData.userName} onChange={handleChange}/>
+                        <span>사원번호</span>
+                        <input type="text" name='userNo' value={data.userNo} readOnly/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>입사일</span>
                         <input type="text" name='hireDate' value={updateData.hireDate} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
-                        <span>사원번호</span>
-                        <input type="text" name='userNo' value={data.userNo} readOnly/>
+                        <span>사원명</span>
+                        <input type="text" name='userName' value={updateData.userName} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
-                        <span>부서</span>
+                        <span>소속</span>
                         <input type="text" name='depName' value={updateData.depName} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
@@ -85,7 +108,13 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>직위</span>
-                        <input type="text" name='posName' value={updateData.posName} onChange={handleChange}/>
+                        <select name="posName" value={updateData.posName} onChange={handleChange}>
+                            {position?.map(pos => (
+                                <option key={pos.posId} value={pos.posId}>
+                                    {pos.posName}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className={styles.infoRow}>
                         <span>전화번호</span>

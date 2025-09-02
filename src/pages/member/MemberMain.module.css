@@ -19,7 +19,8 @@
 .searchSection {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* flex-start로 변경하여 요소들을 왼쪽부터 배치합니다. */
+  gap: 20px; /* 요소들 사이의 간격을 설정합니다. */
   margin-bottom: 20px;
   padding: 15px;
   border: 1px solid #ddd;
@@ -31,7 +32,7 @@
 .searchSection span {
   display: flex;
   align-items: center;
-  margin-right: 20px;
+  /* margin-right: 20px; /* gap 속성 사용으로 제거 */
   font-weight: bold;
 }
 
