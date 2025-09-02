@@ -26,7 +26,7 @@ const Sidebar = () => {
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>캘린더</Link>
                     </li>
                     <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>회사 규정</Link>
+                        <Link to="/cpolicies" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>회사 규정</Link>
                     </li>
                     <li className="px-4">
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>공지</Link>
