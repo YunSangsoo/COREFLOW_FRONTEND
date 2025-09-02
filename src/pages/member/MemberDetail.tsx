@@ -3,7 +3,7 @@ import styles from './MemberDetail.module.css';
 import { memberDetail, memberUpdate, posList } from '../../features/memberService';
 import type { MemberDetail, MemberPatch, Position } from '../../types/member';
 import React, { useEffect, useRef, useState } from 'react';
-import DepartmentMap from '../../components/DepartmentMap';
+import DepartmentMap from './DepartmentMap';
 
 export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:()=> void}) {
     const queryClient = useQueryClient();

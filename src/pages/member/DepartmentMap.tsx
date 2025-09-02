@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import type { Department, DepartmentDetail } from "../types/member";
-import { depDetailList, depList } from "../features/memberService";
 import styles from './DepartmentMap.module.css'
+import type { Department, DepartmentDetail } from "../../types/member";
+import { depDetailList, depList } from "../../features/memberService";
 
 interface DepartmentMapProps{
     departmentSelect : (depName:string) => void;
