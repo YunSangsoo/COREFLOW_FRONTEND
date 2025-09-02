@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
     return (
-        <div className="flex flex-col w-56 bg-gray-800 text-white min-h-screen">
+        <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
                 CoreFlow
             </div>
