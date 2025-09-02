@@ -1,9 +1,3 @@
-/**
- * 통합 원파일 버전 (React + FullCalendar + dayjs)
- * - types, api, ui 모두 이 파일 하나에 모아 개발 → 나중에 섹션 단위 분리
- * - 아래 SECTION 주석을 기준으로 파일을 쪼개면 됩니다.
- */
-
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -50,6 +44,7 @@ type EventDto = {
 
 const BASE = '/api'
 const USE_MOCK = false // ⚠️ 개발 중 편하게 목 데이터 쓰고 싶을 때 true
+const USER_NO = '123'  // dev용 헤더. 운영에선 세션/쿠키로 대체
 
 async function getJSON<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -73,7 +68,7 @@ async function fetchVisibleCalendars(): Promise<CalendarSummaryDto[]> {
 // [GET] 특정 캘린더의 기간 이벤트
 async function fetchEvents(p: { calendarId: number; from: Date; to: Date }): Promise<EventDto[]> {
   if (USE_MOCK) {
-    // ✅ 심플 목: 보이는 범위하고 상관 없이 몇 개만
+    // ✅ 심플 목
     if (p.calendarId === 1) {
       return [
         {
@@ -106,6 +101,58 @@ async function fetchEvents(p: { calendarId: number; from: Date; to: Date }): Pro
     to: dayjs(p.to).toISOString()
   })
   return getJSON<EventDto[]>(`${BASE}/events?${qs}`)
+}
+
+/** === FullCalendar 전용: 생성/수정/삭제 === */
+type FcCreateBody = {
+  calId: number
+  title: string
+  start: string // ISO
+  end: string   // ISO
+  allDay: boolean
+  locationText?: string
+  note?: string
+  roomId?: number | null
+  eventType?: string
+  labelId?: number | null
+  rrule?: string
+  exdates?: string
+}
+
+// [POST] 생성
+async function createEventFc(body: FcCreateBody): Promise<number> {
+  const res = await fetch(`${BASE}/fc/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-No': USER_NO },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) {
+    if (res.status === 409) throw new Error('회의실 예약이 겹칩니다.')
+    throw new Error(`생성 실패: HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
+// [PUT] 수정
+async function updateEventFc(eventId: string | number, calendarId: number, body: Omit<FcCreateBody, 'calId'>) {
+  const res = await fetch(`${BASE}/fc/events/${eventId}?calendarId=${calendarId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-User-No': USER_NO },
+    body: JSON.stringify(body)
+  })
+  if (!res.ok) {
+    if (res.status === 409) throw new Error('회의실 예약이 겹칩니다.')
+    throw new Error(`수정 실패: HTTP ${res.status}`)
+  }
+}
+
+// [DELETE] 삭제
+async function deleteEventFc(eventId: string | number) {
+  const res = await fetch(`${BASE}/fc/events/${eventId}`, {
+    method: 'DELETE',
+    headers: { 'X-User-No': USER_NO }
+  })
+  if (!res.ok) throw new Error(`삭제 실패: HTTP ${res.status}`)
 }
 
 /* =============================================================================
@@ -193,7 +240,9 @@ export default function CalendarPage() {
                 title: e.title,
                 start: e.start,
                 end: e.end,
-                allDay: e.allDay
+                allDay: e.allDay,
+                // 업데이트 시 어떤 캘린더의 이벤트인지 식별용
+                extendedProps: { calId: e.calendarId }
               }))
             )
           } catch (err) {
@@ -215,6 +264,97 @@ export default function CalendarPage() {
   /** 모두 선택/해제 */
   const toggleAll = () =>
     setSelected(allSelected ? new Set() : new Set(calendars.map(c => c.calId)))
+
+  /* ----------------------------
+     FullCalendar 이벤트 핸들러
+     ---------------------------- */
+
+  // 생성: 범위 선택 후 서버 저장
+  const handleSelect = async (selectInfo: any) => {
+    const title = window.prompt('일정 제목을 입력하세요')
+    if (!title) {
+      selectInfo.view.calendar.unselect()
+      return
+    }
+    try {
+      await createEventFc({
+        calId: Array.from(selected)[0] ?? calendars[0]?.calId,
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: !!selectInfo.allDay,
+        locationText: '',
+        note: '',
+        roomId: null,
+        eventType: 'MEETING',
+        labelId: null
+      })
+      selectInfo.view.calendar.refetchEvents()
+    } catch (e: any) {
+      alert(e.message || '생성 실패')
+    }
+  }
+
+  // 이동(drop) → 수정
+  const handleEventDrop = async (arg: any) => {
+    try {
+      await updateEventFc(
+        arg.event.id,
+        Number(arg.event.extendedProps?.calId ?? Array.from(selected)[0]),
+        {
+          title: arg.event.title,
+          start: arg.event.startStr,
+          end: arg.event.endStr,
+          allDay: !!arg.event.allDay,
+          locationText: arg.event.extendedProps?.locationText ?? '',
+          note: arg.event.extendedProps?.note ?? '',
+          roomId: arg.event.extendedProps?.roomId ?? null,
+          eventType: arg.event.extendedProps?.eventType ?? 'MEETING',
+          labelId: arg.event.extendedProps?.labelId ?? null
+        }
+      )
+      arg.view.calendar.refetchEvents()
+    } catch (e: any) {
+      alert(e.message || '업데이트 실패')
+      arg.revert()
+    }
+  }
+
+  // 리사이즈 → 수정
+  const handleEventResize = async (arg: any) => {
+    try {
+      await updateEventFc(
+        arg.event.id,
+        Number(arg.event.extendedProps?.calId ?? Array.from(selected)[0]),
+        {
+          title: arg.event.title,
+          start: arg.event.startStr,
+          end: arg.event.endStr,
+          allDay: !!arg.event.allDay,
+          locationText: arg.event.extendedProps?.locationText ?? '',
+          note: arg.event.extendedProps?.note ?? '',
+          roomId: arg.event.extendedProps?.roomId ?? null,
+          eventType: arg.event.extendedProps?.eventType ?? 'MEETING',
+          labelId: arg.event.extendedProps?.labelId ?? null
+        }
+      )
+      arg.view.calendar.refetchEvents()
+    } catch (e: any) {
+      alert(e.message || '업데이트 실패')
+      arg.revert()
+    }
+  }
+
+  // 클릭 → 삭제
+  const handleEventClick = async (clickInfo: any) => {
+    if (!window.confirm(`'${clickInfo.event.title}' 일정을 삭제할까요?`)) return
+    try {
+      await deleteEventFc(clickInfo.event.id)
+      clickInfo.event.remove()
+    } catch (e: any) {
+      alert(e.message || '삭제 실패')
+    }
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, padding: 16 }}>
@@ -281,7 +421,12 @@ export default function CalendarPage() {
           height="calc(100vh - 120px)"
           timeZone="local"
           selectable
-          events={[]} // eventSource는 동적으로 addEventSource에서 관리
+          editable                     // ← 드래그/이동/리사이즈 허용
+          events={[]}                  // eventSource는 동적으로 addEventSource에서 관리
+          select={handleSelect}        // ← 생성
+          eventDrop={handleEventDrop}  // ← 이동
+          eventResize={handleEventResize} // ← 길이 변경
+          eventClick={handleEventClick}   // ← 삭제
         />
       </div>
     </div>
