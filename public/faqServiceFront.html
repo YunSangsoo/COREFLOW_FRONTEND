@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 채팅</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 980px;
+            height: 680px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            line-height: 1.4;
+        }
+
+        .question {
+            background-color: #4CAF50;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .answer {
+            background-color: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .input-container {
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            background: white;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* 로딩 스피너 스타일 */
+        .loading {
+            align-self: flex-start;
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: black;
+            display: flex;
+            align-items: center;
+        }
+
+        .loading span {
+            margin-left: 5px;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+        <div class="chat-box" id="response"></div>
+        <div class="input-container">
+            <input type="text" id="question" placeholder="질문을 입력하세요..." onkeydown="handleKeyPress(event)">
+            <button onclick="sendQuery()">전송</button>
+        </div>
+    </div>
+
+    <script>
+        const sendQuery = async () => {
+            const questionInput = document.querySelector("#question");
+            const questionText = questionInput.value.trim();
+
+            if (questionText === "") return;
+
+            questionInput.value = ""; // 입력 필드 초기화
+
+            // 사용자의 질문을 채팅창에 추가
+            const questionBox = makeComponent(questionText, "question");
+            document.querySelector("#response").append(questionBox);
+            scrollToBottom();
+
+            // 로딩 상태를 위한 응답 메시지 초기화
+            const answerBox = makeComponent("", "answer");
+            document.querySelector("#response").append(answerBox);
+            scrollToBottom();
+
+            try {
+                const res = await fetch("http://localhost:8000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: questionText })
+                });
+
+                if (!res.ok || !res.body) {
+                    throw new Error("Stream 응답을 받을 수 없습니다.");
+                }
+
+                const reader = res.body.getReader();
+                const textDecoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = textDecoder.decode(value, { stream: true });
+                    answerBox.innerHTML += chunk;  // 실시간으로 텍스트 추가
+                    scrollToBottom();
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                answerBox.innerHTML = "⚠️ 응답을 가져오는 중 오류 발생";
+            }
+        };
+
+        const makeComponent = (text, className) => {
+            const div = document.createElement("div");
+            div.classList.add("message", className);
+            div.innerHTML = text;
+            return div;
+        };
+
+        const handleKeyPress = (event) => {
+            if (event.key === "Enter") {
+                sendQuery();
+            }
+        };
+
+        const scrollToBottom = () => {
+            const chatBox = document.querySelector("#response");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+    </script>
+
+
+</body>
+
+</html>
