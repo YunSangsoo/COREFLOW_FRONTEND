@@ -84,3 +84,4 @@ export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => 
     const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
     return response.status;
 }
+
