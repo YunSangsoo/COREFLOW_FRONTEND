@@ -2,11 +2,12 @@ import { useEffect, useState } from "react"
 import style from "./CompanyPolicyMain.module.css"
 import { addPolicy, deletePolicy, getPolicies, updatePolicy } from "../../api/companyPolicyApi";
 import { type CompanyPolicy } from "../../types/companyPolicy";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
 import TableOfContentsAdmin from "../../components/company_policy/TableOfContentsAdmin";
 import ComPolPaginatorAdmin from "../../components/company_policy/ComPolPaginatorAdmin";
 import Sidebar from "../../components/SideBar";
+import Tiptap from "../../components/company_policy/Tiptap";
 
 export default function CompanyPolicyMainAdmin() {
     const [title, setTitle] = useState("");
@@ -19,6 +20,7 @@ export default function CompanyPolicyMainAdmin() {
     const { policyNo } = useParams();
     const [showAi, setShowAi] = useState(false);
     const [showToC, setShowToC] = useState(false);
+    const navigate = useNavigate();
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
@@ -42,6 +44,8 @@ export default function CompanyPolicyMainAdmin() {
                 addPolicy(title, content)
                     .then(res => {
                         setPolicyId(res.data.policyId);
+                        navigate(`/admin/cpolicies/${policyList.length + 1}`);
+                        alert("저장 성공.");
                     })
                     .catch(err => console.log(err))
                     .finally(() => {
@@ -49,19 +53,22 @@ export default function CompanyPolicyMainAdmin() {
                         setOriginalContent(content);
                         setTitleDisabled(true);
                         getPolicies()
-                            .then(data => setPolicyList(data))
-                            .catch(err => console.log(err));
+                        .then(data => setPolicyList(data))
+                        .catch(err => console.log(err));
                     });
             } else {
                 updatePolicy(policyId, content)
-                    .then(res => console.log(res))
+                    .then(res => {
+                        console.log(res);
+                        alert("저장 성공.");
+                    })
                     .catch(err => console.log(err))
                     .finally(() => {
                         setOriginalTitle(title);
                         setOriginalContent(content);
                         getPolicies()
-                            .then(data => setPolicyList(data))
-                            .catch(err => console.log(err));
+                        .then(data => setPolicyList(data))
+                        .catch(err => console.log(err));
                     });
             }
         }
@@ -116,7 +123,8 @@ export default function CompanyPolicyMainAdmin() {
                 <main>
                     <input type="text" name="title" id="title" className={style.title} placeholder="제목" value={title} onChange={handleTitleChange} disabled={titleDisabled} />
                     <p>*제목은 수정할 수 없습니다.</p>
-                    <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} onChange={handleContentChange}></textarea>
+                    {/* <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} onChange={handleContentChange}></textarea> */}
+                    <Tiptap name="content" value={content} onChange={setContent} disabled={false} />
                     {
                         showAi && <CoreFlowAi setShowModal={setShowAi} />
                     }
