@@ -65,3 +65,7 @@ export interface MemberPatch{
     addressDetail? : string;
 }
 
+// 사원 삭제
+export interface MemberDelete{
+    status : string;
+}

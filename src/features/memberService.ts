@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
+import type { Department, DepartmentDetail, MemberDelete, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 // import {api} from '../api/coreflowApi';
 import { store } from "../store/store";
 import { loginSuccess, logout } from "./authSlice";
@@ -83,4 +83,9 @@ export const memberDetail = async (userNo:number) => {
 export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => {
     const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
     return response.status;
+}
+
+// 사원 삭제
+export const memberDelete = async (userNo:number, updatedMember:MemberDelete) => {
+    const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
 }
