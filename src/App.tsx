@@ -8,8 +8,6 @@ import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
-import MemberMain from './pages/member/MemberMain';
-import MemberDetail from './pages/member/MemberDetail'
 
 function App() {
     const dispatch = useDispatch();
@@ -38,8 +36,6 @@ function App() {
                 <Route path="/admin/cpolicies">
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
-                </Route>
-                <Route path='/members' element={<MemberMain/>}>
                 </Route>
             </Routes>
         </div>
