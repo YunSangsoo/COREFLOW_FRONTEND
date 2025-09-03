@@ -85,6 +85,7 @@ export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => 
     return response.status;
 }
 
-export const memberDelete = async (userNo:number, updatedMember:MemberDelete) => {
-    const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
+export const memberDelete = async (userNo:number) => {
+    const response = await api.delete<void>(`/members/${userNo}`)
+    return response.status;
 }

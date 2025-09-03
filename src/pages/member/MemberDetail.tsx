@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './MemberDetail.module.css';
-import { memberDetail, memberUpdate, posList } from '../../features/memberService';
+import { memberDelete, memberDetail, memberUpdate, posList } from '../../features/memberService';
 import type { MemberDetail, MemberPatch, Position } from '../../types/member';
 import React, { useEffect, useRef, useState } from 'react';
 import DepartmentMap from './DepartmentMap';
@@ -63,6 +63,18 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         }
     });
 
+    const deleteMutation = useMutation({
+        mutationFn: (userNo:number) => memberDelete(userNo),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey:['members']});
+            alert('사원 삭제 완료');
+            onClose();
+        },
+        onError : () => {
+            alert('사원 삭제 실패');
+        }
+    })
+
     // 입력 필드 수정 핸들러
     const handleChange = (e:React.ChangeEvent<HTMLInputElement|HTMLSelectElement>) => {
         const {name,value} = e.target;
@@ -80,16 +92,30 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         setIsDepartment(false)
     }
     
-    // 수정 버튼
+    // 사원 정보 수정 버튼
     const handleUpdate = () => {
-        if(updateData){
-            updateMutation.mutate(updateData);
+        if (!data || !updateData) return;
+
+        const changedData: Partial<MemberPatch> = {};
+        
+        (Object.keys(updateData) as Array<keyof MemberPatch>).forEach(key => {
+            if (updateData[key] !== data[key]) {
+                changedData[key] = updateData[key];
+            }
+        });
+        
+        if (Object.keys(changedData).length > 0) {
+            updateMutation.mutate(changedData);
+        } else {
+            alert("수정사항이 없습니다.");
         }
     }
 
     // 사원 삭제 버튼
     const handleDelete = () => {
-        
+        if(window.confirm('정말로 삭제하시겠습니까?')){
+            deleteMutation.mutate(userNo);
+        }
     }
 
     // 날짜 포맷
@@ -156,6 +182,13 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     <div className={styles.infoRow}>
                         <span>내선번호</span>
                         <input type="text" name='extention' value={updateData.extention||''} onChange={handleChange}/>
+                    </div>
+                    <div className={styles.infoRow}>
+                        <span>재직상태</span>
+                        <select name="status" value={updateData.status||''} onChange={handleChange}>
+                            <option value="T">재직</option>
+                            <option value="F">퇴직</option>
+                        </select>
                     </div>
                     <div className={styles.infoRow}>
                         <span>수정일</span>

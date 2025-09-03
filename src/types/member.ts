@@ -49,6 +49,7 @@ export interface MemberDetail{
     updateDate : string;
     address : string;
     addressDetail : string;
+    status : string;
 }
 
 // 사원 정보 수정
@@ -63,9 +64,9 @@ export interface MemberPatch{
     updateDate? : string;
     address? : string;
     addressDetail? : string;
+    status? : string;
 }
 
-// 사원 삭제
 export interface MemberDelete{
-    status : string;
+    userNo : number;
 }
