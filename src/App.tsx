@@ -13,6 +13,7 @@ import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member/MemberMain';
 import MemberDetail from './pages/member/MemberDetail'
 
+
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
@@ -52,8 +53,6 @@ function App() {
                 <Route path="/admin/cpolicies">
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
-                </Route>
-                <Route path='/members' element={<MemberMain/>}>
                 </Route>
             </Routes>
 
