@@ -20,7 +20,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>홈</Link>
                     </li>
                     <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>인사관리</Link>
+                        <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>인사관리</Link>
                     </li>
                     <li className="px-4">
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>전자결제</Link>
