@@ -85,7 +85,6 @@ export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => 
     return response.status;
 }
 
-// 사원 삭제
 export const memberDelete = async (userNo:number, updatedMember:MemberDelete) => {
     const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
 }
