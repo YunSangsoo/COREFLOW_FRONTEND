@@ -9,6 +9,7 @@ import { api } from './api/coreflowApi';
 import FindPwd from './login/Find-pwd';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
+import Mypage from './mypage/Mypage';
 
 function App() {
     const dispatch = useDispatch();
@@ -31,6 +32,7 @@ function App() {
                     <Route path="login" element={<Login />} />
                     <Route path="find-pwd" element={<FindPwd/>}/>
                 </Route>
+                <Route path="/mypage" element={<Mypage/>}/>
                 <Route path="/cpolicies">
                     <Route path="" element={<CompanyPolicyMain/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMain/>} />
