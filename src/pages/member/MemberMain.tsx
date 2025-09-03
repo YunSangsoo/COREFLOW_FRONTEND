@@ -12,13 +12,15 @@ export default function MemberMain() {
         userName : '',
         parentDepId : null as number | null,
         childDepId : null as number | null,
-        posName : ''
+        posName : '',
+        status : ''
     });
     
     const [searchParams, setSearchParams] = useState<SearchParams>({
         userName : '',
         depName : '',
-        posName : ''
+        posName : '',
+        status : '',
     });
 
     // 사원 상세 조회 모달용 훅
@@ -32,7 +34,8 @@ export default function MemberMain() {
             const convertedParams = {
                 userName : searchParams.userName || '',
                 depName : searchParams.depName || '',
-                posName : searchParams.posName || ''
+                posName : searchParams.posName || '',
+                status : searchParams.status || ''
             };
             return memberList(convertedParams)
         }
@@ -99,9 +102,10 @@ export default function MemberMain() {
         }
         
         setSearchParams({
-            userName: searchValues.userName,
-            depName: finalDepName,
-            posName: searchValues.posName,
+            userName : searchValues.userName,
+            depName : finalDepName,
+            posName : searchValues.posName,
+            status : searchValues.status
         });
     };
 
@@ -111,12 +115,14 @@ export default function MemberMain() {
             userName : '',
             parentDepId : null,
             childDepId : null,
-            posName : ''
+            posName : '',
+            status : ''
         })
         setSearchParams({
             userName : '',
             depName : '',
-            posName : ''
+            posName : '',
+            status : '',
         })
     }
 
@@ -171,6 +177,13 @@ export default function MemberMain() {
                         ))}
                     </select>
                 </span>
+                <span>재직상태
+                    <select name="status" value={searchValues.status} onChange={handleChange}>
+                        <option value="">전체</option>
+                        <option value="T">재직</option>
+                        <option value="F">퇴직</option>
+                    </select>
+                </span>
             </div>
             <div className={styles.buttonSection}>
                 <button onClick={handleReset}>초기화</button>
@@ -189,6 +202,7 @@ export default function MemberMain() {
                             <th>소속</th>
                             <th>직위</th>
                             <th>전화번호</th>
+                            <th>재직상태</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -203,6 +217,7 @@ export default function MemberMain() {
                                     <td>{member.depName}</td>
                                     <td>{member.posName}</td>
                                     <td>{member.phone}</td>
+                                    <td>{member.status === 'T' ? '재직' : '퇴직'}</td>
                                 </tr>
                             ))
                         ) : (

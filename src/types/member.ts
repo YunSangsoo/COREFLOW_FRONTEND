@@ -23,6 +23,7 @@ export interface SearchParams{
     userName : string|null;
     depName : string|null;
     posName : string|null;
+    status : string|null;
 }
 
 // 사원 조회
@@ -34,6 +35,8 @@ export interface MemberResponse{
     depName : string;
     posName : string;
     phone : string;
+    status : string;
+    updateDate : string;
 }
 
 // 사원 상세 조회

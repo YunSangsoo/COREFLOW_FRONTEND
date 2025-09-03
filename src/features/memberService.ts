@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Department, DepartmentDetail, MemberDelete, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
+import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 // import {api} from '../api/coreflowApi';
 import { store } from "../store/store";
 import { loginSuccess, logout } from "./authSlice";
@@ -68,7 +68,7 @@ export const posList = async () => {
 }
 
 // 사원 목록 조회
-export const memberList = async function(searchParams:{userName:string,depName:string,posName:string}) {
+export const memberList = async function(searchParams:{userName:string,depName:string,posName:string,status:string}) {
     const response = await api.get<MemberResponse[]>("/members",{params : searchParams});
     return response.data;
 }
