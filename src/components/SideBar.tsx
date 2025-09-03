@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom';
 
 
-// onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
-interface SidebarProps {
-  onChatClick: () => void;
-}
 
-const Sidebar = ({ onChatClick }: SidebarProps) => {
+
+const Sidebar = () => {
     return (
         <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
@@ -20,7 +17,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>홈</Link>
                     </li>
                     <li className="px-4">
-                        <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>인사관리</Link>
+                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>인사관리</Link>
                     </li>
                     <li className="px-4">
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>전자결제</Link>
@@ -35,9 +32,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>공지</Link>
                     </li>
                     <li className="px-4">
-                        <div onClick={onChatClick} className="block py-2 px-3 rounded hover:bg-gray-700 cursor-pointer" style={{ color: "white" }}>
-                            채팅
-                        </div>
+                        <Link to="/chat" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>채팅</Link>
                     </li>
                 </ul>
             </nav>
