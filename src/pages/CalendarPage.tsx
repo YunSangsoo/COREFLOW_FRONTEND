@@ -112,12 +112,12 @@ export default function CalendarPage() {
   useEffect(() => {
 
     console.log("start");
-    console.log(auth.user?.email);
+    console.log(auth.user?.userNo);
     (async () => {
       console.log(auth);
       await api.get('/calendars/visible',{
         params:{
-          user : auth.user
+          userNo : auth.user?.userNo
         }}).then(res =>{
         console.log(res);
       })

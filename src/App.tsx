@@ -9,6 +9,7 @@ import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import CalendarPage from './pages/CalendarPage';
+import Sidebar from './components/SideBar';
 
 function App() {
     const dispatch = useDispatch();
@@ -25,6 +26,7 @@ function App() {
 
     return (
         <div className="container">
+                <Sidebar />
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/auth">
