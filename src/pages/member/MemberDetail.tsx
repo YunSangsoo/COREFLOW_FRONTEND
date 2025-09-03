@@ -87,6 +87,10 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         }
     }
 
+    // 날짜 포맷
+    const hireDateFormat = updateData?.hireDate?.split('T')[0]; 
+    const updateDateFormat = updateData?.updateDate?.split('T')[0];
+
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
     if(!data || !updateData) return <div>사원 정보를 찾을 수 없습니다.</div>
@@ -108,7 +112,7 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>입사일</span>
-                        <input type="text" name='hireDate' value={updateData.hireDate} onChange={handleChange}/>
+                        <input type="text" name='hireDate' value={hireDateFormat} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>사원명</span>
@@ -117,7 +121,7 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     <div className={styles.infoRow}>
                         <span>소속</span>
                         <div className={styles.depInputContainer} ref={depMapRef}>
-                            <input type="text" name='depName' value={updateData.depName} onClick={handleDepOpen} readOnly/>
+                            <input type="text" name='depName' value={updateData.depName||''} onClick={handleDepOpen} readOnly/>
                             {isDepartmentMap && (
                                 <div className={styles.depTreeContainer}>
                                     {/* DepartmentMap 렌더링 후 부서 선택 시 호출할 함수 전달 */}
@@ -132,9 +136,9 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>직위</span>
-                        <select name="posName" value={updateData.posName} onChange={handleChange}>
+                        <select name="posName" value={updateData.posName||''} onChange={handleChange}>
                             {position?.map(pos => (
-                                <option key={pos.posId} value={pos.posId}>
+                                <option key={pos.posId} value={pos.posName}>
                                     {pos.posName}
                                 </option>
                             ))}
@@ -142,27 +146,27 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>전화번호</span>
-                        <input type="text" name='phone' value={updateData.phone} onChange={handleChange}/>
+                        <input type="text" name='phone' value={updateData.phone||''} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>내선번호</span>
-                        <input type="text" name='extention' value={updateData.extention} onChange={handleChange}/>
+                        <input type="text" name='extention' value={updateData.extention||''} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>수정일</span>
-                        <input type="text" name='updateDate' value={data.updateDate} readOnly/>
+                        <input type="text" name='updateDate' value={updateDateFormat} readOnly/>
                     </div>
                 </div>
                 
                 <div className={styles.addressSection}>
                     <div className={styles.addressRow}>
                         <span>주소</span>
-                        <input type="text" name='address' value={updateData.address} onChange={handleChange}/>
+                        <input type="text" name='address' value={updateData.address||''} onChange={handleChange}/>
                         <button className={styles.addressButton}>주소찾기</button>
                     </div>
                     <div className={styles.addressRow}>
                         <span>상세주소</span>
-                        <input type="text" name='addressDetail' value={updateData.addressDetail} onChange={handleChange}/>
+                        <input type="text" name='addressDetail' value={updateData.addressDetail||''} onChange={handleChange}/>
                     </div>
                 </div>
                 

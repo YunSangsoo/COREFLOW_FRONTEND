@@ -1,0 +1,45 @@
+.company-policy-main main {
+    display: flex;
+    flex-direction: column;
+    margin: 30px;
+    align-items: center;
+}
+
+.title {
+    font-size: xx-large;
+    text-align: center;
+    width: 800px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.content {
+    margin: 20px;
+    font-size: large;
+    width: 1280px;
+    height: 500px;
+    resize: none;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-center {
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+.footer-right {
+    /* width: 500px; */
+    display: flex;
+    /* justify-content: space-between; */
+}
+
+.margin-btn {
+    margin-left: 20px;
+}

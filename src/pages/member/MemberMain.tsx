@@ -21,7 +21,7 @@ export default function MemberMain() {
         posName : ''
     });
 
-    // 사원 상세 조회용 훅
+    // 사원 상세 조회 모달용 훅
     const [isModal, setIsModal] = useState(false);
     const [selectedUser,setSelectedUser] = useState<number|null>(null);
 
@@ -199,7 +199,7 @@ export default function MemberMain() {
                                     <td>{member.userNo}</td>
                                     <td>{member.userName}</td>
                                     <td>{member.email}</td>
-                                    <td>{member.hireDate}</td>
+                                    <td>{member.hireDate.split('T')[0]}</td>
                                     <td>{member.depName}</td>
                                     <td>{member.posName}</td>
                                     <td>{member.phone}</td>

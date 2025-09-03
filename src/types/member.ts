@@ -60,6 +60,7 @@ export interface MemberPatch{
     depName? : string;
     posName? : string;
     extention? : string;
+    updateDate? : string;
     address? : string;
     addressDetail? : string;
 }
