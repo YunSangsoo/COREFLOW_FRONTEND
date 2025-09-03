@@ -87,11 +87,6 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
         }
     }
 
-    // 사원 삭제 버튼
-    const handleDelete = () => {
-        
-    }
-
     // 날짜 포맷
     const hireDateFormat = updateData?.hireDate?.split('T')[0]; 
     const updateDateFormat = updateData?.updateDate?.split('T')[0];
@@ -178,7 +173,6 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                 <div className={styles.buttonGroup}>
                     <button onClick={onClose}>닫기</button>
                     <button onClick={handleUpdate}>수정</button>
-                    <button onClick={handleDelete}>삭제</button>
                 </div>
             </div>
         </div>
