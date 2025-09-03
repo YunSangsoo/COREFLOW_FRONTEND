@@ -10,33 +10,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
+    "@dnd-kit/core": "^6.3.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
-    "@mui/icons-material": "^7.3.1",
-    "@mui/material": "^7.3.1",
-    "@mui/x-date-pickers": "^8.10.2",
-=======
-    "@dnd-kit/core": "^6.3.1",
->>>>>>> main
+    "@mui/material": "^7.3.2",
+    "@mui/x-date-pickers": "^8.11.0",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.12",
     "@tanstack/react-query": "^5.85.5",
-    "@types/react-resizable": "^3.0.8",
     "@types/jquery": "^3.5.33",
+    "@types/react-resizable": "^3.0.8",
     "@types/summernote": "^0.8.10",
     "axios": "^1.11.0",
-<<<<<<< HEAD
-    "dayjs": "^1.11.15",
-=======
     "bootstrap": "^5.3.8",
+    "dayjs": "^1.11.18",
     "jquery": "^3.7.1",
->>>>>>> main
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-redux": "^9.2.0",

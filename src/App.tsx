@@ -8,14 +8,10 @@ import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
-<<<<<<< HEAD
-import CalendarPage from './pages/CalendarPage';
-import Sidebar from './components/SideBar';
-=======
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member/MemberMain';
->>>>>>> main
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
     const dispatch = useDispatch();
@@ -42,12 +38,7 @@ function App() {
 
     return (
         <div className="container">
-<<<<<<< HEAD
-                <Sidebar />
-=======
-            {}
             {!isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
->>>>>>> main
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/auth">
@@ -61,12 +52,10 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-<<<<<<< HEAD
+                    <Route path='/members' element={<MemberMain/>}>
+                </Route>
                 <Route>
                     <Route path='/calendar' element={<CalendarPage/>}/>
-=======
-                    <Route path='/members' element={<MemberMain/>}>
->>>>>>> main
                 </Route>
             </Routes>
 
