@@ -8,6 +8,8 @@ import TableOfContentsAdmin from "../../components/company_policy/TableOfContent
 import ComPolPaginatorAdmin from "../../components/company_policy/ComPolPaginatorAdmin";
 import Sidebar from "../../components/SideBar";
 
+
+
 export default function CompanyPolicyMainAdmin() {
     const [title, setTitle] = useState("");
     const [originalTitle, setOriginalTitle] = useState("");
