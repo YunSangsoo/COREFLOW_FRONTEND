@@ -11,7 +11,6 @@ import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member/MemberMain';
-import MemberDetail from './pages/member/MemberDetail';
 
 function App() {
     const dispatch = useDispatch();
@@ -53,7 +52,7 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-                <Route path='/members' element={<MemberMain/>}>
+                    <Route path='/members' element={<MemberMain/>}>
                 </Route>
             </Routes>
 

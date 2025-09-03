@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
+import type { Department, DepartmentDetail, MemberDelete, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 // import {api} from '../api/coreflowApi';
 import { store } from "../store/store";
 import { loginSuccess, logout } from "./authSlice";
@@ -85,3 +85,6 @@ export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => 
     return response.status;
 }
 
+export const memberDelete = async (userNo:number, updatedMember:MemberDelete) => {
+    const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
+}
