@@ -8,6 +8,7 @@
   align-items: flex-start;   /* 위쪽 정렬 */
   gap: 16px;
   width: 100%;
+  outline: 2px dashed red;
 }
 
 /* 왼쪽(작은 달력) - 고정폭 */

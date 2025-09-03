@@ -1,434 +1,330 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import type { EventResizeDoneArg } from '@fullcalendar/interaction'
+import type { DateSelectArg, EventClickArg, EventDropArg, DatesSetArg } from '@fullcalendar/core'
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
+
 import dayjs, { Dayjs } from 'dayjs'
 import 'dayjs/locale/ko'
 
 import '../style/calendar-layout.css'
+import { api } from '../api/coreflowApi'
+import type { RootState } from '../store/store'
+import { useSelector } from 'react-redux'
 
-/* =============================================================================
-   SECTION 1) TYPES (나중에 src/types/calendar.ts로 이동)
-   ========================================================================== */
-
-/** 내가 볼 수 있는 캘린더 요약 (서버 DTO) */
-type CalendarSummaryDto = {
+// ===== Types that mirror backend payloads =====
+export type FcCalendarRes = {
   calId: number
   name: string
-  color?: string
-  /** 백엔드가 내려주면 초기 선택 판단에 사용 */
-  isPersonal?: boolean
-  /** 백엔드가 명시적으로 1개만 true로 내려주면 가장 깔끔 */
-  defaultForMe?: boolean
+  color: string
+  defaultRole: 'NONE' | 'BUSY_ONLY' | 'READER' | 'CONTRIBUTOR' | 'EDITOR'
 }
 
-/** 일정 이벤트 (서버 DTO) */
-type EventDto = {
-  id: number | string
-  calendarId: number
-  title: string
-  start: string   // ISO-8601(+TZ)
-  end?: string
-  allDay?: boolean
-}
-
-/* =============================================================================
-   SECTION 2) API (나중에 src/api/calendar.ts로 이동)
-   - USE_MOCK 토글로 목/실 API 전환 가능
-   ========================================================================== */
-
-const BASE = '/api'
-const USE_MOCK = false // ⚠️ 개발 중 편하게 목 데이터 쓰고 싶을 때 true
-const USER_NO = '123'  // dev용 헤더. 운영에선 세션/쿠키로 대체
-
-async function getJSON<T>(url: string): Promise<T> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return res.json() as Promise<T>
-}
-
-// [GET] 내가 볼 수 있는 캘린더 목록
-async function fetchVisibleCalendars(): Promise<CalendarSummaryDto[]> {
-  if (USE_MOCK) {
-    // ✅ 목 데이터
-    return [
-      { calId: 1, name: '내 캘린더', color: '#4285F4', isPersonal: true, defaultForMe: true },
-      { calId: 2, name: '개발부서', color: '#0F9D58' },
-      { calId: 3, name: '프로젝트A', color: '#DB4437' }
-    ]
-  }
-  return getJSON<CalendarSummaryDto[]>(`${BASE}/calendars/visible`)
-}
-
-// [GET] 특정 캘린더의 기간 이벤트
-async function fetchEvents(p: { calendarId: number; from: Date; to: Date }): Promise<EventDto[]> {
-  if (USE_MOCK) {
-    // ✅ 심플 목
-    if (p.calendarId === 1) {
-      return [
-        {
-          id: 'm1',
-          calendarId: 1,
-          title: '개발 킥오프',
-          start: dayjs().startOf('month').add(2, 'day').hour(9).minute(0).second(0).format(),
-          end: dayjs().startOf('month').add(2, 'day').hour(10).minute(0).second(0).format(),
-          allDay: false
-        }
-      ]
-    }
-    if (p.calendarId === 2) {
-      return [
-        {
-          id: 'd1',
-          calendarId: 2,
-          title: '부서 주간회의',
-          start: dayjs().startOf('month').add(6, 'day').hour(10).format(),
-          end: dayjs().startOf('month').add(6, 'day').hour(11).format(),
-          allDay: false
-        }
-      ]
-    }
-    return []
-  }
-  const qs = new URLSearchParams({
-    calendarId: String(p.calendarId),
-    from: dayjs(p.from).toISOString(),
-    to: dayjs(p.to).toISOString()
-  })
-  return getJSON<EventDto[]>(`${BASE}/events?${qs}`)
-}
-
-/** === FullCalendar 전용: 생성/수정/삭제 === */
-type FcCreateBody = {
+export type EventRes = {
+  eventId: number
   calId: number
   title: string
-  start: string // ISO
-  end: string   // ISO
-  allDay: boolean
+  startAt: string // 'YYYY-MM-DDTHH:mm:ss' (KST local)
+  endAt: string   // same format
+  allDayYn: 'Y' | 'N'
   locationText?: string
   note?: string
-  roomId?: number | null
+  roomId?: number
+  status?: string
+  labelId?: number
   eventType?: string
-  labelId?: number | null
-  rrule?: string
-  exdates?: string
+  rrule?: string | null
+  exdates?: string | null
 }
 
-// [POST] 생성
-async function createEventFc(body: FcCreateBody): Promise<number> {
-  const res = await fetch(`${BASE}/fc/events`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-User-No': USER_NO },
-    body: JSON.stringify(body)
-  })
-  if (!res.ok) {
-    if (res.status === 409) throw new Error('회의실 예약이 겹칩니다.')
-    throw new Error(`생성 실패: HTTP ${res.status}`)
-  }
-  return res.json()
+// ===== Small fetch helper with base and X-User-No header =====
+const USER_NO = '1' // TODO: replace with real login value
+const API_BASE = 'http://localhost:8081/api'
+const API_PREFIX = '/calendar'
+
+
+// async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
+//   const url = typeof input === 'string'
+//     ? (input.startsWith('http') ? input : `${API_BASE}${input.startsWith('/') ? '' : '/'}${input}`)
+//     : input
+
+//   const res = await fetch(url, {
+//     ...init,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-User-No': USER_NO,
+//       ...(init?.headers || {}),
+//     },
+//     credentials: 'include',
+//   })
+
+//   const ctype = res.headers.get('content-type') || ''
+
+//   if (!res.ok) {
+//     const text = await res.text().catch(() => '')
+//     throw new Error(`HTTP ${res.status} on ${typeof url === 'string' ? url : 'request'}\n${text.slice(0, 200)}`)
+//   }
+//   if (!ctype.includes('application/json')) {
+//     const text = await res.text().catch(() => '')
+//     throw new Error(`Expected JSON but got ${ctype} on ${typeof url === 'string' ? url : 'request'}\n${text.slice(0, 200)}`)
+//   }
+
+//   return res.json() as Promise<T>
+// }
+
+// ===== UI State Types =====
+interface UiCalendar extends FcCalendarRes {
+  checked: boolean
 }
 
-// [PUT] 수정
-async function updateEventFc(eventId: string | number, calendarId: number, body: Omit<FcCreateBody, 'calId'>) {
-  const res = await fetch(`${BASE}/fc/events/${eventId}?calendarId=${calendarId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-User-No': USER_NO },
-    body: JSON.stringify(body)
-  })
-  if (!res.ok) {
-    if (res.status === 409) throw new Error('회의실 예약이 겹칩니다.')
-    throw new Error(`수정 실패: HTTP ${res.status}`)
-  }
-}
-
-// [DELETE] 삭제
-async function deleteEventFc(eventId: string | number) {
-  const res = await fetch(`${BASE}/fc/events/${eventId}`, {
-    method: 'DELETE',
-    headers: { 'X-User-No': USER_NO }
-  })
-  if (!res.ok) throw new Error(`삭제 실패: HTTP ${res.status}`)
-}
-
-/* =============================================================================
-   SECTION 3) UI (이 파일이 그대로 src/pages/CalendarPage.tsx)
-   ========================================================================== */
-
+// ===== Component =====
 export default function CalendarPage() {
-  /** 좌측 작은 달력의 현재 선택 월 */
-  const [monthValue, setMonthValue] = useState<Dayjs>(dayjs())
-  /** FullCalendar 제어용 ref (gotoDate, addEventSource 등) */
-  const calRef = useRef<FullCalendar | null>(null)
+  const [miniDate, setMiniDate] = useState<Dayjs | null>(dayjs())
+  const [calendars, setCalendars] = useState<UiCalendar[]>([])
+  const calendarRef = useRef<FullCalendar | null>(null)
 
-  /** 내가 볼 수 있는 캘린더 목록 */
-  const [calendars, setCalendars] = useState<CalendarSummaryDto[]>([])
-  /** 선택된 캘린더 ID 집합 */
-  const [selected, setSelected] = useState<Set<number>>(new Set())
+  // avoid setState in events loader: keep last range in a ref
+  const rangeRef = useRef<{ from: string; to: string } | null>(null)
 
-  /** 모두 선택 여부 (UI 체크박스 상태 계산용) */
-  const allSelected = useMemo(
-    () => calendars.length > 0 && selected.size === calendars.length,
-    [calendars, selected]
-  )
+  // Create Calendar Modal state
+  const [openCreate, setOpenCreate] = useState(false)
+  const [newCal, setNewCal] = useState<{ name: string; color: string; defaultRole: UiCalendar['defaultRole'] }>({
+    name: '',
+    color: '#1976d2',
+    defaultRole: 'READER',
+  })
+  const auth = useSelector((state:RootState) => state.auth);
+  //const [user, setUser] = useState();
 
-  /** 작은 달력에서 월 변경 → 메인 캘린더 이동 */
-  const handleMonthChange = (value: Dayjs | null) => {
-    if (!value) return
-    setMonthValue(value)
-    calRef.current?.getApi().gotoDate(value.toDate())
-  }
 
-  /** 초기 로드: 캘린더 목록 가져오기 + 초기 선택 결정 */
+  // ===== Effects =====
   useEffect(() => {
-    ;(async () => {
-      const list = await fetchVisibleCalendars()
-      setCalendars(list)
+    dayjs.locale('ko')
+  }, [])
 
-      // --- 초기 선택 정책 ---
-      // 1) defaultForMe가 있으면 그것 1개만
-      let defaultOne = list.find(c => c.defaultForMe)
-      // 2) 없으면 isPersonal 중 첫 번째 하나
-      if (!defaultOne) defaultOne = list.find(c => c.isPersonal)
-      // 3) 그것도 없으면 첫 번째
-      if (!defaultOne) defaultOne = list[0]
+  // Load visible calendars once
+  useEffect(() => {
 
-      setSelected(new Set(defaultOne ? [defaultOne.calId] : []))
+    console.log("start");
+    console.log(auth.user?.email);
+    (async () => {
+      console.log(auth);
+      await api.get('/calendars/visible',{
+        params:{
+          user : auth.user
+        }}).then(res =>{
+        console.log(res);
+      })
+
+      // try {
+      //   // NOTE: endpoint base resolved by API_BASE (see top)
+      //   const list = await api<FcCalendarRes[]>('/calendars/visible')
+      //   setCalendars(list.map(c => ({ ...c, checked: true })))
+      // } catch (e) {
+      //   console.error(e)
+      // }
     })()
   }, [])
 
-  /**
-   * 선택 상태 → FullCalendar eventSource 동기화
-   * - 선택 해제된 소스는 제거
-   * - 새로 선택된 소스는 추가(events 콜백에서 기간에 맞춰 fetch)
-   */
-  useEffect(() => {
-    const api = calRef.current?.getApi()
-    if (!api) return
+  // ===== Helper: current checked calendarIds =====
+  const checkedCalIds = useMemo(() => calendars.filter(c => c.checked).map(c => c.calId), [calendars])
 
-    // 제거
-    calendars.forEach(c => {
-      const id = `cal-${c.calId}`
-      const src = api.getEventSourceById(id)
-      if (src && !selected.has(c.calId)) src.remove()
-    })
-
-    // 추가
-    calendars.forEach(c => {
-      if (!selected.has(c.calId)) return
-      const id = `cal-${c.calId}`
-      if (api.getEventSourceById(id)) return
-
-      api.addEventSource({
-        id,
-        color: c.color,
-        // FullCalendar가 현재 보이는 범위를 info.start/end로 전달해줌
-        events: async (info, success, failure) => {
-          try {
-            const data = await fetchEvents({
-              calendarId: c.calId,
-              from: info.start,
-              to: info.end
-            })
-            success(
-              data.map(e => ({
-                id: e.id,
-                title: e.title,
-                start: e.start,
-                end: e.end,
-                allDay: e.allDay,
-                // 업데이트 시 어떤 캘린더의 이벤트인지 식별용
-                extendedProps: { calId: e.calendarId }
-              }))
-            )
-          } catch (err) {
-            failure(err)
-          }
-        }
-      } as any)
-    })
-  }, [calendars, selected])
-
-  /** 개별 캘린더 토글 */
-  const toggleSelect = (calId: number) =>
-    setSelected(prev => {
-      const next = new Set(prev)
-      next.has(calId) ? next.delete(calId) : next.add(calId)
-      return next
-    })
-
-  /** 모두 선택/해제 */
-  const toggleAll = () =>
-    setSelected(allSelected ? new Set() : new Set(calendars.map(c => c.calId)))
-
-  /* ----------------------------
-     FullCalendar 이벤트 핸들러
-     ---------------------------- */
-
-  // 생성: 범위 선택 후 서버 저장
-  const handleSelect = async (selectInfo: any) => {
-    const title = window.prompt('일정 제목을 입력하세요')
-    if (!title) {
-      selectInfo.view.calendar.unselect()
-      return
-    }
+  // ===== FullCalendar event source loader =====
+  const loadEvents = useCallback(async (fetchInfo: { start: Date; end: Date }, success: any, failure: any) => {
     try {
-      await createEventFc({
-        calId: Array.from(selected)[0] ?? calendars[0]?.calId,
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: !!selectInfo.allDay,
-        locationText: '',
-        note: '',
-        roomId: null,
-        eventType: 'MEETING',
-        labelId: null
-      })
-      selectInfo.view.calendar.refetchEvents()
-    } catch (e: any) {
-      alert(e.message || '생성 실패')
-    }
-  }
+      // back-end expects local KST strings, not ISO Zulu
+      const from = dayjs(fetchInfo.start).format('YYYY-MM-DDTHH:mm:ss')
+      const to = dayjs(fetchInfo.end).format('YYYY-MM-DDTHH:mm:ss')
+      rangeRef.current = { from, to }
 
-  // 이동(drop) → 수정
-  const handleEventDrop = async (arg: any) => {
-    try {
-      await updateEventFc(
-        arg.event.id,
-        Number(arg.event.extendedProps?.calId ?? Array.from(selected)[0]),
-        {
-          title: arg.event.title,
-          start: arg.event.startStr,
-          end: arg.event.endStr,
-          allDay: !!arg.event.allDay,
-          locationText: arg.event.extendedProps?.locationText ?? '',
-          note: arg.event.extendedProps?.note ?? '',
-          roomId: arg.event.extendedProps?.roomId ?? null,
-          eventType: arg.event.extendedProps?.eventType ?? 'MEETING',
-          labelId: arg.event.extendedProps?.labelId ?? null
-        }
+      // aggregate events across all checked calendars
+      const promises = checkedCalIds.map(calId =>
+        api<EventRes[]>(`/events?calendarId=${calId}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+          .then(items => items.map(ev => ({ ...ev, _calId: calId } as EventRes & { _calId: number })))
       )
-      arg.view.calendar.refetchEvents()
-    } catch (e: any) {
-      alert(e.message || '업데이트 실패')
-      arg.revert()
+      const lists = await Promise.all(promises)
+      const all = lists.flat()
+
+      const byCalColor = new Map<number, string>(calendars.map(c => [c.calId, c.color]))
+
+      // map to FullCalendar format
+      const fcEvents = all.map(ev => ({
+        id: String(ev.eventId),
+        title: ev.title,
+        start: ev.startAt,
+        end: ev.endAt,
+        allDay: ev.allDayYn === 'Y',
+        backgroundColor: byCalColor.get((ev as any)._calId) || undefined,
+        borderColor: byCalColor.get((ev as any)._calId) || undefined,
+        extendedProps: {
+          calId: ev.calId,
+          locationText: ev.locationText,
+          note: ev.note,
+          roomId: ev.roomId,
+          status: ev.status,
+          labelId: ev.labelId,
+          eventType: ev.eventType,
+        },
+      }))
+
+      success(fcEvents)
+    } catch (err) {
+      console.error('[events loader]', err)
+      failure(err)
+    }
+  }, [checkedCalIds, calendars])
+
+  // ===== Handlers =====
+  const onDatesSet = (arg: DatesSetArg) => {
+    // keep mini calendar in sync (center to current view start)
+    setMiniDate(dayjs(arg.start))
+  }
+
+  const onMiniChange = (value: Dayjs | null) => {
+    setMiniDate(value)
+    if (value && calendarRef.current) {
+      ;(calendarRef.current as any).getApi().gotoDate(value.toDate())
     }
   }
 
-  // 리사이즈 → 수정
-  const handleEventResize = async (arg: any) => {
+  const onToggleCalendar = (id: number) => {
+    setCalendars(prev => prev.map(c => (c.calId === id ? { ...c, checked: !c.checked } : c)))
+  }
+
+  const onSelect = (arg: DateSelectArg) => {
+    // TODO: open event-create modal here
+    console.log('[select]', arg.startStr, '→', arg.endStr)
+  }
+
+  const onEventClick = (arg: EventClickArg) => {
+    // TODO: open event-detail modal
+    console.log('[click]', arg.event.id)
+  }
+
+  const onEventDrop = async (arg: EventDropArg) => {
+    // TODO: call PUT /events/{id} with new start/end
+    console.log('[drop]', arg.event.id, arg.event.start, arg.event.end)
+  }
+
+  const onEventResize = async (arg: EventResizeDoneArg) => {
+    // TODO: call PUT /events/{id} with new end
+    console.log('[resize]', arg.event.id, arg.event.end)
+  }
+
+  const createCalendar = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
-      await updateEventFc(
-        arg.event.id,
-        Number(arg.event.extendedProps?.calId ?? Array.from(selected)[0]),
-        {
-          title: arg.event.title,
-          start: arg.event.startStr,
-          end: arg.event.endStr,
-          allDay: !!arg.event.allDay,
-          locationText: arg.event.extendedProps?.locationText ?? '',
-          note: arg.event.extendedProps?.note ?? '',
-          roomId: arg.event.extendedProps?.roomId ?? null,
-          eventType: arg.event.extendedProps?.eventType ?? 'MEETING',
-          labelId: arg.event.extendedProps?.labelId ?? null
-        }
-      )
-      arg.view.calendar.refetchEvents()
-    } catch (e: any) {
-      alert(e.message || '업데이트 실패')
-      arg.revert()
+      const body = { name: newCal.name, color: newCal.color, defaultRole: newCal.defaultRole }
+      const created = await api<FcCalendarRes>('/calendars', { method: 'POST', body: JSON.stringify(body) })
+      setCalendars(prev => [{ ...created, checked: true }, ...prev])
+      setOpenCreate(false)
+      setNewCal({ name: '', color: '#1976d2', defaultRole: 'READER' })
+    } catch (err) {
+      console.error(err)
+      alert('캘린더 생성에 실패했어요.')
     }
   }
 
-  // 클릭 → 삭제
-  const handleEventClick = async (clickInfo: any) => {
-    if (!window.confirm(`'${clickInfo.event.title}' 일정을 삭제할까요?`)) return
-    try {
-      await deleteEventFc(clickInfo.event.id)
-      clickInfo.event.remove()
-    } catch (e: any) {
-      alert(e.message || '삭제 실패')
-    }
-  }
-
+  // ===== Render =====
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, padding: 16 }}>
-      {/* 좌측: 작은 달력 + 캘린더 선택 */}
-      <div>
+    <div className="calendar-layout p-4">
+      {/* Left: mini calendar + calendar list */}
+      <div className="calendar-left">
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
-          <DateCalendar
-            views={['year', 'month']}
-            openTo="month"
-            value={monthValue}
-            onChange={handleMonthChange}
-            slotProps={{
-              calendarHeader: { sx: { '& .MuiPickersCalendarHeader-label': { fontSize: 14 } } },
-              day: { sx: { py: 0.2, minWidth: 32 } }
-            }}
-          />
+          <DateCalendar value={miniDate} onChange={onMiniChange} disableHighlightToday={false} />
         </LocalizationProvider>
 
-        {/* 내가 볼 수 있는 캘린더 체크리스트 */}
-        <div style={{ marginTop: 12, borderTop: '1px solid #eee', paddingTop: 12 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
-            <input type="checkbox" checked={allSelected} onChange={toggleAll} />
-            모두 선택
-          </label>
-
-          <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
-            {calendars.map(c => (
-              <label key={c.calId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={selected.has(c.calId)}
-                  onChange={() => toggleSelect(c.calId)}
-                />
-                <span
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 6,
-                    background: c.color || '#999'
-                  }}
-                />
-                <span>{c.name}</span>
-              </label>
-            ))}
-            {calendars.length === 0 && (
-              <div style={{ color: '#888', fontSize: 13 }}>표시할 캘린더가 없습니다.</div>
-            )}
+        <div className="mt-4 bg-white dark:bg-zinc-900 rounded-2xl shadow p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold">캘린더</h3>
+            <button
+              className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+              onClick={() => setOpenCreate(true)}
+            >
+              + 새 캘린더
+            </button>
           </div>
+          <ul className="space-y-2">
+            {calendars.map(c => (
+              <li key={c.calId} className="flex items-center gap-2">
+                <input type="checkbox" checked={c.checked} onChange={() => onToggleCalendar(c.calId)} />
+                <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: c.color }} />
+                <span className="text-sm truncate" title={c.name}>{c.name}</span>
+              </li>
+            ))}
+            {calendars.length === 0 && <li className="text-xs text-gray-500">표시할 캘린더가 없어요.</li>}
+          </ul>
         </div>
       </div>
 
-      {/* 우측: 메인 FullCalendar */}
-      <div>
+      {/* Right: FullCalendar */}
+      <div className="calendar-right">
         <FullCalendar
-          ref={calRef as any}
+          ref={calendarRef as any}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          initialDate={monthValue.toDate()}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
-          height="calc(100vh - 120px)"
+          initialView="timeGridWeek"
+          locale="ko"
           timeZone="local"
+          height="auto"
+          headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' }}
           selectable
-          editable                     // ← 드래그/이동/리사이즈 허용
-          events={[]}                  // eventSource는 동적으로 addEventSource에서 관리
-          select={handleSelect}        // ← 생성
-          eventDrop={handleEventDrop}  // ← 이동
-          eventResize={handleEventResize} // ← 길이 변경
-          eventClick={handleEventClick}   // ← 삭제
+          editable
+          selectMirror
+          navLinks
+          datesSet={onDatesSet}
+          select={onSelect}
+          eventClick={onEventClick}
+          eventDrop={onEventDrop}
+          eventResize={onEventResize}
+          events={(info, success, failure) => loadEvents(info, success, failure)}
+          dayMaxEvents
         />
       </div>
+
+      {/* Create Calendar Modal */}
+      {openCreate && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-[520px] max-w-[94vw] p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">새 캘린더 만들기</h3>
+              <button className="px-2 py-1 text-sm" onClick={() => setOpenCreate(false)}>닫기</button>
+            </div>
+            <form onSubmit={createCalendar} className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">이름</label>
+                <input className="w-full border rounded px-3 py-2" value={newCal.name} onChange={e => setNewCal(s => ({ ...s, name: e.target.value }))} required />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">색상</label>
+                  <input type="color" className="h-10 w-full border rounded" value={newCal.color} onChange={e => setNewCal(s => ({ ...s, color: e.target.value }))} />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">기본 권한</label>
+                  <select className="w-full border rounded px-3 py-2" value={newCal.defaultRole} onChange={e => setNewCal(s => ({ ...s, defaultRole: e.target.value as UiCalendar['defaultRole'] }))}>
+                    <option value="NONE">NONE</option>
+                    <option value="READER">READER</option>
+                    <option value="CONTRIBUTOR">CONTRIBUTOR</option>
+                    <option value="EDITOR">EDITOR</option>
+                    <option value="BUSY_ONLY">BUSY_ONLY</option>
+                  </select>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">개발 모드: 이름/색상/기본권한만 서버로 전송합니다.</p>
+              <div className="flex justify-end gap-2">
+                <button type="button" className="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200" onClick={() => setOpenCreate(false)}>취소</button>
+                <button type="submit" className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">생성</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

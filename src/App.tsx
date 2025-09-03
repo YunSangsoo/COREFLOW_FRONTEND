@@ -1,9 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
-<<<<<<< HEAD
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import CalendarPage from './pages/CalendarPage'
-=======
 import Login from './login/Login'
 import MainPage from './mainPage/MainPage'
 import { useDispatch } from 'react-redux';
@@ -12,20 +8,11 @@ import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
->>>>>>> main
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
     const dispatch = useDispatch();
 
-<<<<<<< HEAD
-  return (
-      <Routes>
-        <Route path='/' element={<CalendarPage/>}/>
-      </Routes>
-    
-      
-  )
-=======
     useEffect(() => {
         api.post("/auth/refresh")
             .then(res => {
@@ -51,10 +38,12 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
+                <Route>
+                    <Route path='/calendar' element={<CalendarPage/>}/>
+                </Route>
             </Routes>
         </div>
     )
->>>>>>> main
 }
 
 export default App
