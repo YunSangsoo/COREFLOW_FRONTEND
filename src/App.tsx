@@ -11,7 +11,7 @@ import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member/MemberMain';
-import MemberDetail from './pages/member/MemberDetail'
+import MemberDetail from './pages/member/MemberDetail';
 
 function App() {
     const dispatch = useDispatch();
