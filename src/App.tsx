@@ -8,6 +8,7 @@ import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
+import { getPolicies } from './api/companyPolicyApi';
 
 function App() {
     const dispatch = useDispatch();
