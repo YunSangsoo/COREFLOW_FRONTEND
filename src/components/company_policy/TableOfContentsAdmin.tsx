@@ -1,11 +1,8 @@
-import { useNavigate } from "react-router-dom";
 import type { CompanyPolicy } from "../../types/companyPolicy";
 
 export default function TableOfContentsAdmin({policyList, setShowToC}:{policyList:CompanyPolicy[], setShowToC:(bool:boolean) => void}) {
-    const navigate = useNavigate();
-
     const handleLiClick = (policyNo:number) => {
-        navigate(`/admin/cpolicies/${policyNo}`);
+        location.href = `/admin/cpolicies/${policyNo}`;
     };
 
     return (

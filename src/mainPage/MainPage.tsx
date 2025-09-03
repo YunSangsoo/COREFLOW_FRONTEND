@@ -5,23 +5,23 @@ import type { RootState } from "../store/store"
 import { logout } from "../features/authSlice";
 import Sidebar from "../components/SideBar";
 
-export default function MainPage(){
-    const auth = useSelector((state:RootState) => state.auth);
+export default function MainPage() {
+    const auth = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const handleLogout = () => {
         api.post("/auth/logout")
-        .then(() => {
-            dispatch(logout());
-            navigate("/");
-        })
+            .then(() => {
+                dispatch(logout());
+                navigate("/");
+            })
     };
 
     return (
         <>
             <div className="flex">
-            <Sidebar />
+            <Sidebar onChatClick={() => console.log("채팅 클릭됨")}/>
             {
             auth.isAuthenticated ? (
                 <>
@@ -64,3 +64,4 @@ export default function MainPage(){
         </>
     )
 }
+

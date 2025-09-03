@@ -1,15 +1,17 @@
 import { useState } from "react";
 import type { CompanyPolicy } from "../../types/companyPolicy";
-import { useNavigate } from "react-router-dom";
 
-export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPolicy[]}) {
+export default function ComPolPaginatorAdmin({policyList, policyNo}:{policyList:CompanyPolicy[], policyNo:(string|undefined)}) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentItems = policyList.slice(startIndex, endIndex);
     const totalPages = Math.ceil(policyList.length / itemsPerPage);
-    const navigate = useNavigate();
+
+    if (policyNo == undefined) {
+        policyNo = "1";
+    }
 
     // 이전 페이지로
     const goToPrevious = () => {
@@ -24,17 +26,19 @@ export default function ComPolPaginatorAdmin({policyList}:{policyList:CompanyPol
         }
     };
     const handleLiClick = (policyNo:number) => {
-        navigate(`/admin/cpolicies/${policyNo}`);
+        location.href = `/admin/cpolicies/${policyNo}`;
     };
 
 
     return (
         <>
             <button type="button" onClick={goToPrevious} disabled={currentPage === 1}>{"<이전"}</button>
-            <ol style={{"display":"flex", "justifyContent":"space-evenly", "padding":0, "margin":0, "listStyle":"none"}}>
+            <ol style={{"display":"flex", "justifyContent":"space-evenly", "padding":0, "margin":0, "listStyle":"none", "alignItems":"center"}}>
                 {
                     currentItems && currentItems.map((policy, index) => (
-                    <li key={policy.policyId} style={{"margin":"5px", "cursor":"pointer"}} onClick={() => handleLiClick(startIndex + index + 1)}>{startIndex + index + 1}</li>
+                    <li key={policy.policyId} style={{"margin":"5px", "cursor":"pointer"}} onClick={() => handleLiClick(startIndex + index + 1)}>{
+                        startIndex + index + 1 == Number(policyNo) ? <b style={{"fontSize":"30px"}}>{startIndex + index + 1}</b> : startIndex + index + 1
+                    }</li>
                 ))
                 }
             </ol>
