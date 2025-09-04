@@ -85,6 +85,15 @@ export default function Mypage() {
             .catch(() => alert("수정 실패"));
     };
 
+    const handleSearchAddress = () => {
+        new window.daum.Postcode({
+            oncomplete: (data: any) => {
+                setRoadAddr(data.address);
+                setDetailAddr(""); // 상세주소 초기화
+            },
+        }).open();
+    };
+
     const handleUpdatePassword = () => {
         if (!currentPassword || !newPassword) {
             alert("현재 비밀번호와 새 비밀번호를 모두 입력하세요.");
@@ -188,6 +197,15 @@ export default function Mypage() {
                 value={roadAddr}
                 onChange={(e) => setRoadAddr(e.target.value)}
                 readOnly={false}
+                renderAction={
+                    <button
+                        type="button"
+                        onClick={handleSearchAddress}
+                        className="px-3 py-1 bg-blue-500 text-white rounded"
+                    >
+                        주소 검색
+                    </button>
+                }
             />
             <MemberControll
                 title="상세주소"

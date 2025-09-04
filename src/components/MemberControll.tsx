@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, HTMLInputTypeAttribute, InputHTMLAttributes, ReactNode } from "react";
 
 //
 // 1. 검색 폼
@@ -92,35 +92,49 @@ export default function MemberSearchForm({
 export interface MemberControllProps {
   title: string;
   value: string;
-  type: string;
   readOnly?: boolean;
+  type?: HTMLInputTypeAttribute;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   renderAction?: ReactNode;
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 
+    "value" | "onChange" | "type" | "readOnly">;
+  className?: string;
+  labelClassName?: string;
+  inputClassName?: string;
+  actionClassName?: string;
 }
 
 export function MemberControll({
   title,
   value,
-  type,
   readOnly = false,
+  type = "text",
   onChange,
   renderAction,
+  inputProps,
+  className = "",
+  labelClassName = "",
+  inputClassName = "",
+  actionClassName = "",
 }: MemberControllProps) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <label className="w-24 font-medium">{title}</label>
+    <div className={`flex items-center justify-between mb-3 ${className}`}>
+      <label className={`w-24 font-medium ${labelClassName}`}>{title}</label>
       <div className="flex-1 flex items-center gap-2">
         <input
-          type="text"
+          type={type}
           value={value}
           onChange={onChange}
           readOnly={readOnly}
-          className={`flex-1 p-1 border rounded ${
-            readOnly ? "bg-gray-100" : ""
-          }`}
+          className={`w-full rounded border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? "bg-gray-100" : ""} ${inputClassName}`}
+          {...inputProps}
         />
-        {renderAction}
       </div>
+      {renderAction && (
+        <div className={`shrink-0 ${actionClassName}`}>
+          {renderAction}
+        </div>
+      )}
     </div>
   );
 }
