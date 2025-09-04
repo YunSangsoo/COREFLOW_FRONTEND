@@ -7,6 +7,7 @@ import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
 import TableOfContents from "../../components/company_policy/TableOfContents";
 import ComPolPaginator from "../../components/company_policy/ComPolPaginator";
 import Sidebar from "../../components/SideBar";
+import Tiptap from "../../components/company_policy/Tiptap";
 
 export default function CompanyPolicyMain() {
     const [title, setTitle] = useState("");
@@ -53,12 +54,13 @@ export default function CompanyPolicyMain() {
             <Sidebar />
             <div className={style["company-policy-main"]}>
                 <header>
-                    <h1 style={{ textAlign: "center" }}>CoreFlow 내부 규정</h1>
+                    <h1 className="text-5xl" style={{ textAlign: "center" }}>CoreFlow 내부 규정</h1>
                 </header>
                 <main>
                     <input type="text" name="title" id="title" className={style.title} placeholder="제목" value={title} disabled />
                     <br />
-                    <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} disabled ></textarea>
+                    {/* <textarea name="content" id="content" className={style.content} placeholder="내용" value={content} disabled ></textarea> */}
+                    <Tiptap name="content" value={content} disabled={true} onChange={() => {}} />
                     {
                         showAi && <CoreFlowAi setShowModal={setShowAi} />
                     }
