@@ -11,7 +11,9 @@ import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
-import MemberMain from './pages/member/MemberMain';
+import MemberMain from './pages/member_main/MemberMain';
+import MemberVacation from './pages/member_vacation/MemberVacation';
+
 
 function App() {
     const dispatch = useDispatch();
@@ -51,6 +53,7 @@ function App() {
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
                 <Route path='/members' element={<MemberMain/>}></Route>
+                <Route path='/vacation' element={<MemberVacation/>}></Route>
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
