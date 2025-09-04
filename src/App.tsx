@@ -10,10 +10,15 @@ import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmi
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import CalendarPage from './pages/CalendarPage';
 =======
+>>>>>>> main
+=======
+import Sidebar from './components/SideBar';
+import ChatManager from './components/chat/ChatManager';
 >>>>>>> main
 
 function App() {
@@ -37,7 +42,8 @@ function App() {
         setIsChatOpen(!isChatOpen);
     };
 
-     return (
+
+    return (
         <div className="container">
             {!isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
             <Routes>
