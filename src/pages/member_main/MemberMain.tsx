@@ -1,8 +1,7 @@
 import { useState, type ChangeEvent } from "react"
-import styles from './MemberMain.module.css'
 import { useQuery } from "@tanstack/react-query";
 import type { Department, DepartmentDetail, MemberResponse, Position, SearchParams } from "../../types/member";
-import { depDetailList, depList, memberList, posList } from "../../features/memberService";
+import { depDetailList, depList, memberList, posList } from "../../api/memberApi";
 import MemberDetail from "../../components/member_main/MemberDetail";
 
 export default function MemberMain() {

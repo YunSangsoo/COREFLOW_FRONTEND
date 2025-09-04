@@ -12,7 +12,9 @@ import { getPolicies } from './api/companyPolicyApi';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member_main/MemberMain';
-import MemberVacation from './pages/member_vacation/MemberVacation';
+import VacationInfo from './pages/member_vacation/VacationInfo';
+import VacationMember from './pages/member_vacation/VacationMember';
+import VacationPersonal from './pages/member_vacation/VacationPersonal';
 
 
 function App() {
@@ -53,7 +55,11 @@ function App() {
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
                 <Route path='/members' element={<MemberMain/>}></Route>
-                <Route path='/vacation' element={<MemberVacation/>}></Route>
+                <Route path='/vacation'>
+                    <Route path='info' element={<VacationInfo/>}></Route>
+                    <Route path='member' element={<VacationMember/>}></Route>
+                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                </Route>
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}

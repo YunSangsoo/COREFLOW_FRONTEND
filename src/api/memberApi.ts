@@ -2,7 +2,7 @@ import axios from "axios";
 import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 // import {api} from '../api/coreflowApi';
 import { store } from "../store/store";
-import { loginSuccess, logout } from "./authSlice";
+import { loginSuccess, logout } from "../features/authSlice";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './MemberDetail.module.css';
-import { memberDelete, memberDetail, memberUpdate, posList } from '../../features/memberService';
+import { memberDelete, memberDetail, memberUpdate, posList } from '../../api/memberApi';
 import type { MemberDetail, MemberPatch, Position } from '../../types/member';
 import React, { useEffect, useRef, useState } from 'react';
 import DepartmentMap from './DepartmentMap';

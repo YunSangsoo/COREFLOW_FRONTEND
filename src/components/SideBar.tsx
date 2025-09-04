@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 
@@ -7,6 +8,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ onChatClick }: SidebarProps) => {
+    const [isApprovalOpen, setIsApprovalOpen] = useState(false);
     return (
         <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
@@ -20,7 +22,21 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>홈</Link>
                     </li>
                     <li className="px-4">
-                        <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>인사관리</Link>
+                        <button type='button' onClick={() => setIsApprovalOpen(!isApprovalOpen)}
+                            style={{ backgroundColor:"#1e2939", padding:"10px"}}
+                            className="block w-full text-left py-2 px-3 rounded hover:bg-gray-700 text-white">
+                            인사관리
+                        </button>
+                        {isApprovalOpen && (
+                            <ul className="ml-4 mt-2 space-y-1 text-sm">
+                                <li>
+                                    <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>사원관리</Link>
+                                </li>
+                                <li>
+                                    <Link to="/vacation/info" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>연차관리</Link>
+                                </li>
+                            </ul>
+                        )}
                     </li>
                     <li className="px-4">
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>전자결제</Link>
