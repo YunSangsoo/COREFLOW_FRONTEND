@@ -12,7 +12,9 @@ export default function Mypage() {
 
     const [email, setEmail] = useState(""); // 조회만 가능
     const [name, setName] = useState("");
-    const [phone, setPhone] = useState(""); // 수정 가능
+
+    const [phone, setPhone] = useState("");
+    const [isEditingPhone, setIsEditingPhone] = useState(false);
 
     const [roadAddr, setRoadAddr] = useState("");
     const [detailAddr, setDetailAddr] = useState("");
@@ -23,7 +25,8 @@ export default function Mypage() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
 
-    const [profile, setProfile] = useState("");
+    const [profile, setProfile] = useState<File | null>(null);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
 
     const addressValid = useMemo(
         () => roadAddr.trim().length > 0 && detailAddr.trim().length > 0,
@@ -112,6 +115,14 @@ export default function Mypage() {
             .catch(() => alert("비밀번호 변경 실패"));
     };
 
+    const handleUpdateProfile = () => {
+        if (profile) {
+            const formData = new FormData();
+            formData.append("profileImage", profile);
+            setIsEditingProfile(false);
+        }
+    };
+
     return (
         <div className="max-w-lg mx-auto bg-white shadow rounded p-4">
             <h1 className="text-xl font-bold mb-4">마이페이지</h1>
@@ -121,20 +132,47 @@ export default function Mypage() {
             <MemberControll title="이메일" value={email} readOnly />
 
             {/* 휴대폰 번호 - 수정 가능 */}
-            <MemberControll
-                title="휴대폰"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                readOnly={false}
-                renderAction={
-                    <button
-                        onClick={handleUpdatePhone}
-                        className="px-3 py-1 bg-blue-500 text-white rounded"
-                    >
-                        변경
-                    </button>
-                }
-            />
+            {!isEditingPhone ? (
+                <MemberControll
+                    title="휴대폰"
+                    value={phone}
+                    readOnly
+                    renderAction={
+                        <button
+                            onClick={() => setIsEditingPhone(true)}
+                            className="px-3 py-1 bg-blue-500 text-white rounded"
+                        >
+                            수정
+                        </button>
+                    }
+                />
+            ) : (
+                <MemberControll
+                    title="휴대폰"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    readOnly={false}
+                    renderAction={
+                        <div className="space-x-2">
+                            <button
+                                onClick={handleUpdatePhone}
+                                className="px-3 py-1 bg-green-500 text-white rounded"
+                            >
+                                저장
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsEditingPhone(false);
+                                    setPhone(auth.user?.phone ?? "");
+                                }}
+                                className="px-3 py-1 bg-gray-400 text-white rounded"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    }
+                />
+            )}
 
             {/* 비밀번호 - 수정 가능 */}
             {!isEditingPassword ? (
@@ -250,11 +288,49 @@ export default function Mypage() {
                         .catch(() => alert("이미지 업로드 실패"));
                 }}
             />
-            {profile && (
-                <img
-                    src={profile}
-                    alt="프로필 이미지"
-                    className="mt-2 h-24 w-24 rounded-full object-cover"
+            {!isEditingProfile ? (
+                <MemberControll
+                    title="프로필"
+                    value={auth.user?.profile ?? ""}
+                    readOnly
+                    renderAction={
+                        <button
+                            onClick={() => setIsEditingProfile(true)}
+                            className="px-3 py-1 bg-blue-500 text-white rounded"
+                        >
+                            변경
+                        </button>
+                    }
+                />
+            ) : (
+                <MemberControll
+                    title="프로필"
+                    value=""
+                    readOnly={false}
+                    renderAction={
+                        <div className="space-x-2">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setProfile(e.target.files?.[0] ?? null)}
+                            />
+                            <button
+                                onClick={handleUpdateProfile}
+                                className="px-3 py-1 bg-green-500 text-white rounded"
+                            >
+                                저장
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsEditingProfile(false);
+                                    setProfile(null);
+                                }}
+                                className="px-3 py-1 bg-gray-400 text-white rounded"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    }
                 />
             )}
         </div>
