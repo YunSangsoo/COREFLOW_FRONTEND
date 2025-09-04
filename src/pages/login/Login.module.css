@@ -1,0 +1,84 @@
+/* pages/Login/Login.module.css */
+.page {
+    padding: 36px 20px 72px;
+    background: #F6F7FB;
+    min-height: 100vh;
+  }
+  .card {
+    max-width: 560px;
+    margin: 0 auto;
+    background: #FFFFFF;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+    padding: 40px 32px;
+  }
+  .title {
+    text-align: center;
+    font-weight: 800;
+    font-size: 28px;
+    color: #0F172A;
+    letter-spacing: 0.3px;
+    margin: 6px 0 28px;
+  }
+  /* 세로 스택 레이아웃 */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .label {
+    color: #0F172A;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .input {
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .input:focus {
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18);
+  }
+  /* 기본 로그인 버튼 (보라 그라데이션) */
+  .primaryBtn {
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background-image: linear-gradient(135deg, #7C3AED, #6366F1);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+  }
+  .primaryBtn:hover { filter: brightness(1.03); }
+  .primaryBtn:active { transform: translateY(1px); }
+  .primaryBtn:disabled { opacity: .6; cursor: not-allowed; }
+  .error {
+    margin-top: 10px;
+    text-align: center;
+    color: #DC2626;
+    font-size: 13px;
+  }
+  /* 구분선 */
+  .dividerWrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 10px;
+  }
+  .divider {
+    flex: 1;
+    height: 1px;
+    background: #E5E7EB;
+  }
+  .dividerText {
+    font-size: 12px;
+    color: #6B7280;
+    white-space: nowrap;
+  }

@@ -92,6 +92,7 @@ export default function MemberSearchForm({
 export interface MemberControllProps {
   title: string;
   value: string;
+  type: string;
   readOnly?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   renderAction?: ReactNode;
@@ -100,6 +101,7 @@ export interface MemberControllProps {
 export function MemberControll({
   title,
   value,
+  type,
   readOnly = false,
   onChange,
   renderAction,

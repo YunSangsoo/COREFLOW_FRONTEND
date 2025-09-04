@@ -10,15 +10,14 @@ import FindPwd from './login/Find-pwd';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import Mypage from './mypage/Mypage';
+import { getPolicies } from './api/companyPolicyApi';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
-import MemberMain from './pages/member/MemberMain';
 
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
-
 
     useEffect(() => {
         api.post("/auth/refresh")
@@ -30,7 +29,6 @@ function App() {
             })
     }, [])
 
-
     //어떤 페이지에서든 채팅을 구현하기 위해 App페이지에서 변수를 관리함
     const [isChatOpen, setIsChatOpen] = useState(false);
     const handleToggleChat = () => {
@@ -39,7 +37,6 @@ function App() {
 
     return (
         <div className="container">
-            {}
             {!isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
             <Routes>
                 <Route path="/" element={<MainPage />} />
@@ -55,8 +52,6 @@ function App() {
                 <Route path="/admin/cpolicies">
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
-                </Route>
-                    <Route path='/members' element={<MemberMain/>}>
                 </Route>
             </Routes>
 

@@ -149,11 +149,13 @@
             scrollToBottom();
 
             try {
-                const res = await fetch("http://localhost:8000/chat", {
+                const res = await fetch("http://192.168.10.216:8000/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ question: questionText })
                 });
+
+                console.log(res);
 
                 if (!res.ok || !res.body) {
                     throw new Error("Stream 응답을 받을 수 없습니다.");

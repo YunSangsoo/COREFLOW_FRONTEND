@@ -21,7 +21,6 @@ export default function MainPage() {
     return (
         <>
             <div className="flex">
-            <Sidebar onChatClick={() => console.log("채팅 클릭됨")}/>
             {
             auth.isAuthenticated ? (
                 <>
@@ -64,4 +63,3 @@ export default function MainPage() {
         </>
     )
 }
-
