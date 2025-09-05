@@ -55,8 +55,8 @@ export const vacInfo = async () => {
 }
 
 // 사원 조회
-export const memChoice = async () => {
-    const response = await api.get<MemberChoice[]>("/vacation/member");
+export const memChoice = async (userName:string) => {
+    const response = await api.get<MemberChoice[]>(`/vacation/member?userName=${userName}`);
     return response.data;
 }
 

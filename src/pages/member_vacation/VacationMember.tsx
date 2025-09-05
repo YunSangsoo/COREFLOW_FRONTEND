@@ -1,32 +1,14 @@
 import { useState } from "react";
 import VacSideBar from "../../components/member_vacation/vacSideBar";
+import { useQuery } from "@tanstack/react-query";
+import { memChoice } from "../../api/vacationApi";
+import SearchMember from "../../components/member_vacation/SearchMember";
 
 export default function VacationMember() {
     // 검색어 저장용 훅
     const [searchName, setSearchName] = useState('');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const handleReset = () => {
-
-    }
-
+    
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
             <h1 className="text-2xl font-bold mb-6">연차관리</h1>
@@ -39,7 +21,8 @@ export default function VacationMember() {
                         <div className="flex items-center">
                             <div className="px-3 py-1 border bg-gray-800 text-white rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">사원명</div>
                             <input type="text" placeholder="사원명을 입력하세요" className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"/>
-                            <button className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors" onClick={handleReset}>초기화</button>
+                            <button className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">초기화</button>
+                            <SearchMember/>
                         </div>
                     </div>
 

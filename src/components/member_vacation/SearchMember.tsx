@@ -1,6 +1,7 @@
 
 export default function SearchMember() {
 
+    
     return (
         <table className="w-full text-sm">
             <thead>
