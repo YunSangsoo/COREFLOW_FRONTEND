@@ -1,3 +1,5 @@
+import AiMain from "../../pages/ai/AiMain";
+
 export default function CoreFlowAi({setShowModal}:{setShowModal:(bool:boolean)=>void}) {
     return (
         <div
@@ -9,7 +11,7 @@ export default function CoreFlowAi({setShowModal}:{setShowModal:(bool:boolean)=>
                 height: '100%',
                 backgroundColor: 'rgba(0,0,0,0.5)'
             }}
-            onClick={() => setShowModal(false)}  // 배경 클릭시 닫기
+            // onClick={() => setShowModal(false)}  // 배경 클릭시 닫기
         >
             <div
                 style={{
@@ -25,8 +27,7 @@ export default function CoreFlowAi({setShowModal}:{setShowModal:(bool:boolean)=>
                 }}
                 onClick={(e) => e.stopPropagation()}  // 내용 클릭시 닫히지 않게
             >
-                <h2>CoreFlow AI</h2>
-                <iframe src="/faqServiceFront.html" width="1000px" height="700px" />
+                <AiMain/>
                 <button onClick={() => setShowModal(false)}>닫기</button>
             </div>
         </div>
