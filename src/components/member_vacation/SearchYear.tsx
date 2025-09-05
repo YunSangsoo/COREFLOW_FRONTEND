@@ -1,21 +1,22 @@
 import { useState } from "react";
 import dayjs from 'dayjs';
 
-export default function SearchYear() {
-
-    // 년도 표시용 훅
-    const [selectYear, setSelectYear] = useState(dayjs().year());
+interface VacationMemberProps {
+    selectYear : number;
+    onYearChange : (year:number) => void;
+}
+export default function SearchYear({selectYear,onYearChange}:VacationMemberProps) {
 
     // 리스트 표시용 훅
     const [isYearList, setIsYearList] = useState(false);
 
     const prevYear = () => {
-        setSelectYear(selectYear - 1)
+        onYearChange(selectYear - 1)
     }
 
     const nextYear = () => {
         if(selectYear < dayjs().year()){
-            setSelectYear(selectYear + 1)
+            onYearChange(selectYear + 1)
         }
     }
 
@@ -43,7 +44,7 @@ export default function SearchYear() {
             {isYearList && (
                 <div className="mt-4 w-48 h-52 overflow-y-scroll border border-gray-300 rounded-lg shadow-lg bg-white">
                     {Array.from({ length: 31 }, (_, i) => dayjs().year() - i).map(year => (
-                        <div key={year} onClick={() => {setSelectYear(year); setIsYearList(false);}}
+                        <div key={year} onClick={() => {onYearChange(year); setIsYearList(false);}}
                             className={`p-2 cursor-pointer transition-colors hover:bg-gray-200 
                                 ${year === selectYear ? 'bg-blue-500 text-white font-semibold' : ''}`}>
                             {year}

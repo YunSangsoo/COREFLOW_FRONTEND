@@ -181,7 +181,7 @@ export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:(
                     </div>
                     <div className={styles.infoRow}>
                         <span>내선번호</span>
-                        <input type="text" name='extention' value={updateData.extention||''} onChange={handleChange}/>
+                        <input type="text" name='extension' value={updateData.extension||''} onChange={handleChange}/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>재직상태</span>

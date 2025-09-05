@@ -5,6 +5,7 @@ import type { MemberChoice, MemberVacation } from "../../types/vacation";
 import { useQuery } from "@tanstack/react-query";
 import { memVacation } from "../../api/vacationApi";
 import SearchYear from "../../components/member_vacation/SearchYear";
+import dayjs from "dayjs";
 
 export default function VacationMember() {
     // 사원명 입력값 저장용 훅
@@ -16,15 +17,18 @@ export default function VacationMember() {
     // 선택한 사원 데이터 저장용 훅
     const [selectMember, setSelectMember] = useState<MemberChoice|null>(null);
 
+    // 연도 상태 관리용 훅
+    const [selectYear, setSelectYear] = useState(dayjs().year());
+
     // 선택된 사원 연차내역 조회용 훅
     const {data, error} = useQuery<MemberVacation[]>({
-        queryKey:['memberVacation',selectMember?.userNo],
+        queryKey:['memberVacation',selectMember?.userNo, selectYear],
         queryFn:({queryKey}) => {
-            const [,userNo] = queryKey;
-            if(!userNo){
+            const [,userNo,year] = queryKey;
+            if(typeof userNo !== 'number'){
                 return Promise.resolve([]);
             }
-            return memVacation(userNo as number);
+            return memVacation(userNo).then(vacation => vacation.filter(vac => dayjs(vac.vacStart).year() === year))
         },
         enabled: !! selectMember
     })
@@ -41,6 +45,7 @@ export default function VacationMember() {
         setSearchName(member.userName);
     }
 
+    // 초기화 버튼
     const handleReset = () => {
         setSearchName('');
         setSearchQuery('');
@@ -74,7 +79,7 @@ export default function VacationMember() {
                     {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember}/>}
 
                     <div className="border border-gray-300 rounded overflow-hidden">
-                        <div ><SearchYear/></div>
+                        <div ><SearchYear selectYear={selectYear} onYearChange={setSelectYear}/></div>
 
                         <div className="bg-gray-200 border-b border-gray-300">
                             <div className="flex text-sm font-semibold">
@@ -94,8 +99,8 @@ export default function VacationMember() {
                                     <div key={index} className="flex text-sm border-b border-gray-200">
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userNo}</div>
                                         <div className="w-20 p-2 border-r border-gray-200 text-center">{item.vacName}</div>
-                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{item.vacStart.split('T')[0]}</div>
-                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{item.vacEnd.split('T')[0]}</div>
+                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacStart).format("YYYY-MM-DD")}</div>
+                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacEnd).format('YYYY-MM-DD')}</div>
                                         <div className="w-16 p-2 border-r border-gray-200 text-center">{item.vacAmount}</div>
                                         <div className="w-16 p-2 text-center">{item.status===1 ? "승인" : item.status===2 ? "대기" : "반려"}</div>
                                     </div>

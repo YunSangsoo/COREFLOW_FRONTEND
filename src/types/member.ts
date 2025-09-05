@@ -48,7 +48,7 @@ export interface MemberDetail{
     hireDate : string;
     depName : string;
     posName : string;
-    extention : string;
+    extension : string;
     updateDate : string;
     address : string;
     addressDetail : string;
@@ -63,7 +63,7 @@ export interface MemberPatch{
     hireDate? : string
     depName? : string;
     posName? : string;
-    extention? : string;
+    extension? : string;
     updateDate? : string;
     address? : string;
     addressDetail? : string;
