@@ -1,14 +1,52 @@
-import { useState } from "react";
 import VacSideBar from "../../components/member_vacation/vacSideBar";
-import { useQuery } from "@tanstack/react-query";
-import { memChoice } from "../../api/vacationApi";
 import SearchMember from "../../components/member_vacation/SearchMember";
+import { useState } from "react";
+import type { MemberChoice, MemberVacation } from "../../types/vacation";
+import { useQuery } from "@tanstack/react-query";
+import { memVacation } from "../../api/vacationApi";
+import SearchYear from "../../components/member_vacation/SearchYear";
 
 export default function VacationMember() {
-    // 검색어 저장용 훅
+    // 사원명 입력값 저장용 훅
     const [searchName, setSearchName] = useState('');
 
-    
+    // input내부 상태 훅
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // 선택한 사원 데이터 저장용 훅
+    const [selectMember, setSelectMember] = useState<MemberChoice|null>(null);
+
+    // 선택된 사원 연차내역 조회용 훅
+    const {data, error} = useQuery<MemberVacation[]>({
+        queryKey:['memberVacation',selectMember?.userNo],
+        queryFn:({queryKey}) => {
+            const [,userNo] = queryKey;
+            if(!userNo){
+                return Promise.resolve([]);
+            }
+            return memVacation(userNo as number);
+        },
+        enabled: !! selectMember
+    })
+
+    // 검색 버튼
+    const handleSearch = () => {
+        setSearchQuery(searchName);
+    }
+
+    // 사원 선택시 실행
+    const handleSelectMember = (member:MemberChoice) => {
+        setSelectMember(member);
+        setSearchQuery(member.userName);
+        setSearchName(member.userName);
+    }
+
+    const handleReset = () => {
+        setSearchName('');
+        setSearchQuery('');
+        setSelectMember(null);
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
             <h1 className="text-2xl font-bold mb-6">연차관리</h1>
@@ -20,34 +58,23 @@ export default function VacationMember() {
                     <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded">
                         <div className="flex items-center">
                             <div className="px-3 py-1 border bg-gray-800 text-white rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">사원명</div>
-                            <input type="text" placeholder="사원명을 입력하세요" className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"/>
-                            <button className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">초기화</button>
-                            <SearchMember/>
+                            <input 
+                                onChange={(e) => setSearchName(e.target.value)} value={searchName} type="text" placeholder="사원명을 입력하세요" 
+                                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                            <button 
+                                onClick={handleSearch}
+                                className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">검색
+                            </button>
+                            <button 
+                                onClick={handleReset}
+                                className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">초기화
+                            </button>
                         </div>
                     </div>
-
-                    <div className="mb-4 p-3 bg-gray-100 border border-gray-300 rounded">
-                        <div className="flex justify-between items-center">
-                            <div className="flex gap-6">
-                                <div className="text-sm">
-                                    <span className="font-semibold">사원번호:</span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="font-semibold">이름:</span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="font-semibold">부서:</span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="font-semibold">직위:</span>
-                                </div>
-                            </div>
-                            <div className="text-right text-sm text-gray-600">????년 연차 내역</div>
-                        </div>
-                    </div>
+                    {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember}/>}
 
                     <div className="border border-gray-300 rounded overflow-hidden">
-                        <div className="bg-gray-100 border-b border-gray-300 p-2 text-center font-semibold">???? 년</div>
+                        <div ><SearchYear/></div>
 
                         <div className="bg-gray-200 border-b border-gray-300">
                             <div className="flex text-sm font-semibold">
@@ -62,7 +89,18 @@ export default function VacationMember() {
 
                         <div className="bg-white">
                             {
-
+                                data && data.length > 0 ? (
+                                    data.map((item,index) => (
+                                    <div key={index} className="flex text-sm border-b border-gray-200">
+                                        <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userNo}</div>
+                                        <div className="w-20 p-2 border-r border-gray-200 text-center">{item.vacName}</div>
+                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{item.vacStart.split('T')[0]}</div>
+                                        <div className="w-24 p-2 border-r border-gray-200 text-center">{item.vacEnd.split('T')[0]}</div>
+                                        <div className="w-16 p-2 border-r border-gray-200 text-center">{item.vacAmount}</div>
+                                        <div className="w-16 p-2 text-center">{item.status===1 ? "승인" : item.status===2 ? "대기" : "반려"}</div>
+                                    </div>
+                                    ))
+                                ) : <div>{error?.message}</div>
                             }
                         </div>
                     </div>
