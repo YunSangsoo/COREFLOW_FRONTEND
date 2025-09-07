@@ -10,19 +10,11 @@ export default function SearchYear({selectYear,onYearChange}:VacationMemberProps
     // 리스트 표시용 훅
     const [isYearList, setIsYearList] = useState(false);
 
-    const prevYear = () => {
-        onYearChange(selectYear - 1)
-    }
+    const prevYear = () => {onYearChange(selectYear - 1)}
 
-    const nextYear = () => {
-        if(selectYear < dayjs().year()){
-            onYearChange(selectYear + 1)
-        }
-    }
+    const nextYear = () => {if(selectYear < dayjs().year()){onYearChange(selectYear + 1)}}
 
-    const yearList = () => {
-        setIsYearList(!isYearList);
-    }
+    const yearList = () => {setIsYearList(!isYearList);}
 
     return (
         <div className="flex flex-col items-center p-4 font-sans">

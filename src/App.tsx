@@ -15,6 +15,7 @@ import MemberMain from './pages/member_main/MemberMain';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
+import Attendance from './pages/member_attendance/Attendance';
 
 
 function App() {
@@ -59,6 +60,8 @@ function App() {
                     <Route path='info' element={<VacationInfo/>}></Route>
                     <Route path='member' element={<VacationMember/>}></Route>
                     <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                </Route>
+                <Route path='/attendance' element={<Attendance/>}>
                 </Route>
             </Routes>
 

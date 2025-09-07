@@ -40,9 +40,9 @@ export default function VacationMember() {
 
     // 사원 선택시 실행
     const handleSelectMember = (member:MemberChoice) => {
-        setSelectMember(member);
-        setSearchQuery(member.userName);
         setSearchName(member.userName);
+        setSearchQuery(member.userName);
+        setSelectMember(member);
     }
 
     // 초기화 버튼
