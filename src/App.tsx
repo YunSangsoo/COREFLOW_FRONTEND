@@ -59,7 +59,7 @@ function App() {
                 <Route path='/vacation'>
                     <Route path='info' element={<VacationInfo/>}></Route>
                     <Route path='member' element={<VacationMember/>}></Route>
-                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                    <Route path='personal' element={<VacationPersonal/>}></Route>
                 </Route>
                 <Route path='/attendance' element={<Attendance/>}>
                 </Route>
