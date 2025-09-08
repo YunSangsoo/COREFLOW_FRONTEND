@@ -1,0 +1,68 @@
+
+table {
+  width: 1500px;
+  border-collapse: collapse;
+}
+
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+.arrbtn {
+   width: 150px;
+   border: solid 1px;
+}
+
+.arrbtn1{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    
+}
+
+.status-대기중 {
+    background-color: #FF8E1D;
+    width: 5%;
+    border-radius: 10px;
+    text-align: center;
+    display: inline-block; 
+    min-width: 50px;       
+    font-size: 12px;      
+    padding: 2px 6px;     
+    color: white;  
+
+
+}
+
+.status-완료 
+{
+    background-color: #1D87FF; 
+    width: 5%;
+    border-radius: 10px;
+    text-align: center;
+    display: inline-block; 
+    min-width: 50px;       
+    font-size: 12px;      
+    padding: 2px 6px;     
+    color: white;         
+}
+
+.status-반려 {
+    background-color: #FF301D;
+    width: 5%;
+    border-radius: 10px;
+    text-align: center;
+    display: inline-block;
+    min-width: 50px;       
+    font-size: 12px;       
+    padding: 2px 6px;     
+    color: white;          
+    justify-content: center;
+}
+

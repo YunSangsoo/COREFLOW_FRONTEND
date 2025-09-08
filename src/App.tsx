@@ -18,6 +18,12 @@ import VacationPersonal from './pages/member_vacation/VacationPersonal';
 import Attendance from './pages/member_attendance/Attendance';
 
 
+import { getPolicies } from './api/companyPolicyApi';
+import Sidebar from './components/SideBar';
+import ChatManager from './components/chat/ChatManager';
+import DocumentTable from './components/Approval/DocumentTable';
+import ApprovalForm from './components/Approval/ApprovalEditor';
+
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
@@ -63,6 +69,12 @@ function App() {
                 </Route>
                 <Route path='/attendance' element={<Attendance/>}>
                 </Route>
+                <Route path='/approval'>
+                    <Route path='' element={<DocumentTable />} />
+                    <Route path='approval' element={<DocumentTable  />} />
+                </Route>
+                <Route path="/approval/ApprovalEditor" element={<ApprovalForm />} />
+
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}

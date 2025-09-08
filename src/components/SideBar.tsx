@@ -42,7 +42,33 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         )}
                     </li>
                     <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>전자결제</Link>
+                        <button type="button" onClick={() => setIsApprovalOpen(!isApprovalOpen)}
+                        style={{ backgroundColor:"#1e2939", padding:"10px"}}
+                        className="block w-full text-left py-2 px-3 rounded hover:bg-gray-700 text-white">
+                        전자결재
+                        </button>
+                        {isApprovalOpen && (
+                            <ul className="ml-4 mt-2 space-y-1 text-sm">
+                                <li>
+                                    <Link to="/approval" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        문서목록
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/approval/ApprovalEditor" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        문서 작성
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/approval/manage" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        결재 관리
+                                    </Link>
+                                </li>
+                            </ul>
+                        )}
                     </li>
                     <li className="px-4">
                         <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>캘린더</Link>
@@ -63,5 +89,4 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
         </div>
     );
 };
-
 export default Sidebar;
