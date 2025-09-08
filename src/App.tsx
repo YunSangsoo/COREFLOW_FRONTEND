@@ -11,6 +11,12 @@ import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
+import MemberMain from './pages/member_main/MemberMain';
+import VacationInfo from './pages/member_vacation/VacationInfo';
+import VacationMember from './pages/member_vacation/VacationMember';
+import VacationPersonal from './pages/member_vacation/VacationPersonal';
+import Attendance from './pages/member_attendance/Attendance';
+
 
 function App() {
     const dispatch = useDispatch();
@@ -48,6 +54,14 @@ function App() {
                 <Route path="/admin/cpolicies">
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                </Route>
+                <Route path='/members' element={<MemberMain/>}></Route>
+                <Route path='/vacation'>
+                    <Route path='info' element={<VacationInfo/>}></Route>
+                    <Route path='member' element={<VacationMember/>}></Route>
+                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                </Route>
+                <Route path='/attendance' element={<Attendance/>}>
                 </Route>
             </Routes>
 
