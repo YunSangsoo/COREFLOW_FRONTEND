@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { AiChatSession, message } from "../types/aiTypes";
+import type { AiChatHistory, AiChatSession, message } from "../types/aiTypes";
 
 const getAccessToken = () => {
     return store.getState().auth.accessToken;
@@ -88,3 +88,17 @@ export const updateAiChatSession = async (sessionId:number) => {
     return response;
 };
 
+export const insertAiChatHistory = async (sessionId:number, role:string, content:string) => {
+    const response = await api.post(`/${sessionId}/histories`, {role, content});
+    return response;
+};
+
+export const getAiChatHistory = async (sessionId:number) => {
+    const response = await api.get<AiChatHistory[]>(`/${sessionId}/histories`);
+    return response.data;
+};
+
+export const deleteChatSession = async (sessionId:number) => {
+    const response = await api.delete(`/${sessionId}`);
+    return response;
+}

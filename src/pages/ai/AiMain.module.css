@@ -2,7 +2,6 @@
     font-family: Arial, sans-serif;
     background-color: transparent;
     display: flex;
-    flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
     height: 750px;
@@ -108,4 +107,22 @@
     100% {
         opacity: 0.3;
     }
+}
+
+.nav {
+    align-self: baseline;
+    margin-top: 40px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.session-li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.session-p {
+    cursor: pointer;
 }
