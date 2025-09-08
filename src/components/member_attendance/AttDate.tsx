@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 dayjs.locale('ko')
@@ -25,13 +25,13 @@ interface AttendanceProps {
     selectDate: dayjs.Dayjs;
     onDateChange: (date: dayjs.Dayjs) => void;
 }
-export default function SearchDate({ selectDate, onDateChange }: AttendanceProps) {
+export default function AttDate({ selectDate, onDateChange }: AttendanceProps) {
 
     // 달력 표시용 훅
     const [isCalendar, setIsCalendar] = useState(false);
+    const calendarRef = useRef<HTMLDivElement>(null);
     // 월 정보용 훅
     const [currentMonth, setCurrentMonth] = useState(dayjs());
-
 
     const prevDay = () => { onDateChange(selectDate.subtract(1, 'day')) }
     const nextDay = () => { onDateChange(selectDate.add(1, 'day')) }
@@ -76,10 +76,22 @@ export default function SearchDate({ selectDate, onDateChange }: AttendanceProps
         return yearRange;
     }, []);
 
-    // const DateList = () => {setIsCalendar(!isCalendar);}
+    // 달력 외부 클릭시 닫기
+    useEffect(() => {
+        const handleClickOutside = (e:MouseEvent) => {
+            if(calendarRef.current && !calendarRef.current.contains(e.target as Node)){
+                setIsCalendar(false);
+            }
+        }
+        document.addEventListener("mousedown",handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown",handleClickOutside);
+        }
+    },[calendarRef])
 
     return (
-        <div className="relative flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+        <div ref={calendarRef} className="relative flex items-center justify-between p-4 bg-gray-100 rounded-lg">
             <button onClick={prevDay} className="text-gray-600 hover:text-gray-800 transition-colors">
                 {/* <ChevronLeftIcon/> */}
                 {'<'}

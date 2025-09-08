@@ -3,9 +3,9 @@ import SearchMember from "../../components/member_vacation/SearchMember";
 import { useState } from "react";
 import type { MemberChoice, MemberVacation } from "../../types/vacation";
 import { useQuery } from "@tanstack/react-query";
-import { memVacation } from "../../api/vacationApi";
-import SearchYear from "../../components/member_vacation/SearchYear";
+import { memVacation, memVacationAll } from "../../api/vacationApi";
 import dayjs from "dayjs";
+import VacDate from "../../components/member_vacation/VacDate";
 
 export default function VacationMember() {
     // 사원명 입력값 저장용 훅
@@ -19,19 +19,29 @@ export default function VacationMember() {
 
     // 연도 상태 관리용 훅
     const [selectYear, setSelectYear] = useState(dayjs().year());
+    const [selectMonth, setSelectMonth] = useState(dayjs().month() +1);
 
-    // 선택된 사원 연차내역 조회용 훅
-    const {data, error} = useQuery<MemberVacation[]>({
-        queryKey:['memberVacation',selectMember?.userNo, selectYear],
-        queryFn:({queryKey}) => {
-            const [,userNo,year] = queryKey;
-            if(typeof userNo !== 'number'){
+    // 모든 사원 연차내역 조회용 훅(기본)
+    const {data:allVacation, error:allError} = useQuery<MemberVacation[]>({
+        queryKey:['allVacation',selectYear, selectMonth],
+        queryFn:() => memVacationAll(selectYear,selectMonth)
+    })
+
+    // 특정 사원 연차내역 조회용 훅(사원 선택시)
+    const {data:memberVacation, error:memberError} = useQuery<MemberVacation[]>({
+        queryKey:['memberVacation',selectMember?.userNo, selectYear,selectMonth],
+        queryFn:() => {
+            if(!selectMember?.userNo){
                 return Promise.resolve([]);
             }
-            return memVacation(userNo).then(vacation => vacation.filter(vac => dayjs(vac.vacStart).year() === year))
+            return memVacation(selectMember.userNo,selectYear,selectMonth);
         },
         enabled: !! selectMember
     })
+
+    // 사원 선택 or 선택안함
+    const displayData = selectMember ? memberVacation : allVacation;
+    const displayError = selectMember ? memberError : allError;
 
     // 검색 버튼
     const handleSearch = () => {
@@ -50,6 +60,14 @@ export default function VacationMember() {
         setSearchName('');
         setSearchQuery('');
         setSelectMember(null);
+    }
+
+    // 날짜 상태 업데이트
+    const handleDateChange = (year:number, month?:number) => {
+        setSelectYear(year);
+        if(month !== undefined){
+            setSelectMonth(month);
+        }
     }
 
     return (
@@ -79,11 +97,12 @@ export default function VacationMember() {
                     {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember}/>}
 
                     <div className="border border-gray-300 rounded overflow-hidden">
-                        <div ><SearchYear selectYear={selectYear} onYearChange={setSelectYear}/></div>
+                        <div ><VacDate selectYear={selectYear} selectMonth={selectMonth} onDateChange={handleDateChange}/></div>
 
                         <div className="bg-gray-200 border-b border-gray-300">
                             <div className="flex text-sm font-semibold">
                                 <div className="w-12 p-2 border-r border-gray-300 text-center">no</div>
+                                <div className="w-12 p-2 border-r border-gray-300 text-center">사원명</div>
                                 <div className="w-20 p-2 border-r border-gray-300 text-center">휴가 구분</div>
                                 <div className="w-24 p-2 border-r border-gray-300 text-center">시작일</div>
                                 <div className="w-24 p-2 border-r border-gray-300 text-center">종료일</div>
@@ -94,10 +113,11 @@ export default function VacationMember() {
 
                         <div className="bg-white">
                             {
-                                data && data.length > 0 ? (
-                                    data.map((item,index) => (
+                                displayData && displayData.length > 0 ? (
+                                    displayData.map((item,index) => (
                                     <div key={index} className="flex text-sm border-b border-gray-200">
-                                        <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userNo}</div>
+                                        <div className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</div>
+                                        <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userName}</div>
                                         <div className="w-20 p-2 border-r border-gray-200 text-center">{item.vacName}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacStart).format("YYYY-MM-DD")}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacEnd).format('YYYY-MM-DD')}</div>
@@ -105,7 +125,7 @@ export default function VacationMember() {
                                         <div className="w-16 p-2 text-center">{item.status===1 ? "승인" : item.status===2 ? "대기" : "반려"}</div>
                                     </div>
                                     ))
-                                ) : <div>{error?.message}</div>
+                                ) : <div>{displayError?.message}</div>
                             }
                         </div>
                     </div>

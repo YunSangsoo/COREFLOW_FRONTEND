@@ -10,7 +10,9 @@ export default function VacSideBar() {
                 <Link to="/vacation/member">
                     <button className="px-4 py-2 text-left border border-gray-300 mb-1">사원 연차 관리</button>
                 </Link>
-            <button className="px-4 py-2 text-left border border-gray-300">내 연차 관리</button>
+                <Link to="/vacation/personal">
+                    <button className="px-4 py-2 text-left border border-gray-300 mb-1">내 연차 관리</button>
+                </Link>
         </div>
     )
 }
