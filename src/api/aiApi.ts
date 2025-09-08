@@ -58,8 +58,8 @@ export const checkUsedBefore = async () => {
     return response.data;
 };
 
-export const updateAiUsage = async () => {
-    const response = await api.patch("/updateAiUsage");
+export const updateAiUsage = async (tokensUsed:number) => {
+    const response = await api.patch("/updateAiUsage", {tokensUsed});
     return response;
 };
 
@@ -77,3 +77,14 @@ export const insertAiUsage = async (tokensUsed:number) => {
     const response = await api.post("/insertAiUsage", {tokensUsed});
     return response;
 };
+
+export const insertAiChatSession = async (title:string) => {
+    const response = await api.post("/sessions", {title});
+    return response.data;
+};
+
+export const updateAiChatSession = async (sessionId:number) => {
+    const response = await api.patch(`/sessions/${sessionId}`);
+    return response;
+};
+

@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import style from "./AiMain.module.css"
-import { checkUsedBefore, createTitle, getSessions, insertAiUsage, sendPrompt } from "../../api/aiApi";
+import { checkUsedBefore, createTitle, getSessions, insertAiUsage, sendPrompt, updateAiUsage } from "../../api/aiApi";
 import { type message, type AiChatHistory, type AiChatSession } from "../../types/aiTypes";
 
 export default function AiMain() {
-    const [sessionNo, setSessionNo] = useState(0);
+    const [sessionId, setSessionId] = useState(0);
     const promptRef = useRef<HTMLInputElement>(null);
     const [sessionsList, setSessionsList] = useState<AiChatSession[]>([]);
     const [historyList, setHistoryList] = useState<AiChatHistory[]>([]);
-    const [usedBefore, setUsedBefore] = useState(false);
     const [messages, setMessages] = useState<message[]>([{"role": "system", "content": ""}]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -22,6 +21,7 @@ export default function AiMain() {
         const prompt = promptRef.current?.value.trim();
         let tokensUsed = 0;
         let title = "";
+        let usedBefore = false;
 
         if (prompt == null || prompt == "") {
             return;
@@ -33,14 +33,10 @@ export default function AiMain() {
         setIsLoading(true);
 
         // 제목 만들기
-        if (sessionNo == 0) {
+        if (sessionId == 0) {
             checkUsedBefore()
             .then(data => {
-                setUsedBefore(data);
-
-                if (!data) {
-
-                }
+                usedBefore = data;
             })
             .catch(err => console.log(err));
 
@@ -48,13 +44,9 @@ export default function AiMain() {
             .then(res => {
                 title = res.message.content;
                 console.log(title);
-                tokensUsed = res.eval_count + res.prompt_eval_count;    
+                tokensUsed += res.eval_count + res.prompt_eval_count;    
             })
             .catch(err => console.log(err));
-
-            // AI_USAGE 테이블에 행 삽입.
-            insertAiUsage(tokensUsed)
-            .then(res => console.log(res))
         }
 
         // 채팅하기
@@ -63,12 +55,23 @@ export default function AiMain() {
             console.log(res);
             messages.push({"role": "assistant", "content": res.message.content});
             setMessages([...messages]);
-            tokensUsed = res.eval_count + res.prompt_eval_count;
+            tokensUsed += res.eval_count + res.prompt_eval_count;
         })
         .catch(err => console.log(err))
         .finally(() => {
             setIsLoading(false);
         });
+
+        if (usedBefore) {
+            updateAiUsage(tokensUsed)
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        } else {
+            // AI_USAGE 테이블에 행 삽입.
+            insertAiUsage(tokensUsed)
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        }
     };    
 
     return (
