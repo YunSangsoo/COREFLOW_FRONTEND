@@ -4,10 +4,9 @@ import { memberDelete, memberDetail, memberUpdate, posList } from '../../api/mem
 import type { MemberDetail, MemberPatch, Position } from '../../types/member';
 import React, { useEffect, useRef, useState } from 'react';
 import DepartmentMap from './DepartmentMap';
+import { useNavigate } from 'react-router-dom';
 
-export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:()=> void}) {
-    const queryClient = useQueryClient();
-
+export default function MemberDetail({userNo, onClose}:{userNo:number, onClose:()=> void}) {    
     // 초기 데이터용 훅
     const {data, isLoading, isError, error} = useQuery<MemberDetail>({
         queryKey : ['memberDetail',userNo],
