@@ -6,7 +6,6 @@ import { getPolicies } from "../../api/companyPolicyApi";
 import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
 import TableOfContents from "../../components/company_policy/TableOfContents";
 import ComPolPaginator from "../../components/company_policy/ComPolPaginator";
-import Sidebar from "../../components/SideBar";
 import Tiptap from "../../components/company_policy/Tiptap";
 
 export default function CompanyPolicyMain() {
@@ -51,7 +50,6 @@ export default function CompanyPolicyMain() {
 
     return (
         <div className="flex">
-            <Sidebar />
             <div className={style["company-policy-main"]}>
                 <header>
                     <h1 className="text-5xl" style={{ textAlign: "center" }}>CoreFlow 내부 규정</h1>

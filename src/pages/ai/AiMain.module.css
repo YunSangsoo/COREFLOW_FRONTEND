@@ -1,0 +1,128 @@
+.ai-body {
+    font-family: Arial, sans-serif;
+    background-color: transparent;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 750px;
+    margin: 0;
+}
+
+.chat-container {
+    width: 980px;
+    height: 680px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    max-width: 75%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 10px;
+    line-height: 1.4;
+}
+
+.question {
+    background-color: #4CAF50;
+    color: white;
+    align-self: flex-end;
+}
+
+.answer {
+    background-color: #e0e0e0;
+    color: black;
+    align-self: flex-start;
+}
+
+.input-container {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    background: white;
+}
+
+.ai-input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+}
+
+.ai-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.ai-button:hover {
+    background-color: #45a049;
+}
+
+/* 로딩 스피너 스타일 */
+.loading {
+    align-self: flex-start;
+    background-color: #e0e0e0;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: black;
+    display: flex;
+    align-items: center;
+}
+
+.loading span {
+    margin-left: 5px;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.3;
+    }
+}
+
+.nav {
+    align-self: baseline;
+    margin-top: 40px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+}
+
+.session-li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.session-p {
+    cursor: pointer;
+}
