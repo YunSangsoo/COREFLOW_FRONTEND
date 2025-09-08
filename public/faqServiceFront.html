@@ -117,6 +117,7 @@
             }
         }
     </style>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 </head>
 
 <body>
@@ -126,10 +127,19 @@
         <div class="input-container">
             <input type="text" id="question" placeholder="질문을 입력하세요..." onkeydown="handleKeyPress(event)">
             <button onclick="sendQuery()">전송</button>
+            <button type="button" onclick="test()">테스트</button>
         </div>
     </div>
 
     <script>
+        let sessionNo = 0;
+        let numPromptsSent = 0;
+        function test() {
+            $.ajax({
+                url: "http://localhost:8081/api/ai/sessions"
+            });
+        }
+
         const sendQuery = async () => {
             const questionInput = document.querySelector("#question");
             const questionText = questionInput.value.trim();
