@@ -73,8 +73,8 @@ export const memVacation = async (userNo:number,year:number,month:number) => {
 }
 
 // 로그인 사원 프로필
-export const loginUser = async (userNo:number) => {
-    const response = await api.get<LoginUser>(`/user/profile/${userNo}`);
+export const loginUser = async () => { // 임시 로그인유저로 하는거니까 userNo:number 해라 나중에? ㅎㅎ
+    const response = await api.get<LoginUser>(`/user/profile`);
     return response.data;
 }
 // 로그인 사용자 연차 조회

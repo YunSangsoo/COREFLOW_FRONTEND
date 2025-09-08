@@ -18,7 +18,7 @@ export default function VacationPersonal() {
     const loginUserNo = 61;
     const { data: loginUserProfile } = useQuery<LoginUser>({
         queryKey: ['userProfile', loginUserNo],
-        queryFn: () => loginUser(loginUserNo)
+        queryFn: () => loginUser()
     })
 
     const { data: loinUserVacation } = useQuery<MemberVacation[]>({
@@ -27,26 +27,29 @@ export default function VacationPersonal() {
     })
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white">
+        <div className="max-w-7xl mx-auto p-8 bg-white rounded-lg shadow-lg">
             <h1 className="text-2xl font-bold mb-6">내 연차 관리</h1>
             <div className="flex gap-6">
                 <VacSideBar />
                 <div className="flex-1">
                     <div className="bg-gray-100 p-4 rounded-t-lg border border-gray-300">
                         <h2 className="text-xl font-bold mb-2">{loginUserProfile?.userName}</h2>
-                        <div className="flex flex-wrap gap-x-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap gap-x-12 text-sm text-gray-600">
                             <div className="flex items-center">
-                                <span className="font-semibold w-16">부서명 :{loginUserProfile?.depName}</span>
-                                <span className="flex-1">{ }</span>
+                                <span className="font-semibold min-w-[70px]">부서명 :</span>
+                                <span className="flex-1">{loginUserProfile?.depName}</span>
                             </div>
                             <div className="flex items-center">
-                                <span className="font-semibold w-12">직위 :{loginUserProfile?.posName}</span>
-                                <span className="flex-1">{ }</span>
+                                <span className="font-semibold min-w-[70px]">직위 :</span>
+                                <span className="flex-1">{loginUserProfile?.posName}</span>
                             </div>
                             <div className="flex items-center">
-                                <span className="font-semibold w-16">입사일 :{loginUserProfile?.hireDate}</span>
-                                <span className="flex-1">{dayjs().format('YYYY-MM-DD')}</span>
+                                <span className="font-semibold min-w-[70px]">입사일 :</span>
+                                <span className="flex-1">{dayjs(loginUserProfile?.hireDate).format('YYYY-MM-DD')}</span>
                             </div>
+                            <button className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                                휴가 등록
+                            </button>
                         </div>
                     </div>
                     {/* SearchYear 컴포넌트만 남겨두어 연도별 필터링 기능을 제공 */}
