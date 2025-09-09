@@ -56,7 +56,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/approval/ApprovalEditor" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    <Link to="/approval/ApprovalForm" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         문서 작성
                                     </Link>

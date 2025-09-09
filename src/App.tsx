@@ -16,13 +16,8 @@ import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
 import Attendance from './pages/member_attendance/Attendance';
-
-
-import { getPolicies } from './api/companyPolicyApi';
-import Sidebar from './components/SideBar';
-import ChatManager from './components/chat/ChatManager';
 import DocumentTable from './components/Approval/DocumentTable';
-import ApprovalForm from './components/Approval/ApprovalEditor';
+import ApprovalForm from './components/Approval/ApprovalForm';
 
 function App() {
     const dispatch = useDispatch();
@@ -73,7 +68,7 @@ function App() {
                     <Route path='' element={<DocumentTable />} />
                     <Route path='approval' element={<DocumentTable  />} />
                 </Route>
-                <Route path="/approval/ApprovalEditor" element={<ApprovalForm />} />
+                <Route path="/approval/ApprovalForm" element={<ApprovalForm />} />
 
             </Routes>
 

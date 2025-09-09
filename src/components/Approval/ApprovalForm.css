@@ -1,0 +1,60 @@
+
+table {
+  width: 1500px;
+  border-collapse: collapse;
+}
+
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+.tiptap {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  min-height: 600px;
+  padding: 1rem;
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+}
+
+.edbtn{
+  
+  display: 'flex'; 
+  gap: '5px'; 
+  padding: '10px';
+  border: solid 1px;
+  border-radius: 5px;
+  border-color: gray;
+}
+.edbtn button{
+  color: grey;
+  
+}
+
+.main33{
+  border: solid 0.5px;
+}
+
+.main34{
+  border: solid 0.5px;
+  width: 500px;
+  
+}
+
+.topbtn button{
+  border: solid 1px;
+  margin-right: 5px;
+  width: 200px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.topbtn button:hover{
+  background-color: #1D87FF;
+  color: #fff;
+}
