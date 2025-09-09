@@ -268,8 +268,8 @@ const ApprovalForm: React.FC = () => {
   const [title, setTitle] = useState('');
   const [approver, setApprover] = useState('');
   const [cc, setCc] = useState('');
-  const [approverUserNo, setApproverUserNo] = useState<number | null>(null);
-  const [ccUserNo, setCcUserNo] = useState<number | null>(null);
+  const [approverUserNo, setApproverUserNo] = useState<number[]>([]);
+  const [ccUserNo, setCcUserNo] = useState<number[]>([]);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [editorValue, setEditorValue] = useState('');
   
@@ -311,18 +311,31 @@ const ApprovalForm: React.FC = () => {
 
   const handleApproverConfirm = (picked: Member[]) => {
     if (picked.length > 0) {
-      setApprover(picked[0].userName);
-      setApproverUserNo(picked[0].userNo);
+      const approverNames = picked.map(m => m.userName).join(',');
+      setApprover(approverNames);
+      setApproverUserNo(picked.map(m => m.userNo));
       setInitialApprovers(picked);
+    } else{
+      setApprover('');
+      setApproverUserNo([]);
+      setInitialApprovers([]);
     }
     setIsApproverModalOpen(false);
   };
 
   const handleCcConfirm = (picked: Member[]) => {
     if (picked.length > 0) {
-      setCc(picked.map(m => m.userName).join(', '));
-      setCcUserNo(picked[0].userNo);
+      const ccNames = picked.map(m => m.userName).join(',');
+      setCc(ccNames);
+
+      const ccUserNos = picked.map(m => m.userNo);
+      setCcUserNo(ccUserNos);
+
       setInitialCCs(picked);
+    }else{
+      setCc('');
+      setCcUserNo([]);
+      setInitialCCs([]);
     }
     setIsCcModalOpen(false);
   };
@@ -449,7 +462,7 @@ const ApprovalForm: React.FC = () => {
         <div>
           <label>참조자</label>
           <input 
-            className="main33" 
+            className="main34" 
             type="button"
             value={cc} 
             onClick={() => setIsCcModalOpen(true)}
