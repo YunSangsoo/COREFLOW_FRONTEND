@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css'
 import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../features/authSlice';
-import { api } from '../api/coreflowApi';
+import { loginSuccess } from '../../features/authSlice';
+import { api } from '../../api/coreflowApi';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -31,6 +31,7 @@ export default function Login() {
         .then(res => {
             console.log(res);
             dispatch(loginSuccess(res.data));
+            console.log("로그인 디스패치 : ", loginSuccess(res.data));
             navigate("/", {state:{flash:"로그인 성공"}});
         })
         .catch((err:AxiosError) => {
