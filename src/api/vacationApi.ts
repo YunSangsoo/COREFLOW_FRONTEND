@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { LoginUser, MemberChoice, MemberVacation, VacationInfo } from "../types/vacation";
+import type { LoginUser, MemberChoice, MemberVacation, PutVacation, VacationInfo, VacType } from "../types/vacation";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -81,4 +81,16 @@ export const loginUser = async () => { // 임시 로그인유저로 하는거니
 export const loginUserVacation = async (year:number) => {
     const response = await api.get<MemberVacation[]>(`/vacation/personal`,{params:{year}});
     return response.data;
+}
+
+// 휴가 종류 조회
+export const vacType = async () => {
+    const response = await api.get<VacType[]>('/vacation/type');
+    return response.data;
+}
+
+// 로그인 사용자 휴가 신청
+export const putVacation = async (vacationData:PutVacation) => {
+    const response = await api.put<PutVacation>(`/vacation/personal`,vacationData);
+    return response.status;
 }

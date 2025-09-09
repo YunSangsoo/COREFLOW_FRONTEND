@@ -12,6 +12,7 @@ import { getPolicies } from './api/companyPolicyApi';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member_main/MemberMain';
+// import MemberDetail from './components/member_main/MemberDetail';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
@@ -55,7 +56,9 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-                <Route path='/members' element={<MemberMain/>}></Route>
+                <Route path='/members'>
+                    <Route path='' element={<MemberMain/>}/>                
+                </Route>
                 <Route path='/vacation'>
                     <Route path='info' element={<VacationInfo/>}></Route>
                     <Route path='member' element={<VacationMember/>}></Route>

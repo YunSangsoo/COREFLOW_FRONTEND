@@ -29,3 +29,15 @@ export interface LoginUser{
     posName:string;
     hireDate:string;
 }
+
+export interface VacType{
+    vacCode:number;
+    vacName:string;
+}
+
+export interface PutVacation{
+    vacCode:number;
+    vacStart:string;
+    vacEnd:string;
+    vacAmount:number;
+}

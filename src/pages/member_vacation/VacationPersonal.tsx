@@ -5,10 +5,19 @@ import dayjs from "dayjs";
 import type { LoginUser, MemberVacation } from "../../types/vacation";
 import { useQuery } from "@tanstack/react-query";
 import { loginUser, loginUserVacation } from "../../api/vacationApi";
+import PutVacation from "../../components/member_vacation/putVacation";
 
 export default function VacationPersonal() {
 
-    const [selectYear, setSelectYear] = useState(dayjs().year());
+    const [selectYear, setSelectYear] = useState(dayjs().year()); 
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    }
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    }
 
     const handleDateChange = (year: number) => {
         setSelectYear(year);
@@ -47,12 +56,14 @@ export default function VacationPersonal() {
                                 <span className="font-semibold min-w-[70px]">입사일 :</span>
                                 <span className="flex-1">{dayjs(loginUserProfile?.hireDate).format('YYYY-MM-DD')}</span>
                             </div>
-                            <button className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                            <button 
+                                onClick={handleOpenModal}
+                                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                                 휴가 등록
                             </button>
+                            {isModalOpen && <PutVacation onClose={handleCloseModal}  />}
                         </div>
                     </div>
-                    {/* SearchYear 컴포넌트만 남겨두어 연도별 필터링 기능을 제공 */}
                     <div className="border border-gray-300 rounded-md overflow-hidden">
                         <div>
                             <VacDate selectYear={selectYear} onDateChange={handleDateChange} />
