@@ -343,23 +343,25 @@ const ApprovalForm: React.FC = () => {
         return;
     }
 
-    const lines = [];
+    const lines=[];
 
     if (approverUserNo) {
-        lines.push({
-            approverUserNo: approverUserNo,
-            lineOrder: 1,
-            status: status === 'SUBMIT' ? 'WAITING' : 'PENDING'
-        });
-    }
+    lines.push({
+        approverUserNo: approverUserNo,
+        lineOrder: 1,
+        status: status === 'SUBMIT' ? 'WAITING' : 'PENDING'
+    });
+  }
 
-    if (ccUserNo) {
-        lines.push({
-            approverUserNo: ccUserNo,
-            lineOrder: 2,
-            status: 'PENDING'
-        });
-    }
+  if (ccUserNo) {
+    lines.push({
+        approverUserNo: ccUserNo,
+        lineOrder: 2,
+        status: 'PENDING'
+    });
+  }
+
+    const formData = new FormData();
 
     const approvalData = {
       approvalTitle: title,
@@ -380,10 +382,17 @@ const ApprovalForm: React.FC = () => {
         : []
     };
 
+    formData.append(
+      'approvalData',
+      new Blob([JSON.stringify(approvalData)], {type:'application/json'})
+    );
+    if (attachedFile) {
+      formData.append('files', attachedFile);
+    }
+
     try {
-      await axios.post("http://localhost:8081/api/approvals", approvalData, {
+      await axios.post("http://localhost:8081/api/approvals", FormData, {
         headers: {
-            "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
         },
       });
@@ -393,7 +402,7 @@ const ApprovalForm: React.FC = () => {
       alert("문서 제출에 실패했습니다.");
     }
   };
-
+//===========================================
   return (
     <div>
       <div>

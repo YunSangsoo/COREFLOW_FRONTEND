@@ -24,7 +24,7 @@ export const getDocuments = async (): Promise<ApprovalDto[]> => {
     }
     try {
         const response: AxiosResponse<ApprovalDto[]> = await axios.get(
-            "http://localhost:8081/api/approvals/documents",
+            "http://localhost:8081/api/approvals/",
             {
                 headers: {
                     Authorization: `Bearer ${token}`
