@@ -3,13 +3,12 @@ import type { RootState } from "../../store/store";
 import { useEffect, useState } from "react";
 import { MemberControll } from "../../components/MemberControll";
 import { api } from "../../api/coreflowApi";
-import { loginSuccess } from "../../features/authSlice";
+import { loginSuccess, setUser } from "../../features/authSlice";
 import type { LoginResponse } from "../../types/type";
 
 export default function Mypage() {
     const auth = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch();
-
     const [phone, setPhone] = useState(auth.user?.phone ?? "");
     const [roadAddr, setRoadAddr] = useState("");
     const [detailAddr, setDetailAddr] = useState("");
@@ -19,6 +18,10 @@ export default function Mypage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [dbProfileUrl, setDbProfileUrl] = useState(auth.user?.profile ?? "/default-profile.png");
 
+    useEffect(()=>{
+
+    console.log(auth);
+    },[])
 
     const [isEditingPhone, setIsEditingPhone] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -36,7 +39,7 @@ export default function Mypage() {
         api.get("/auth/me")
             .then((res) => {
                 // Redux store 갱신 (LoginResponse 그대로)
-                dispatch(loginSuccess(res.data));
+                dispatch(setUser(res.data));
 
                 // UI 상태 갱신
                 setPhone(res.data.user.phone ?? "");
@@ -126,12 +129,13 @@ export default function Mypage() {
             .catch(() => alert("프로필 이미지 업로드 실패"));
     };
 
+
     return (
         <div className="max-w-lg mx-auto bg-white shadow rounded p-4">
             <h1 className="text-xl font-bold mb-4">마이페이지</h1>
 
             {/* 이름/이메일 조회 */}
-            <MemberControll title="이름" value={auth.user?.name ?? ""} readOnly />
+            <MemberControll title="이름" value={auth.user?.userName ?? ""} readOnly />
             <MemberControll title="이메일" value={auth.user?.email ?? ""} readOnly />
 
             {/* 휴대폰 */}

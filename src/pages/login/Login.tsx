@@ -31,6 +31,7 @@ export default function Login() {
         .then(res => {
             console.log(res);
             dispatch(loginSuccess(res.data));
+            console.log("로그인 디스패치 : ", loginSuccess(res.data));
             navigate("/", {state:{flash:"로그인 성공"}});
         })
         .catch((err:AxiosError) => {

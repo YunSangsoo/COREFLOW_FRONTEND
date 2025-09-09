@@ -25,7 +25,7 @@ export default function MainPage() {
                 <>
                 <div className="nav-item">
                     <span style={{fontWeight:"bold"}}>
-                        {auth.user?.name} {auth.user?.email}
+                        {auth.user?.userName} {auth.user?.email}
                     </span>
                 </div>
                 <div id="logout-button" className="nav-item">
