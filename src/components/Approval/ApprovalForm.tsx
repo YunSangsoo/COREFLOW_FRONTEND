@@ -345,8 +345,13 @@ const ApprovalForm: React.FC = () => {
       alert("사용자 정보가 없습니다.");
       return;
     }
+
+    if (status === 'SUBMIT' && !title.trim()){
+      alert("제목을 입력해주세요")
+      return;
+    }
     
-    if (status === 'SUBMIT' && !approverUserNo) {
+    if (status === 'SUBMIT' && approverUserNo.length === 0) {
       alert("결재자를 선택해주세요.");
       return;
     }
@@ -356,23 +361,6 @@ const ApprovalForm: React.FC = () => {
         return;
     }
 
-    const lines=[];
-
-    if (approverUserNo) {
-    lines.push({
-        approverUserNo: approverUserNo,
-        lineOrder: 1,
-        status: status === 'SUBMIT' ? 'WAITING' : 'PENDING'
-    });
-  }
-
-  if (ccUserNo) {
-    lines.push({
-        approverUserNo: ccUserNo,
-        lineOrder: 2,
-        status: 'PENDING'
-    });
-  }
 
     const formData = new FormData();
 
@@ -382,8 +370,10 @@ const ApprovalForm: React.FC = () => {
       userNo: user.id,
       approvalType: approvalType, // ✅ 이 부분이 이제 올바르게 동작합니다
       approvalStatus: status === 'SUBMIT' ? 1 : 0,
+      startDate: new Date().toISOString(),
       saveDate: new Date().toISOString(),
-      lines: lines,
+      approverUserNo: approverUserNo,
+      ccUserNo: ccUserNo,
       files: attachedFile
         ? [
           {
@@ -404,7 +394,7 @@ const ApprovalForm: React.FC = () => {
     }
 
     try {
-      await axios.post("http://localhost:8081/api/approvals", FormData, {
+      await axios.post("http://localhost:8081/api/approvals", formData, {
         headers: {
             "Authorization": `Bearer ${accessToken}`
         },
@@ -425,6 +415,7 @@ const ApprovalForm: React.FC = () => {
         <button onClick={() => setIsApproverModalOpen(true)}>결재선</button>
         <input type="file" id="file-attach" onChange={handleFileChange} style={{ display: 'none' }} />
         <button onClick={() => document.getElementById('file-attach')?.click()}>파일첨부</button>
+        {attachedFile && <span>{attachedFile.name}</span>}
       </div>
 
       <div>
