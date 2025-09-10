@@ -2,12 +2,13 @@ import VacSideBar from "../../components/member_vacation/vacSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
 import { useState } from "react";
 import type { MemberChoice, MemberVacation } from "../../types/vacation";
-import { useQuery } from "@tanstack/react-query";
-import { memVacation, memVacationAll } from "../../api/vacationApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { memVacation, memVacationAll, vacStatusUpdate } from "../../api/vacationApi";
 import dayjs from "dayjs";
 import VacDate from "../../components/member_vacation/VacDate";
 
 export default function VacationMember() {
+    const queryClient = useQueryClient();
     // 사원명 입력값 저장용 훅
     const [searchName, setSearchName] = useState('');
 
@@ -70,6 +71,30 @@ export default function VacationMember() {
         }
     }
 
+    // 휴가 상태값 변경
+    const mutation = useMutation({
+        mutationFn:({vacId, newState}:{vacId:number, newState:number}) => vacStatusUpdate(vacId,newState),
+        onSuccess:()=>{
+            queryClient.invalidateQueries({queryKey:['allVacation',selectYear,selectMonth]});
+            if(selectMember){
+                queryClient.invalidateQueries({queryKey:['memberVacation',selectMember.userNo,selectYear,selectMonth]});
+            }
+        }
+    })
+
+    const handleVacStatusUpdate = (vacId:number, status:number) => {
+        const updateStatus = (status % 3) + 1;
+        mutation.mutate({vacId,newState:updateStatus});
+    }
+
+
+
+
+
+
+
+
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
             <h1 className="text-2xl font-bold mb-6">연차관리</h1>
@@ -115,14 +140,16 @@ export default function VacationMember() {
                             {
                                 displayData && displayData.length > 0 ? (
                                     displayData.map((item,index) => (
-                                    <div key={index} className="flex text-sm border-b border-gray-200">
+                                    <div key={item.vacId} className="flex text-sm border-b border-gray-200">
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</div>
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userName}</div>
                                         <div className="w-20 p-2 border-r border-gray-200 text-center">{item.vacName}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacStart).format("YYYY-MM-DD")}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacEnd).format('YYYY-MM-DD')}</div>
                                         <div className="w-16 p-2 border-r border-gray-200 text-center">{item.vacAmount}</div>
-                                        <div className="w-16 p-2 text-center">{item.status===1 ? "승인" : item.status===2 ? "대기" : "반려"}</div>
+                                        <button
+                                            onClick={() => handleVacStatusUpdate(item.vacId, item.status)}
+                                            className="w-16 p-2 bg-blue-600 text-center">{item.status===1 ? "대기" : item.status===2 ? "승인" : "반려"}</button>
                                     </div>
                                     ))
                                 ) : <div>{displayError?.message}</div>

@@ -13,6 +13,7 @@ export interface MemberChoice{
 }
 
 export interface MemberVacation{
+    vacId:number;
     userNo:number;
     userName:string;
     vacName:string;
@@ -21,6 +22,11 @@ export interface MemberVacation{
     vacAmount:number;
     status:number;
 }
+
+export interface VacStatus{
+    status:number;
+}
+
 
 export interface LoginUser{
     userNo:number;

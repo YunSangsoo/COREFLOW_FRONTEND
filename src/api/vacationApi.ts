@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { LoginUser, MemberChoice, MemberVacation, PutVacation, VacationInfo, VacType } from "../types/vacation";
+import type { LoginUser, MemberChoice, MemberVacation, PutVacation, VacationInfo, VacStatus, VacType } from "../types/vacation";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -66,18 +66,25 @@ export const memChoice = async (userName:string) => {
     return response.data;
 }
 
-// 선택 휴가 내역 조회
+// 선택 사원 휴가 내역 조회
 export const memVacation = async (userNo:number,year:number,month:number) => {
     const response = await api.get<MemberVacation[]>(`/vacation/member/${userNo}`,{params:{year,month}});
     return response.data;
 }
 
+// 휴가 승인 상태 업데이트
+export const vacStatusUpdate = async (vacId:number, newState:number) => {
+    const response = await api.patch<VacStatus>(`/vacation/member/${vacId}`,{status:newState});
+    return response.data;
+}
+
 // 로그인 사원 프로필
-export const loginUser = async () => { // 임시 로그인유저로 하는거니까 userNo:number 해라 나중에? ㅎㅎ
+export const loginUser = async () => {
     const response = await api.get<LoginUser>(`/user/profile`);
     return response.data;
 }
-// 로그인 사용자 연차 조회
+
+// 로그인 사용자 휴가 조회
 export const loginUserVacation = async (year:number) => {
     const response = await api.get<MemberVacation[]>(`/vacation/personal`,{params:{year}});
     return response.data;
