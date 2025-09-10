@@ -62,7 +62,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/approval/manage" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    <Link to="/received-documents" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         결재 관리
                                     </Link>

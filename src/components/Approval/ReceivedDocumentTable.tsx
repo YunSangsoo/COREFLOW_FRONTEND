@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React,{ useEffect, useState} from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import './Approval.css'
 import { Link } from "react-router-dom";
+import './Approval.css';
+
+interface ApiDocument {
+    approvalId: number;
+    approvalType: string;
+    approvalTitle: string;
+    startDate: string;
+    apporvalStatus: string;
+}
 
 interface Document {
     id: number;
@@ -12,7 +20,7 @@ interface Document {
     status: string;
 }
 
-const DocumentTable: React.FC = () => {
+const ReceivedDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [filter, setFilter] = useState<string>("일반결재");
     const [loading, setLoading] = useState(true);
@@ -25,19 +33,20 @@ const DocumentTable: React.FC = () => {
             return;
         }
 
-        const fetchMyDocuments = async () =>{
+        const fetchReceivedDocuments = async () =>{
             try{
-                const response = await axios.get('http://localhost:8081/api/approvals/my-documents',{
+                const response = await axios.get('http://localhost:8081/api/approvals/received-documents',{
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 });
-                const mappedDocs = response.data.map((item: any) => ({
+
+                const mappedDocs = response.data.map((item: ApiDocument) => ({
                     id: item.approvalId,
                     type: item.approvalType, 
                     title: item.approvalTitle,
                     date: item.startDate ? new Date(item.startDate).toLocaleDateString() : "",
-                    status: item.approvalStatus === 1 ? "진행중" : item.approvalStatus === 2 ? "완료" : "반려" // 임시 상태 매핑
+                    status: "결재 대기"
                 }));
                 setDocuments(mappedDocs);
             } catch(err) {
@@ -46,58 +55,49 @@ const DocumentTable: React.FC = () => {
             setLoading(false);
         }    
     };
-    fetchMyDocuments();
+    fetchReceivedDocuments();
     }, [accessToken]);
 
-    if (loading) return <div>로딩중...</div>;
+    if (loading) {
+        return <div>로딩중...</div>;
+    }
 
     const filteredDocs = documents.filter(doc => doc.type === filter);
 
-    const getStatusClassName = (status: string): string => {
-    switch (status) {
-        case "대기중": 
-            return 'status-waiting';
-        case "완료":
-            return 'status-completed';
-        case "반려":
-            return 'status-rejected';
-        default:
-            return '대기중'; 
-    }
-};
-
-    return (
+    return(
         <div>
             <div className="arrbtn1">
                 <button className="arrbtn" onClick={() => setFilter("일반결재")}>일반문서</button>
                 <button className="arrbtn" onClick={() => setFilter("휴가원")}>휴가원</button>
             </div>
-            <table>
-                <thead className="topbar">
+                <table>
+
+            <thead className="topbar">
                     <tr>
                         <th>구분</th>
                         <th>제목</th>
                         <th>기안일</th>
                         <th>상태</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {filteredDocs.map(doc => (
-                        <tr key={doc.id}>
-                            <td>{doc.type}</td>
-                            <td>
-                              <Link to={`/document/${doc.id}`}>{doc.title}</Link>
-                            </td>
-                            <td>{doc.date}</td>
-                            <td>
-                            <span className={`status ${getStatusClassName(doc.status)}`}>{doc.status}</span>
-                            </td>
-                        </tr>
-                    ))}
+            </thead>
+            <tbody>
+                {filteredDocs.map(doc => (
+                    <tr key={doc.id}>
+                    <td>{doc.type}</td>
+                    <td>
+                        <Link to={`/document/${doc.id}`}>{doc.title}</Link>
+                    </td>
+                    <td>{doc.date}</td>
+                    <td>
+                        <span className="status status-waiting">{doc.status}</span>
+                    </td>
+                </tr>
+                ))}
                 </tbody>
             </table>
         </div>
-    );
+        
+    )
 };
 
-export default DocumentTable;
+export default ReceivedDocumentTable;

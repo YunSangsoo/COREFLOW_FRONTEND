@@ -26,43 +26,34 @@ tr:hover {
     
 }
 
-.status-대기중 {
+.status {
+    /* height: 28px; */
+    width: 5%;
+    border-radius: 10px;
+    text-align: center;
+    display: inline-block; 
+    min-width: 50px;       
+    font-size: 12px;      
+    padding: 2px 6px;     
+    color: rgb(255, 255, 255);  
     background-color: #FF8E1D;
-    width: 5%;
-    border-radius: 10px;
-    text-align: center;
-    display: inline-block; 
-    min-width: 50px;       
-    font-size: 12px;      
-    padding: 2px 6px;     
-    color: white;  
-
+    /* margin-top: 5px */
 
 }
+.status-waiting {
+    background-color: #FF8E1D;
+}
 
-.status-완료 
-{
+.status-completed {
     background-color: #1D87FF; 
-    width: 5%;
-    border-radius: 10px;
-    text-align: center;
-    display: inline-block; 
-    min-width: 50px;       
-    font-size: 12px;      
-    padding: 2px 6px;     
-    color: white;         
+       
 }
 
-.status-반려 {
+.status-rejected {
     background-color: #FF301D;
-    width: 5%;
-    border-radius: 10px;
-    text-align: center;
-    display: inline-block;
-    min-width: 50px;       
-    font-size: 12px;       
-    padding: 2px 6px;     
-    color: white;          
-    justify-content: center;
 }
 
+.topbar th{
+  margin-right: 20px;
+
+}

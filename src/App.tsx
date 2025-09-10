@@ -19,6 +19,8 @@ import VacationPersonal from './pages/member_vacation/VacationPersonal';
 import Attendance from './pages/member_attendance/Attendance';
 import DocumentTable from './components/Approval/DocumentTable';
 import ApprovalForm from './components/Approval/ApprovalForm';
+import DocumentDetailPage from './components/Approval/DocumentDetailPage';
+import ReceivedDocumentTable from './components/Approval/ReceivedDocumentTable';
 
 function App() {
     const dispatch = useDispatch();
@@ -72,7 +74,9 @@ function App() {
                     <Route path='approval' element={<DocumentTable  />} />
                 </Route>
                 <Route path="/approval/ApprovalForm" element={<ApprovalForm />} />
-
+                <Route path='/my-documents' element={<DocumentTable/>}/>
+                <Route path='/document/:id' element={<DocumentDetailPage/>}/>
+                <Route path="/received-documents" element={<ReceivedDocumentTable />} />
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
