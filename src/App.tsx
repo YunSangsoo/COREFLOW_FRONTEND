@@ -9,17 +9,10 @@ import { api } from './api/coreflowApi';
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
-import CalendarPage from './pages/CalendarPage';
-=======
->>>>>>> main
-=======
-import Sidebar from './components/SideBar';
-import ChatManager from './components/chat/ChatManager';
->>>>>>> main
+import CalendarPage from './pages/calendar/CalendarPage';
 
 function App() {
     const dispatch = useDispatch();
