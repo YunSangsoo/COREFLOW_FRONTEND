@@ -3,6 +3,7 @@ import FloatingWindow from './FloatingWindow';
 import ChatMenu from './ChatMenu';
 import { DndContext, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 
+
 interface WindowState {
   id: string;
   title: string;

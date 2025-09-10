@@ -1,18 +1,27 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
-import Login from './login/Login'
+import Login from './pages/login/Login';
 import MainPage from './mainPage/MainPage'
 import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
+import FindPwd from './pages/login/Find-pwd'
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
 
+
+import CalendarPage from './pages/calendar/CalendarPage';
+import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
-import CalendarPage from './pages/calendar/CalendarPage';
+import MemberMain from './pages/member_main/MemberMain';
+import VacationInfo from './pages/member_vacation/VacationInfo';
+import VacationMember from './pages/member_vacation/VacationMember';
+import VacationPersonal from './pages/member_vacation/VacationPersonal';
+import Attendance from './pages/member_attendance/Attendance';
+
 
 function App() {
     const dispatch = useDispatch();
@@ -43,7 +52,9 @@ function App() {
                 <Route path="/" element={<MainPage />} />
                 <Route path="/auth">
                     <Route path="login" element={<Login />} />
+                    <Route path="find-pwd" element={<FindPwd/>}/>
                 </Route>
+                <Route path="/mypage" element={<Mypage/>}/>
                 <Route path="/cpolicies">
                     <Route path="" element={<CompanyPolicyMain/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMain/>} />
@@ -54,6 +65,14 @@ function App() {
                 </Route>
                 <Route>
                     <Route path='/calendar' element={<CalendarPage/>}/>
+                </Route>
+                <Route path='/members' element={<MemberMain/>}></Route>
+                <Route path='/vacation'>
+                    <Route path='info' element={<VacationInfo/>}></Route>
+                    <Route path='member' element={<VacationMember/>}></Route>
+                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                </Route>
+                <Route path='/attendance' element={<Attendance/>}>
                 </Route>
             </Routes>
 

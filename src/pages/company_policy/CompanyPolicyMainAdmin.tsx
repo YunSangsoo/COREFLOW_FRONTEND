@@ -6,7 +6,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import CoreFlowAi from "../../components/company_policy/CoreFlowAi";
 import TableOfContentsAdmin from "../../components/company_policy/TableOfContentsAdmin";
 import ComPolPaginatorAdmin from "../../components/company_policy/ComPolPaginatorAdmin";
-import Sidebar from "../../components/SideBar";
 import Tiptap from "../../components/company_policy/Tiptap";
 
 export default function CompanyPolicyMainAdmin() {
@@ -115,7 +114,6 @@ export default function CompanyPolicyMainAdmin() {
 
     return (
         <div className="flex">
-            <Sidebar/>
             <div className={style["company-policy-main"]}>
                 <header>
                     <h1 style={{ textAlign: "center" }}>CoreFlow 내부 규정(관리자 모드)</h1>
