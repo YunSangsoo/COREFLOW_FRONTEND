@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { Attendance } from "../../types/attendance";
-import { attInfo } from "../../api/attendanceApi";
+import { memAttendance } from "../../api/attendanceApi";
 import dayjs from "dayjs";
-import AttSideBar from "../../components/member_attendance/attSideBar";
+import AttSideBar from "../../components/member_attendance/AttSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
 import type { MemberChoice } from "../../types/vacation";
 import AttDate from "../../components/member_attendance/AttDate";
 
-export default function Attendance () {
+export default function AttendanceMember () {
 
     const [searchName, setSearchName] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -16,8 +16,8 @@ export default function Attendance () {
     const [currentDate, setCurrentDate] = useState(dayjs());
     
     const {data,isLoading,isError,error} = useQuery<Attendance[]>({
-        queryKey:['attendance',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
-        queryFn:() => attInfo(currentDate.format('YYYY-MM-DD'),selectMember?.userNo ?? null)
+        queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
+        queryFn:() => memAttendance(currentDate.format('YYYY-MM-DD'),selectMember?.userNo ?? null)
     });
 
     const handleSearch = () => {

@@ -23,21 +23,19 @@ export default function VacationPersonal() {
         setSelectYear(year);
     }
 
-    // 임시 로그인.. 찐 로그인 유저 가지고 하는건 내일해볼까 우리?
-    const loginUserNo = 61;
     const { data: loginUserProfile } = useQuery<LoginUser>({
-        queryKey: ['userProfile', loginUserNo],
+        queryKey: ['userProfile'],
         queryFn: () => loginUser()
     })
 
     const { data: loinUserVacation } = useQuery<MemberVacation[]>({
-        queryKey: ['personalVacation', loginUserNo, selectYear],
+        queryKey: ['personalVacation', selectYear],
         queryFn: () => loginUserVacation(selectYear)
     })
 
     return (
         <div className="max-w-7xl mx-auto p-8 bg-white rounded-lg shadow-lg">
-            <h1 className="text-2xl font-bold mb-6">내 연차 관리</h1>
+            <h1 className="text-2xl font-bold mb-6">휴가관리</h1>
             <div className="flex gap-6">
                 <VacSideBar />
                 <div className="flex-1">
@@ -91,7 +89,7 @@ export default function VacationPersonal() {
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacStart).format("YYYY-MM-DD")}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacEnd).format('YYYY-MM-DD')}</div>
                                         <div className="w-16 p-2 border-r border-gray-200 text-center">{item.vacAmount}</div>
-                                        <div className="w-16 p-2 text-center">{item.status === 1 ? "승인" : item.status === 2 ? "대기" : "반려"}</div>
+                                        <div className="w-16 p-2 text-center">{item.status === 1 ? "대기" : item.status === 2 ? "승인" : "반려"}</div>
                                     </div>
                                 ))
                             ) : (

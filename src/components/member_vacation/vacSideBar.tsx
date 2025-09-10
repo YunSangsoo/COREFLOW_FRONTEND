@@ -1,17 +1,16 @@
 import { Link } from "react-router-dom";
 
 export default function VacSideBar() {
-
     return (
         <div className="flex flex-col w-48">
                 <Link to="/vacation/info" >
-                    <button className="w-full py-3 text-center border border-gray-300 mb-1">기본 연차 관리</button>
+                    <button className="w-full py-3 text-center border border-gray-300 mb-1">기본 연차 정보</button>
                 </Link>
                 <Link to="/vacation/member">
-                    <button className="w-full py-3 text-center border border-gray-300 mb-1">사원 연차 관리</button>
+                    <button className="w-full py-3 text-center border border-gray-300 mb-1">사원 휴가 정보</button>
                 </Link>
                 <Link to="/vacation/personal">
-                    <button className="w-full py-3 text-center border border-gray-300 mb-1">내 연차 관리</button>
+                    <button className="w-full py-3 text-center border border-gray-300 mb-1">내 휴가 정보</button>
                 </Link>
         </div>
     )

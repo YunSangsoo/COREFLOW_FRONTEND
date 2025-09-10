@@ -13,11 +13,11 @@ import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
 import MemberMain from './pages/member_main/MemberMain';
-// import MemberDetail from './components/member_main/MemberDetail';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
-import Attendance from './pages/member_attendance/Attendance';
+import AttendanceMember from './pages/member_attendance/AttendanceMember';
+import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 
 
 function App() {
@@ -63,11 +63,13 @@ function App() {
                     <Route path='' element={<MemberMain/>}/>                
                 </Route>
                 <Route path='/vacation'>
-                    <Route path='info' element={<VacationInfo/>}></Route>
-                    <Route path='member' element={<VacationMember/>}></Route>
-                    <Route path='personal' element={<VacationPersonal/>}></Route>
+                    <Route path='info' element={<VacationInfo/>}/>
+                    <Route path='member' element={<VacationMember/>}/>
+                    <Route path='personal' element={<VacationPersonal/>}/>
                 </Route>
-                <Route path='/attendance' element={<Attendance/>}>
+                <Route path='/attendance'>
+                    <Route path="member" element={<AttendanceMember/>}/>
+                    <Route path="personal" element={<AttendancePersonal/>}/>
                 </Route>
             </Routes>
 

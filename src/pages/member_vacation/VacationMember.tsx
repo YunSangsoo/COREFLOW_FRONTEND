@@ -76,9 +76,7 @@ export default function VacationMember() {
         mutationFn:({vacId, newState}:{vacId:number, newState:number}) => vacStatusUpdate(vacId,newState),
         onSuccess:()=>{
             queryClient.invalidateQueries({queryKey:['allVacation',selectYear,selectMonth]});
-            if(selectMember){
-                queryClient.invalidateQueries({queryKey:['memberVacation',selectMember.userNo,selectYear,selectMonth]});
-            }
+            queryClient.invalidateQueries({queryKey:['memberVacation',selectYear,selectMonth]});
         }
     })
 
@@ -87,17 +85,9 @@ export default function VacationMember() {
         mutation.mutate({vacId,newState:updateStatus});
     }
 
-
-
-
-
-
-
-
-
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
-            <h1 className="text-2xl font-bold mb-6">연차관리</h1>
+            <h1 className="text-2xl font-bold mb-6">휴가관리</h1>
 
             <div className="flex gap-6">
                 <VacSideBar />
@@ -147,9 +137,11 @@ export default function VacationMember() {
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacStart).format("YYYY-MM-DD")}</div>
                                         <div className="w-24 p-2 border-r border-gray-200 text-center">{dayjs(item.vacEnd).format('YYYY-MM-DD')}</div>
                                         <div className="w-16 p-2 border-r border-gray-200 text-center">{item.vacAmount}</div>
-                                        <button
+                                        <div className="w-16 p-2 border-r border-gray-200 text-center">
+                                            <button
                                             onClick={() => handleVacStatusUpdate(item.vacId, item.status)}
-                                            className="w-16 p-2 bg-blue-600 text-center">{item.status===1 ? "대기" : item.status===2 ? "승인" : "반려"}</button>
+                                            className="w-10w-16 p-2 text-white bg-blue-600 text-center">{item.status===1 ? "대기" : item.status===2 ? "승인" : "반려"}</button>
+                                        </div>
                                     </div>
                                     ))
                                 ) : <div>{displayError?.message}</div>

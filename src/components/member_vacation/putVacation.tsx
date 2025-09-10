@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import type { PutVacation, VacType } from "../../types/vacation";
-import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { putVacation, vacType } from "../../api/vacationApi";
 
 interface PutVacationProps{
@@ -16,7 +16,7 @@ export default function PutVacation(props:PutVacationProps){
     })
     
     const [vacationData, setVacationData] = useState<PutVacation>({
-        vacCode:1,
+        vacCode:4,
         vacStart:'',
         vacEnd:'',
         vacAmount:0
@@ -25,7 +25,7 @@ export default function PutVacation(props:PutVacationProps){
     const {mutate,isSuccess} = useMutation({
         mutationFn:(data:PutVacation) => putVacation(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey:['putVacation']});
+            queryClient.invalidateQueries({queryKey:['personalVacation']});
             alert("휴가 신청 완료");
         },
         onError:()=>{

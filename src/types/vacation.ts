@@ -27,7 +27,6 @@ export interface VacStatus{
     status:number;
 }
 
-
 export interface LoginUser{
     userNo:number;
     userName:string;

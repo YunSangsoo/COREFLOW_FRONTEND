@@ -94,7 +94,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         setIsDepartment(false)
     }
 
-    // 사원 정보 수정 버튼
+    // 사원 정보 수정 버튼 (GPT HELP)
     const handleUpdate = () => {
         if (!data || !updateData) {
             alert("수정사항이 없습니다.");
@@ -107,16 +107,13 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
 
             if (key === 'hireDate' || key === 'updateDate') {
                 const initialDateStr = typeof initialValue === 'string'
-                    ? initialValue.split('T')[0]
-                    : '';
+                    ? initialValue.split('T')[0] : '';
 
                 const updatedDateStr = typeof updatedValue === 'string'
-                    ? updatedValue.split('T')[0]
-                    : '';
+                    ? updatedValue.split('T')[0] : '';
 
                 return initialDateStr !== updatedDateStr;
             }
-
             return initialValue !== updatedValue;
         });
 
@@ -125,19 +122,6 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         } else {
             alert("수정사항이 없습니다.");
         }
-        // const changedData: Partial<MemberPatch> = {};
-
-        // (Object.keys(updateData) as Array<keyof MemberPatch>).forEach(key => {
-        //     if (updateData[key] !== data[key]) {
-        //         changedData[key] = updateData[key];
-        //     }
-        // });
-
-        // if (Object.keys(changedData).length > 0) {
-        //     updateMutation.mutate(changedData);
-        // } else {
-        //     alert("수정사항이 없습니다.");
-        // }
     }
 
     // 사원 삭제 버튼
