@@ -28,7 +28,10 @@ export default function CoreFlowAi({setShowModal}:{setShowModal:(bool:boolean)=>
                 onClick={(e) => e.stopPropagation()}  // 내용 클릭시 닫히지 않게
             >
                 <AiMain/>
-                <button onClick={() => setShowModal(false)}>닫기</button>
+                <p style={{"color":"red"}}>주의 사항: 회사에 대한 질문을 할 때는 반드시 "CoreFlow"라는 단어를 포함해서 질문해주세요.</p>
+                <p>예시: CoreFlow의 휴가 규정에 대해서 알려줘.</p>
+                <br />
+                <button onClick={() => setShowModal(false)} className="border-amber-500">닫기</button>
             </div>
         </div>
     )
