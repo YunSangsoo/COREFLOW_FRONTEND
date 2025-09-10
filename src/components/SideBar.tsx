@@ -33,10 +33,10 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>사원관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/vacation/info" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>연차관리</Link>
+                                    <Link to="/vacation/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>휴가관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/attendance" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>출결관리</Link>
+                                    <Link to="/attendance/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>근태관리</Link>
                                 </li>
                             </ul>
                         )}

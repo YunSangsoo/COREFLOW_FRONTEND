@@ -1,6 +1,5 @@
 import axios from "axios";
 import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
-// import {api} from '../api/coreflowApi';
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
 
