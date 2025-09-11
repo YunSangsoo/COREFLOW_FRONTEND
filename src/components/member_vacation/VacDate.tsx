@@ -82,9 +82,7 @@ export default function VacDate({selectYear,selectMonth,onDateChange}:VacationMe
                 setIsMonthList(false);
             }
         }
-
         document.addEventListener("mousedown",handleClickOutside);
-        
         return () => {
             document.removeEventListener("mousedown",handleClickOutside);
         }

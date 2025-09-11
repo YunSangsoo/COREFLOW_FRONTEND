@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import type { Attendance } from "../../types/attendance";
-import { memAttendance } from "../../api/attendanceApi";
+import { memAttendance, vacTypeUpdate } from "../../api/attendanceApi";
 import dayjs from "dayjs";
 import AttSideBar from "../../components/member_attendance/attSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
@@ -10,12 +10,13 @@ import AttDate from "../../components/member_attendance/AttDate";
 import { vacType } from "../../api/vacationApi";
 
 export default function AttendanceMember () {
-
+    const queryClient = useQueryClient();
     const [searchName, setSearchName] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectMember,setSelectMember] = useState<MemberChoice|null>(null);
     const [currentDate, setCurrentDate] = useState(dayjs());
-    const [vacTypeList, setVacTypeList] = useState(false);
+    const [vacTypeList, setVacTypeList] = useState<number|null>(null);
+    const listRef = useRef<HTMLDivElement>(null);
 
     const {data:attData,isLoading,isError,error} = useQuery<Attendance[]>({
         queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
@@ -25,8 +26,22 @@ export default function AttendanceMember () {
     const {data : vacData} = useQuery<VacType[]>({
         queryKey:['vacType'],
         queryFn:vacType,
-        enabled:vacTypeList
+        enabled:vacTypeList !== null
     })
+
+    const mutation = useMutation({
+        mutationFn : vacTypeUpdate,
+        onSuccess:(data) => {
+            queryClient.invalidateQueries({
+                queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo]
+            });
+            setVacTypeList(null);
+        },
+        onError:(error) => {
+            console.log('비고 업데이트 실패 : ',error);
+        }
+    })
+
     const handleSearch = () => {
         setSearchQuery(searchName);
     }
@@ -43,10 +58,30 @@ export default function AttendanceMember () {
         setSelectMember(null);
     }
 
-    const handleVacType = () => {
-        setVacTypeList(!vacTypeList);
+    const handleVacType = (attId:number) => {
+        setVacTypeList(vacTypeList === attId ? null : attId);
     }
     
+    const handleVacSelect = (attId:number, vacCode:number) => {
+        mutation.mutate({
+            attId,
+            vacCode,
+            vacName:''
+        })
+    }
+
+    useEffect(() => {
+        const handleClickOutside = (e:MouseEvent) => {
+            if(listRef.current && !listRef.current.contains(e.target as Node)){
+                setVacTypeList(null);
+            }
+        }
+        document.addEventListener('mousedown',handleClickOutside);
+        return() => {
+            document.removeEventListener('mousedown',handleClickOutside);
+        }
+    },[])
+
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
     
@@ -76,7 +111,7 @@ export default function AttendanceMember () {
                     </div>
                     {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember}/>}
 
-                    <div className="border border-gray-300 rounded overctDate={selectDate} onDateChange={setSelectDate}flow-hidden">
+                    <div className="border border-gray-300 rounded">
                         <AttDate selectDate={currentDate} onDateChange={setCurrentDate}/>
                         <table className="min-w-full bg-white border-collapse">
                             <thead>
@@ -95,7 +130,7 @@ export default function AttendanceMember () {
                             {
                                 attData && attData.length > 0 ? (
                                     attData.map((data,index) => (
-                                    <tr className="border-b border-gray-200" key={index}>
+                                    <tr className="border-b border-gray-200" key={data.attId}>
                                         <td className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</td>
                                         <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
                                         <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
@@ -106,16 +141,16 @@ export default function AttendanceMember () {
                                         <td className="w-16 p-2 border-r border-gray-200 text-center">
                                             <div className="relative">
                                             <button
-                                                onClick={handleVacType}
+                                                onClick={() => handleVacType(data.attId)}
                                                 className="w-16 p-2 text-white bg-blue-600 text-center">{data.vacName}
                                             </button>
-                                            {vacTypeList && (
-                                                <div className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                            {vacTypeList === data.attId&& (
+                                                <div ref={listRef} className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
                                                     <div className="max-h-40 overflow-y-auto">
                                                     {vacData && vacData.length > 0 && (
                                                         <ul>
                                                             {vacData.map((vac)=>(
-                                                                <li key={vac.vacCode}
+                                                                <li key={vac.vacCode} onClick={() => handleVacSelect(data.attId, vac.vacCode)}
                                                                     className="p-2 hover:bg-gray-100 cursor-pointer">
                                                                     {vac.vacName}
                                                                 </li>
