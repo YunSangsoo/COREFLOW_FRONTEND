@@ -9,7 +9,7 @@ interface ApiDocument {
     approvalType: string;
     approvalTitle: string;
     startDate: string;
-    apporvalStatus: string;
+    approvalStatus: string;
 }
 
 interface Document {
