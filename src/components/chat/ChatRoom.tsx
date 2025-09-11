@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import type { ChatMessage, chatProfile, ChatRooms } from '../../types/chat';
-import { store } from '../../store/store';
 import { api } from '../../api/coreflowApi';
+import stompClient from '../../api/webSocketApi';
 
 interface ChatRoomProps extends ChatRooms {
   myProfile: chatProfile;
+  onNewMessage: (room: ChatRooms, message: ChatMessage) => void;
 }
 
 const formatTime = (dateString: string | Date): string => {
@@ -38,15 +38,17 @@ const formatDateSeparator = (dateString: string | Date): string => {
   });
 };
 
+const markAsRead = (roomId:Number) => {
+  api.post(`/chatting/room/${roomId}/read`)
+      .catch(err => console.error("'읽음' 처리 실패:", err));
+};
 
 const ChatRoom = (props : ChatRoomProps) => {
-  const { roomId, myProfile, partner } = props;
+  const { roomId, myProfile, partner, onNewMessage } = props;
   // 채팅 메시지 목록을 저장할 state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   // 입력창의 내용을 저장할 state
   const [newMessage, setNewMessage] = useState('');
-  // STOMP 클라이언트 인스턴스를 저장할 ref
-  const clientRef = useRef<Client | null>(null);
   // 메시지 목록 스크롤을 위한 ref
   const messageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -55,13 +57,13 @@ const ChatRoom = (props : ChatRoomProps) => {
   }, [messages]);
   useEffect(() => {
 
+
     const fetchPreviousMessages = async () => {
       try {
-        // 백엔드에 특정 채팅방의 메시지 목록을 요청하는 API (예시)
+        // 백엔드에 특정 채팅방의 메시지 목록을 요청하는 API
         await api.get<ChatMessage[]>(`/chatting/room/${roomId}/messages`).then(res => {
           setMessages(res.data);// 받아온 데이터로 메시지 목록 초기화
         })
-        //setMessages(response.data); 
       } catch (error) {
         console.error("이전 대화 내역을 불러오는 데 실패했습니다:", error);
       }
@@ -69,105 +71,70 @@ const ChatRoom = (props : ChatRoomProps) => {
     // 함수 실행
     fetchPreviousMessages();
 
-    // 1. localStorage에서 accessToken을 가져옵니다.
-    const accessToken = store.getState().auth.accessToken;
-    if (!accessToken) {
-      console.error("Access Token이 없어 연결할 수 없습니다.");
-      // 여기서 사용자에게 로그인 페이지로 이동하라는 등의 처리를 할 수 있습니다.
-      return;
-    }
+    if (stompClient.connected&& roomId) {
+      markAsRead(roomId);
+      // 1. 특정 채팅방 토픽 구독
+      const subscription = stompClient.subscribe(`/topic/room/${roomId}`, (message: IMessage) => {
+        const receivedMessage: ChatMessage = JSON.parse(message.body);
+        setMessages(prev => [...prev, receivedMessage]);
+        const { onNewMessage, ...roomData } = props;
+        onNewMessage({ ...roomData, unreadCount: 0 }, receivedMessage);
+      });
+      
 
-    // 2. STOMP 클라이언트 생성
-    const client = new Client({
-      // 백엔드의 WebSocketConfig에 설정한 엔드포인트 주소
-      // server.servlet.context-path가 있다면 반드시 포함해야 합니다.
-      webSocketFactory: () => new SockJS('http://localhost:8081/api/ws'),
 
-      // STOMP 연결 시 인증 헤더를 추가합니다.
-      connectHeaders: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-
-      // 연결 성공 시 실행될 콜백
-      onConnect: () => {
-        console.log(`STOMP 서버에 연결되었습니다. (방 번호: ${roomId})`);
-
-        // 3. 채팅방 구독 (서버로부터 메시지를 받기 시작)
-        client.subscribe(`/topic/room/${roomId}`, (message: IMessage) => {
-          const receivedMessage: ChatMessage = JSON.parse(message.body);
-          setMessages(prevMessages => [...prevMessages, receivedMessage]);
-        });
-
-        // 4. 입장 메시지 전송 (서버로 메시지 발행)
-        client.publish({
+      // 2. 입장 메시지 발행
+      stompClient.publish({
           destination: `/app/chat/enter/${roomId}`,
           body: JSON.stringify({
             userNo : myProfile.userNo,
             userName : myProfile.userName,
             roomId:roomId,
+            sentAt: new Date(),
             messageText: '',
           }),
         });
-      },
-
-      // 연결 끊김 시 콜백
-      onDisconnect: () => {
-        console.log('STOMP 연결이 끊어졌습니다.');
-      },
-
-      // STOMP 프로토콜 오류 발생 시 콜백
-      onStompError: (frame) => {
-        console.error('STOMP 프로토콜 오류:', frame.headers['message']);
-        console.error('오류 상세:', frame.body);
-      },
-
-      // 디버깅 메시지 출력
-      debug: (str) => {
-        console.log(new Date(), str);
-      },
-    });
-
-    // 5. STOMP 연결 활성화
-    client.activate();
-    clientRef.current = client;
-
-    // 6. 컴포넌트가 언마운트될 때 연결을 해제합니다. (자원 누수 방지)
-    return () => {
-      if (client.connected) {
-        // 퇴장 메시지 전송
-        client.publish({
+      
+      // 3. 컴포넌트가 사라질 때 구독을 해제하고 퇴장 메시지를 보냄
+      return () => {
+        stompClient.publish({
           destination: `/app/chat/exit/${roomId}`,
           body: JSON.stringify({
             userNo : myProfile.userNo,
             userName : myProfile.userName,
             roomId:roomId,
+            sentAt: new Date(),
             messageText: '',
           }),
         });
-        client.deactivate();
-      }
-    };
-  }, [roomId, myProfile,partner]); // 방이나 유저가 바뀌면 연결을 다시 설정
+        subscription.unsubscribe();
+        markAsRead(roomId);
+      };
+    }
+  }, [roomId, myProfile?.userNo]); // 방이나 유저가 바뀌면 연결을 다시 설정
 
   // 메시지 전송 함수
   const sendMessage = () => {
-    if (newMessage.trim() && clientRef.current?.connected) {
-      clientRef.current.publish({
+    if (newMessage.trim() && stompClient?.connected) {
+      stompClient?.publish({
         destination: `/app/chat/message/${roomId}`, // 메시지 전송용 엔드포인트
         body: JSON.stringify({
           roomId:roomId,
+          userName : myProfile.userName,
           messageText: newMessage,
+          sentAt: new Date(),
           type: 'TALK',
         }),
       });
       setNewMessage('');
+      markAsRead(roomId);
     }
   };
 
   return (
     <div className="flex flex-col h-full">
       {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 space-y-4">
         {messages.map((msg, index) => {
           const prevMsg = messages[index - 1];
           const showDateSeparator = !isSameDay(prevMsg?.sentAt, msg.sentAt);
@@ -202,7 +169,9 @@ const ChatRoom = (props : ChatRoomProps) => {
                   <div className="flex items-end space-x-2">
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
                     <div>
+                      {index>0 && prevMsg.userName===msg.userName ? <></> :
                       <p className="text-sm font-semibold">{msg.userName}</p>
+                      }
                       <div className="flex items-end space-x-2">
                         <div className="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
                           <p className="break-all">{msg.messageText}</p>

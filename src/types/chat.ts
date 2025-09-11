@@ -48,6 +48,7 @@ export interface ChatRooms {
   createdAt : Date;
   partner : chatProfile[];
   lastMessage? : ChatMessage;
+  unreadCount: number;
 }
 
 // 메시지 타입을 정의합니다.

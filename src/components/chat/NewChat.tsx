@@ -5,15 +5,13 @@ import ChatPeoplePickerDialog from "./ChatPeoplePickerDialog";
 
 interface NewChatProps {
   myProfile: chatProfile;
-  onOpenChatRoom: (chatRoom: ChatRooms) => void;
-  onClose: () => void;
+  onCreationComplete: (chatRoom: ChatRooms) => void;
 }
 
-const NewChat = ({ myProfile, onOpenChatRoom, onClose }: NewChatProps) => {
+const NewChat = ({ myProfile, onCreationComplete }: NewChatProps) => {
   const [roomName, setRoomName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<chatProfile[]>([]);
   const [isPickerOpen, setPickerOpen] = useState(false);
-  const [newChatRoom, setNewChatRoom] = useState<ChatRooms>();
 
   
   // 사용자 선택 모달에서 '선택 완료'를 눌렀을 때 호출될 함수
@@ -41,15 +39,12 @@ const NewChat = ({ myProfile, onOpenChatRoom, onClose }: NewChatProps) => {
         roomName: roomName,
         participantUserNos: participantUserNos
       });
-      setNewChatRoom(response.data);
+      const newChatRoom = response.data;
+
+      onCreationComplete(newChatRoom);
     } catch (error) {
       console.error('채팅방 생성에 실패했습니다:', error);
       alert('채팅방 생성에 실패했습니다.');
-    } finally {
-      if(newChatRoom){
-        onOpenChatRoom(newChatRoom);
-      }
-      onClose(); // 현재 창 닫기
     }
   };
 
@@ -69,7 +64,6 @@ const NewChat = ({ myProfile, onOpenChatRoom, onClose }: NewChatProps) => {
           />
         </div>
 
-        {/* 참여자 선택 버튼 */}
         <div>
           <label className="block text-sm font-medium text-gray-700">참여자</label>
           <button
@@ -88,7 +82,6 @@ const NewChat = ({ myProfile, onOpenChatRoom, onClose }: NewChatProps) => {
               className="flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full"
             >
               {user.userName}
-              {/* (선택) 여기서도 사용자 제거 버튼을 만들 수 있습니다. */}
             </span>
           ))}
         </div>

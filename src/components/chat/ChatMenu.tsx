@@ -176,8 +176,12 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
                     </div>
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-gray-500 truncate">{room.lastMessage?.messageText}</p>
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">3</span>
-                    </div>
+                        {room.unreadCount > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                            {room.unreadCount}
+                          </span>
+                        )}
+                  </div>
                   </div>
                 </li>
               ))

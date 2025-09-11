@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import FloatingWindow from './FloatingWindow';
 import ChatMenu from './ChatMenu';
 import { DndContext, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
-import type { ChatManagerProps, chatProfile, ChatRooms, WindowState } from '../../types/chat';
+import type { ChatManagerProps, ChatMessage, chatProfile, ChatRooms, WindowState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
 import ChatRoom from './ChatRoom';
 import NewChat from './NewChat';
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState } from '../../store/store';
+import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
 
 
 const ChatManager = ({ onClose }: ChatManagerProps) => {
@@ -20,10 +23,15 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     position: { top: initialTop, left: initialLeft }
   }]);
   const [nextZIndex, setNextZIndex] = useState(11);
+
   const [myProfile, setMyProfile] = useState<chatProfile>();
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
-  const [allChatRooms, setAllChatRooms] = useState<ChatRooms[]>([]);
+  //const [allChatRooms, setAllChatRooms] = useState<ChatRooms[]>([]);
+
+  const dispatch = useDispatch();
+  const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
+
 
 
   useEffect(() => {
@@ -36,14 +44,20 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       setMyProfile(profileRes.data);
       setAllUsers(userRes.data);
       setFavoriteUsers(favRes.data);
-      setAllChatRooms(roomRes.data);
+      dispatch(setChatRooms(roomRes.data));
+      //setAllChatRooms(roomRes.data);
     }).catch(error => {
       console.error("초기 데이터를 불러오는 데 실패했습니다:", error);
     });
-  }, []);
+  }, [dispatch]);
 
   if(!myProfile)
     return;
+
+  const handleNewMessage = (room: ChatRooms, message: ChatMessage) => {
+    const updatedRoom = { ...room, lastMessage: message };
+    dispatch(updateChatRoom(updatedRoom));
+  };
 
   const handleOpenChatFromUser = async (user: chatProfile) => {
     const windowId = `chat-${user.userNo}`;
@@ -68,13 +82,15 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       setWindows([...windows, newWindow]);
       setNextZIndex(nextZIndex + 1);
 
-      setAllChatRooms(prevRooms => {
-        const roomExists = prevRooms.some(room => room.roomId === chatRoomData.roomId);
-        return roomExists ? prevRooms : [chatRoomData, ...prevRooms];
-      });
+      dispatch(updateChatRoom(chatRoomData));
+
+      // setAllChatRooms(prevRooms => {
+      //   const roomExists = prevRooms.some(room => room.roomId === chatRoomData.roomId);
+      //   return roomExists ? prevRooms : [chatRoomData, ...prevRooms];
+      // });
     } catch(err){
       console.error("채팅방 정보를 가져오는 데 실패했습니다:", err);
-      // 사용자에게 에러 알림을 보여주는 등의 처리를 할 수 있습니다.
+      // 사용자에게 에러 알림을 보여주는 등의 처리
     }
   };
 
@@ -163,27 +179,47 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     const originalFavorites = [...favoriteUsers]; // 에러 시 복구를 위해 원래 배열을 복사
 
     if (isCurrentlyFavorite) {
-      // 즐겨찾기에서 제거: userNo가 다른 유저들만 남깁니다.
+      // 즐겨찾기에서 제거: userNo가 다른 유저들만 남기기
       setFavoriteUsers(favoriteUsers.filter(favUser => favUser.userNo !== user.userNo));
     } else {
-      // 즐겨찾기에 추가: 기존 배열에 새로운 유저를 추가합니다.
+      // 즐겨찾기에 추가: 기존 배열에 새로운 유저 추가
       setFavoriteUsers([...favoriteUsers, user]);
     }
 
     try {
       if (isCurrentlyFavorite) {
-        console.log(`/chatting/favorites/${user.userNo}`);
         await api.delete(`/chatting/favorites/${user.userNo}`);
       } else {
         await api.post('/chatting/favorites', { favoriteUserNo: user.userNo });
       }
     } catch (error) {
       console.error("Failed to update favorite:", error);
-      //에러 발생 시, 복사해둔 원래 배열로 state를 되돌립니다.
+      //에러 발생 시, 복사해둔 원래 배열로 state를 되돌리기
       setFavoriteUsers(originalFavorites);
       alert('즐겨찾기 처리에 실패했습니다.');
     }
   }
+
+  const handleCreationComplete = (newChatRoom: ChatRooms) => {
+    const windowId = `chat-${newChatRoom.roomId}`;
+    
+    // 함수형 업데이트로 창 상태 변경 (닫고 열기)
+    setWindows(prevWindows => {
+      const windowsWithoutCreator = prevWindows.filter(win => win.id !== 'new-chat');
+
+      const newWindow: WindowState = {
+        id: windowId,
+        title: newChatRoom.roomName,
+        zIndex: nextZIndex,
+        position: { top: initialTop, left: initialLeft },
+        chatRoomInfo: newChatRoom,
+      };
+
+      return [...windowsWithoutCreator, newWindow];
+    });
+    dispatch(updateChatRoom(newChatRoom));
+    setNextZIndex(prevZIndex => prevZIndex + 1);
+  };
 
   return (
     <div className="fixed inset-0 z-40 pointer-events-none">
@@ -213,8 +249,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               <>
                 <NewChat
                   myProfile={myProfile}
-                  onOpenChatRoom={handleOpenChatFromRoom} // 새 채팅방을 여는 함수 전달
-                  onClose={() => handleCloseWindow("new-chat")} // 창 닫기 함수 전달
+                  onCreationComplete={handleCreationComplete}
                 />
               </>
               ) : (
@@ -222,6 +257,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
                   <ChatRoom
                     {...window.chatRoomInfo}
                     myProfile={myProfile}
+                    onNewMessage={handleNewMessage}
                   />
                 ) : (<p>채팅 정보를 불러오는 중입니다...</p>)
                 )
