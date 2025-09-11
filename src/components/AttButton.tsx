@@ -1,11 +1,31 @@
-import { useState } from "react";
+import type { LoginUser } from "../types/vacation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { checkIn } from "../api/attendanceApi";
 
-export default function AttButton() {
+interface AttButtonProps{
+    loginUserProfile:LoginUser|undefined;
+    attId:number|null;
+    setAttId:(id:number|null) => void;
+}
+export default function AttButton({loginUserProfile, attId, setAttId}:AttButtonProps) {
+    const queryClient = useQueryClient();
 
-    const [attId, setAttId] = useState<number|null>(null);
+    const checkInMutation = useMutation({
+        mutationFn:checkIn,
+        onSuccess:(data) => {
+            setAttId(data.attId);
+            queryClient.invalidateQueries({queryKey:['loginUserAtt']});
+            alert("출근완료");
+        },
+        onError:(error)=>{
+            console.error("출근실패",error);
+            alert("출근실패")
+        }
+    });
     
-    
-    
+    const checkOutMutation = useMutation({
+
+    });
     
     
     

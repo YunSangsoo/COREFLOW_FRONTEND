@@ -1,8 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { Attendance, GetAttId, PutCheckInTime, PutCheckOutTime } from "../types/attendance";
-import type { LoginUser } from "../types/vacation";
+import type { Attendance, PutCheckInTime, PutCheckOutTime } from "../types/attendance";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -63,13 +62,13 @@ export const loginUserAttendance = async (year:number,month:number) => {
 }
 
 // 출근시간 넣기
-export const checkIn = async (checkInRequest : Omit<PutCheckInTime,"userNo">) => {
-    const response = await api.post<GetAttId>('/attendance/checkIn',checkInRequest);
+export const checkIn = async (checkInRequest : PutCheckInTime) => {
+    const response = await api.post('/attendance/checkIn',checkInRequest);
     return response.data;
 }
 
 // 퇴근시간 넣기
-export const checkOut = async (checkOutRequest : Omit<PutCheckOutTime,"userNo">) => {
-    const response = await api.patch<void>('/attendance/checkOut',checkOutRequest);
+export const checkOut = async (checkOutRequest : PutCheckOutTime) => {
+    const response = await api.patch('/attendance/checkOut',checkOutRequest);
     return response.status;
 }

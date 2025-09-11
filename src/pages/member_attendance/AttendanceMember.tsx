@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { Attendance } from "../../types/attendance";
 import { memAttendance } from "../../api/attendanceApi";
 import dayjs from "dayjs";
-import AttSideBar from "../../components/member_attendance/AttSideBar";
+import AttSideBar from "../../components/member_attendance/attSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
 import type { MemberChoice } from "../../types/vacation";
 import AttDate from "../../components/member_attendance/AttDate";

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Attendance } from "../../types/attendance";
 import dayjs from "dayjs";
-import AttSideBar from "../../components/member_attendance/AttSideBar";
+import AttSideBar from "../../components/member_attendance/attSideBar";
 import type { LoginUser } from "../../types/vacation";
 import VacDate from "../../components/member_vacation/VacDate";
 import { loginUser } from "../../api/vacationApi";
@@ -15,6 +15,10 @@ export default function AttendancePersonal() {
     const [selectYear, setSelectYear] = useState(dayjs().year());
     const [selectMonth, setSelectMonth] = useState(dayjs().month() +1);
     
+    // 출퇴근 버튼용 코드
+    const [attId, setAttId] = useState<number|null>(null);
+    // 출퇴근 버튼용 코드
+
     // 날짜 상태 업데이트
     const handleDateChange = (year:number, month?:number) => {
         setSelectYear(year);
@@ -30,10 +34,23 @@ export default function AttendancePersonal() {
     })
 
     // 로그인 사용자 근태정보
-    const {data, isLoading, isError, error} = useQuery<Attendance[]>({
+    const {data : loginUserAtt, isLoading, isError, error} = useQuery<Attendance[]>({
         queryKey:['loginUserAtt',selectYear,selectMonth],
         queryFn:() => loginUserAttendance(selectYear,selectMonth)
     });
+
+    // 출퇴근 버튼용 코드
+    useEffect(() => {
+        if(loginUserAtt && loginUserAtt.length > 0){
+            const today = loginUserAtt.find(data => dayjs(data.attDate).isSame(dayjs(),'day'));
+            if(today && today.checkInTime && !today.checkOutTime) {
+                setAttId(today.attId);
+            }else{
+                setAttId(null);
+            }
+        }
+    },[loginUserAtt])
+    // 출퇴근 버튼용 코드
 
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
@@ -81,17 +98,17 @@ export default function AttendancePersonal() {
                             </thead>
                             <tbody>
                                 {
-                                    data && data.length > 0 ? (
-                                        data.map((item, index) => (
-                                            <tr className="border-b border-gray-200" key={index}>
+                                    loginUserAtt && loginUserAtt.length > 0 ? (
+                                        loginUserAtt.map((data, index) => (
+                                            <tr className="border-b border-gray-200" key={data.attId}>
                                                 <td className="w-12 p-2 border-r border-gray-200 text-center">{index + 1}</td>
-                                                <td className="w-20 p-2 border-r border-gray-200 text-center">{item.attDate}</td>
-                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{item.userName}</td>
-                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{item.depName}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{item.posName}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{item.checkInTime || "-"}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{item.checkOutTime || "-"}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{item.status}</td>
+                                                <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
+                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
+                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.depName}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime || "-"}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime || "-"}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.status}</td>
                                             </tr>
                                         ))
                                     ) :
@@ -102,7 +119,7 @@ export default function AttendancePersonal() {
                             </tbody>
                         </table>
                     </div>
-                    <AttButton/>
+                    <AttButton loginUserProfile={loginUserProfile} attId={attId} setAttId={setAttId} />
                 </div>
             </div>
         </div>

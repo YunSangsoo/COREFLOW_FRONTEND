@@ -16,12 +16,7 @@ export interface PutCheckInTime{
     status:number;
 }
 
-export interface GetAttId{
-    addId:number;
-}
-
 export interface PutCheckOutTime{
     attId:number;
-    userNo:number;
     checkOutTime:string|null;
 }
