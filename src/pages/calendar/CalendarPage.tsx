@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { type DateClickArg } from "@fullcalendar/interaction";
 import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
-
+import type { RootState } from "../../store/store";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MonthCalendar } from "@mui/x-date-pickers/MonthCalendar";
@@ -45,6 +45,7 @@ import type {
   RecurrenceRule,
 } from "../../types/calendar/calendar";
 import { generateOccurrences } from "../../utils/calendar/recurrence";
+import { useSelector } from "react-redux";
 
 // 큰 카테고리(유형) 기본값
 const DEFAULT_EVENT_TYPE = "MEETING";
@@ -59,14 +60,14 @@ type EventFormState = {
   start: Dayjs;
   end: Dayjs;
   labelId?: number;
-  eventType?: string;       // ✅ 복구: 큰 카테고리
+  typeId?: number;       // 큰 카테고리
   locationText?: string;
   note?: string;
 };
 
 export default function CalendarPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
-
+  const userNo = useSelector((s: RootState) => s.auth.user?.userNo);
   const [miniDate, setMiniDate] = useState<Dayjs>(dayjs());
   const [visibleCals, setVisibleCals] = useState<CalendarVisibilityItem[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -104,7 +105,7 @@ export default function CalendarPage() {
   const [eventForm, setEventForm] = useState<EventFormState>({
     calId: null, title: "", allDay: false,
     start: dayjs(), end: dayjs().add(1, "hour"),
-    labelId: undefined, eventType: DEFAULT_EVENT_TYPE,
+    labelId: undefined, typeId: undefined,
     locationText: "", note: "",
   });
   const [eventErr, setEventErr] = useState<{ calId?: string; title?: string; time?: string }>({});
@@ -145,10 +146,11 @@ export default function CalendarPage() {
 
   // 최초: 캘린더 목록 로딩
   useEffect(() => {
+    if (!userNo)  return;
     (async () => {
       try {
         setLoading(true); setError(null);
-        const list = await fetchVisibleCalendars();
+        const list = await fetchVisibleCalendars(userNo);
         const withChecked: CalendarVisibilityItem[] = (list || []).map((c) => ({
           calId: c.calId, name: c.name, color: c.color, checked: true,
         }));
@@ -157,7 +159,7 @@ export default function CalendarPage() {
         setError(e?.message ?? "캘린더 목록 조회 실패");
       } finally { setLoading(false); }
     })();
-  }, []);
+  }, [userNo]);
 
   // 현재 뷰 범위의 이벤트 로딩
   const handleViewDidMount = async () => {
@@ -230,8 +232,8 @@ export default function CalendarPage() {
     const end = preset?.end ?? start.add(1, "hour");
     setEventForm({
       calId: defaultCalId, title: "", allDay: !!preset?.allDay,
-      start, end: (preset?.allDay ? start.startOf("day").add(1, "day") : end),
-      labelId: undefined, eventType: DEFAULT_EVENT_TYPE,
+      start, end,
+      labelId: undefined, typeId: undefined,
       locationText: "", note: "",
     });
     setSelectedLabel(null);
@@ -338,7 +340,7 @@ export default function CalendarPage() {
 
   // 일정 저장 (eventType 포함, 반복등록 지원)
   const handleEventSave = async () => {
-    const { calId, title, allDay, start, end, labelId, eventType, locationText, note } = eventForm;
+    const { calId, title, allDay, start, end, labelId, typeId, locationText, note } = eventForm;
     const nextErr: typeof eventErr = {};
     if (!calId) nextErr.calId = "캘린더를 선택하세요.";
     if (!title?.trim()) nextErr.title = "제목을 입력하세요.";
@@ -356,7 +358,7 @@ export default function CalendarPage() {
 
       const baseCalId = calId!;
       const labelToUse = selectedLabel?.labelId ?? labelId;
-      const typeToUse = eventType ?? DEFAULT_EVENT_TYPE;
+      const typeToUse = Number(typeId);
 
       // 반복 OFF → 1건 생성
       if (!recurrence.enabled) {
@@ -366,7 +368,7 @@ export default function CalendarPage() {
           endAt: end.format("YYYY-MM-DDTHH:mm:ss"),
           allDayYn: allDay ? "Y" : "N",
           labelId: labelToUse,
-          eventType: typeToUse,              // ✅ 전송
+          typeId: typeToUse,              // ✅ 전송
           locationText, note,
           attendeeUserNos: selectedAttendees.map(m => m.userNo),
           shareUserNos: selectedSharers.map(m => m.userNo),
@@ -402,7 +404,7 @@ export default function CalendarPage() {
           endAt: o.end,
           allDayYn: allDay ? "Y" : "N",
           labelId: labelToUse,
-          eventType: typeToUse,             // ✅ 전송
+          typeId: typeToUse,             
           locationText, note,
           attendeeUserNos: selectedAttendees.map(m => m.userNo),
           shareUserNos: selectedSharers.map(m => m.userNo),
@@ -494,6 +496,15 @@ export default function CalendarPage() {
         ".fc .fc-timegrid-axis-cushion": { fontSize: 12, color: "#6b7280" },
         ".fc .fc-timegrid-slot": { height: "38px" },
         ".calendar-right, .calendar-right .fc, .calendar-right .fc-view-harness, .calendar-right .fc-scrollgrid": { width: "100%" },
+          ".cf-calstripe": { position: "relative" },
+  ".cf-calstripe::before": {
+    content: '""',
+    position: "absolute",
+    left: 0, top: 0, bottom: 0,
+    width: "7px",                    // 필요하면 2px로 더 얇게
+    background: "var(--cf-cal)",     // 캘린더색
+    // borderRadius: "8px 0 0 8px"      // 둥글게
+  }
       }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "280px minmax(900px, 1fr)", gap: 24, alignItems: "start", width: "100%" }}>
@@ -553,6 +564,12 @@ export default function CalendarPage() {
             select={handleSelect} dateClick={handleDateClick}
             eventDrop={handleEventDrop} eventResize={handleEventResize} eventClick={handleEventClick}
             datesSet={handleViewDidMount}
+            eventClassNames={() => ["cf-calstripe"]}   // ✅ 모든 이벤트에 클래스 부여
+            eventDidMount={(info) => {                 // ✅ 캘린더색만 CSS 변수로 주입
+              const calId = info.event.extendedProps?.calId as number;
+              const calHex = findCalColor(calId) || "#64748b";
+              (info.el as HTMLElement).style.setProperty("--cf-cal", calHex);
+            }}
           />
         </div>
       </div>
@@ -566,64 +583,79 @@ export default function CalendarPage() {
       />
 
       {/* 새 일정 모달 */}
-      <EventCreateDialog
-        open={eventOpen}
-        onClose={() => setEventOpen(false)}
-        visibleCals={visibleCals}
-        value={{
-          calId: eventForm.calId,
-          title: eventForm.title,
-          allDay: eventForm.allDay,
-          start: eventForm.start,
-          end: eventForm.end,
-          label: selectedLabel,
-          eventType: eventForm.eventType,        // ✅ 전달
-          locationText: eventForm.locationText,
-          note: eventForm.note,
-        }}
-        onChange={(patch) => {
-          // 1) 종일 토글
-          if ("allDay" in patch) {
-            const allDay = !!patch.allDay;
-            setEventForm(f => {
-              const newEnd = allDay
-                ? f.start.startOf("day").add(1, "day")
-                : (f.end.isAfter(f.start) ? f.end : f.start.add(1, "hour"));
-              return { ...f, allDay, end: newEnd };
-            });
-            return;
-          }
-          // 2) 시작시간 변경
-          if (patch.start) {
-            const newStart = patch.start;
-            setEventForm(f => {
-              const newEnd = f.allDay
-                ? newStart.startOf("day").add(1, "day")
-                : (f.end.isAfter(newStart) ? f.end : newStart.add(1, "hour"));
-              return { ...f, start: newStart, end: newEnd };
-            });
-            return;
-          }
-          // 3) 라벨 선택
-          if ("label" in patch) {
-            const lab = patch.label ?? null;
-            setSelectedLabel(lab);
-            setEventForm(f => ({ ...f, labelId: lab?.labelId }));
-            return;
-          }
-          // 4) 나머지(유형 포함)
-          setEventForm(f => ({ ...f, ...(patch as Partial<EventFormState>) }));
-        }}
-        onSave={handleEventSave}
-        attendees={selectedAttendees}
-        sharers={selectedSharers}
-        onQuickAdd={handleQuickAdd}
-        onOpenPeoplePicker={(m) => openPeoplePicker(m)}
-        error={eventErr}
-        recurrence={recurrence}
-        onOpenRecurrence={() => setRecurrenceOpen(true)}
-      />
+      {eventOpen && (
+        <EventCreateDialog
+          open={eventOpen}
+          onClose={() => setEventOpen(false)}
+          visibleCals={visibleCals}
+          value={{
+            calId: eventForm.calId,
+            title: eventForm.title,
+            allDay: eventForm.allDay,
+            start: eventForm.start,
+            end: eventForm.end,
+            label: selectedLabel,
+            typeId: eventForm.typeId,       
+            locationText: eventForm.locationText,
+            note: eventForm.note,
+          }}
+          onChange={(patch) => {
+           // 1) 종일 토글
+if ("allDay" in patch) {
+  const toAllDay = !!patch.allDay;
+  setEventForm(f => {
+    // 현재 기간(밀리초) 유지
+    const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
+    if (toAllDay) {
+      const s = f.start.startOf("day");
+      // 최소 1일은 보장(드래그가 1일 미만일 수도 있으니)
+      const safeDur = Math.max(durMs, 24 * 60 * 60 * 1000);
+      const e = s.add(safeDur, "millisecond");
+      return { ...f, allDay: true, start: s, end: e };
+    } else {
+      // 타임 이벤트로 전환 시 최소 1시간 보장
+      const s = f.start;
+      const safeDur = Math.max(durMs, 60 * 60 * 1000);
+      const e = s.add(safeDur, "millisecond");
+      return { ...f, allDay: false, start: s, end: e };
+    }
+  });
+  return;
+}
 
+// 2) 시작시간 변경
+if (patch.start) {
+  const newStart = patch.start;
+  setEventForm(f => {
+    // 기간 유지(종일이면 n일, 타임이면 기존 ms)
+    const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
+    const minDur = f.allDay ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+    const safeDur = Math.max(durMs, minDur);
+    const newEnd = newStart.add(safeDur, "millisecond");
+    return { ...f, start: newStart, end: newEnd };
+  });
+  return;
+}
+            // 3) 라벨 선택
+            if ("label" in patch) {
+              const lab = patch.label ?? null;
+              setSelectedLabel(lab);
+              setEventForm(f => ({ ...f, labelId: lab?.labelId }));
+              return;
+            }
+            // 4) 나머지(유형 포함)
+            setEventForm(f => ({ ...f, ...(patch as Partial<EventFormState>) }));
+          }}
+          onSave={handleEventSave}
+          attendees={selectedAttendees}
+          sharers={selectedSharers}
+          onQuickAdd={handleQuickAdd}
+          onOpenPeoplePicker={(m) => openPeoplePicker(m)}
+          error={eventErr}
+          recurrence={recurrence}
+          onOpenRecurrence={() => setRecurrenceOpen(true)}
+        />
+      )}
       {/* 반복 등록 모달 */}
       <RecurrenceDialog
         open={recurrenceOpen}

@@ -25,7 +25,9 @@ export type EventDto = {
   roomId?: number;
   status?: string;
   labelId?: number;
-  eventType?: string;
+  typeId?: number;
+  typeName?: string;
+  typeCode?: string;
   rrule?: string;
   exdates?: string;
 };
@@ -55,6 +57,12 @@ export type Label = {
   labelColor : string;
 }
 
+export type EventTypeOption = {
+  typeId: number;
+  typeCode: string;
+  typeName: string;
+};
+
 function unwrap<T = any>(res: any): T {
   // 백엔드가 { data: {...} } 또는 {...} 형태 모두 지원
   if (res?.data?.data !== undefined) return res.data.data as T;
@@ -69,8 +77,11 @@ function num(n: any, d = 0): number {
 
 
 // ── 내가 조회 가능한 캘린더 목록
-export async function fetchVisibleCalendars(): Promise<CalendarSummary[]> {
-  const r = await api.get("/calendar/visible");
+export async function fetchVisibleCalendars(userNo: number): Promise<CalendarSummary[]> {
+  const r = await api.get("/calendar/visible", {
+    headers: { "X-User-No": String(userNo) }, 
+    params:  { userNo },                      
+  });
   const raw = unwrap<any[]>(r) ?? [];
   return raw.map((c) => ({
     calId: num(c.calId ?? c.CAL_ID),
@@ -140,7 +151,9 @@ export async function fetchEvents(params: {
     roomId: e.roomId ?? e.ROOM_ID,
     status: e.status ?? e.STATUS,
     labelId: e.labelId ?? e.LABEL_ID,
-    eventType: e.eventType ?? e.EVENT_TYPE,
+    typeId: e.typeId ?? e.TYPE_ID,
+    typeName: e.typeName ?? e.TYPE_NAME ?? undefined,  
+    typeCode: e.typeCode ?? e.TYPE_CODE ?? undefined,  
     rrule: e.rrule ?? e.RRULE,
     exdates: e.exdates ?? e.EXDATES,
   }));
@@ -158,7 +171,7 @@ export async function createEvent(req: {
   roomId?: number;
   status?: string;
   labelId?: number;
-  eventType?: string;
+  typeId?: number;
   rrule?: string;
   exdates?: string;
   attendeeUserNos?: number[];    // 참석자
@@ -175,7 +188,7 @@ export async function updateEvent(
   eventId: string | number,
   body: Partial<Pick<
     EventDto,
-    "title" | "startAt" | "endAt" | "allDayYn" | "locationText" | "note" | "labelId" | "eventType" | "rrule" | "exdates" | "status"
+    "title" | "startAt" | "endAt" | "allDayYn" | "locationText" | "note" | "labelId" | "typeId" | "rrule" | "exdates" | "status"
   >>
 ): Promise<void> {
   await api.put(`/events/${eventId}`, body);
@@ -194,6 +207,27 @@ export async function fetchDepartments(): Promise<Department[]> {
 // ── 일정 삭제
 export async function deleteEvent(eventId: number | string): Promise<void> {
   await api.delete(`/events/${eventId}`);
+}
+// 일정 유형
+export async function fetchEventTypes() {
+  const r = await api.get("/events/event-types");
+  const raw = r.data ?? [];
+  return raw.map((m:any)=>({
+    typeId: Number(m.typeId ?? m.TYPE_ID),
+    typeCode: String(m.typeCode ?? m.TYPE_CODE ?? ""),
+    typeName: String(m.typeName ?? m.TYPE_NAME ?? ""),
+  }));
+}
+export async function createEventType(typeName: string): Promise<EventTypeOption> {
+  const r = await api.post("/events/event-types", { typeName });
+  const m = r.data;
+  return { typeId: Number(m.typeId), typeCode: String(m.typeCode ?? ""), typeName: String(m.typeName) };
+}
+export async function updateEventType(typeId: number, typeName: string): Promise<void> {
+  await api.put(`/events/event-types/${typeId}`, { typeName });
+}
+export async function deleteEventType(typeId: number): Promise<void> {
+  await api.delete(`/events/event-types/${typeId}`);
 }
 
 /** 멤버 검색 (이름/이메일 부분검색) */
