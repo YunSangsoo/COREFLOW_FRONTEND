@@ -5,8 +5,9 @@ import { memAttendance } from "../../api/attendanceApi";
 import dayjs from "dayjs";
 import AttSideBar from "../../components/member_attendance/attSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
-import type { MemberChoice } from "../../types/vacation";
+import type { MemberChoice, VacType } from "../../types/vacation";
 import AttDate from "../../components/member_attendance/AttDate";
+import { vacType } from "../../api/vacationApi";
 
 export default function AttendanceMember () {
 
@@ -14,12 +15,18 @@ export default function AttendanceMember () {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectMember,setSelectMember] = useState<MemberChoice|null>(null);
     const [currentDate, setCurrentDate] = useState(dayjs());
-    
-    const {data,isLoading,isError,error} = useQuery<Attendance[]>({
+    const [vacTypeList, setVacTypeList] = useState(false);
+
+    const {data:attData,isLoading,isError,error} = useQuery<Attendance[]>({
         queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
-        queryFn:() => memAttendance(currentDate.format('YYYY-MM-DD'),selectMember?.userNo ?? null)
+        queryFn:() => memAttendance(currentDate.format('YYYY-MM-DD'),selectMember?.userNo ?? null),
     });
 
+    const {data : vacData} = useQuery<VacType[]>({
+        queryKey:['vacType'],
+        queryFn:vacType,
+        enabled:vacTypeList
+    })
     const handleSearch = () => {
         setSearchQuery(searchName);
     }
@@ -36,6 +43,10 @@ export default function AttendanceMember () {
         setSelectMember(null);
     }
 
+    const handleVacType = () => {
+        setVacTypeList(!vacTypeList);
+    }
+    
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
     
@@ -82,17 +93,40 @@ export default function AttendanceMember () {
                             </thead>
                             <tbody>
                             {
-                                data && data.length > 0 ? (
-                                    data.map((item,index) => (
+                                attData && attData.length > 0 ? (
+                                    attData.map((data,index) => (
                                     <tr className="border-b border-gray-200" key={index}>
                                         <td className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</td>
-                                        <td className="w-20 p-2 border-r border-gray-200 text-center">{item.attDate}</td>
-                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{item.userName}</td>
-                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{item.depName}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{item.posName}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{item.checkInTime||null}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{item.checkOutTime||null}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{item.status}</td>
+                                        <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
+                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
+                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{data.depName}</td>
+                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
+                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime||null}</td>
+                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime||null}</td>
+                                        <td className="w-16 p-2 border-r border-gray-200 text-center">
+                                            <div className="relative">
+                                            <button
+                                                onClick={handleVacType}
+                                                className="w-16 p-2 text-white bg-blue-600 text-center">{data.vacName}
+                                            </button>
+                                            {vacTypeList && (
+                                                <div className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                                    <div className="max-h-40 overflow-y-auto">
+                                                    {vacData && vacData.length > 0 && (
+                                                        <ul>
+                                                            {vacData.map((vac)=>(
+                                                                <li key={vac.vacCode}
+                                                                    className="p-2 hover:bg-gray-100 cursor-pointer">
+                                                                    {vac.vacName}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            </div>
+                                        </td>
                                     </tr>
                                     ))
                                 ):

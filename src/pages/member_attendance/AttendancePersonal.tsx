@@ -15,10 +15,6 @@ export default function AttendancePersonal() {
     const [selectYear, setSelectYear] = useState(dayjs().year());
     const [selectMonth, setSelectMonth] = useState(dayjs().month() +1);
     
-    // 출퇴근 버튼용 코드
-    const [attId, setAttId] = useState<number|null>(null);
-    // 출퇴근 버튼용 코드
-
     // 날짜 상태 업데이트
     const handleDateChange = (year:number, month?:number) => {
         setSelectYear(year);
@@ -38,19 +34,6 @@ export default function AttendancePersonal() {
         queryKey:['loginUserAtt',selectYear,selectMonth],
         queryFn:() => loginUserAttendance(selectYear,selectMonth)
     });
-
-    // 출퇴근 버튼용 코드
-    useEffect(() => {
-        if(loginUserAtt && loginUserAtt.length > 0){
-            const today = loginUserAtt.find(data => dayjs(data.attDate).isSame(dayjs(),'day'));
-            if(today && today.checkInTime && !today.checkOutTime) {
-                setAttId(today.attId);
-            }else{
-                setAttId(null);
-            }
-        }
-    },[loginUserAtt])
-    // 출퇴근 버튼용 코드
 
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
@@ -108,7 +91,7 @@ export default function AttendancePersonal() {
                                                 <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
                                                 <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime || "-"}</td>
                                                 <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime || "-"}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.status}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.vacName}</td>
                                             </tr>
                                         ))
                                     ) :
@@ -119,7 +102,7 @@ export default function AttendancePersonal() {
                             </tbody>
                         </table>
                     </div>
-                    <AttButton loginUserProfile={loginUserProfile} attId={attId} setAttId={setAttId} />
+                    <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt}/>
                 </div>
             </div>
         </div>

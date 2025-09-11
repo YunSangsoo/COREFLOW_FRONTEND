@@ -6,12 +6,11 @@ export interface Attendance{
     posName:string;
     checkInTime:string|null;
     checkOutTime:string|null;
-    status:number;
+    vacName:string;
 }
 
-export interface PutCheckInTime{
+export interface PostCheckInTime{
     attDate:string;
-    userNo:number;
     checkInTime:string|null;
     status:number;
 }
@@ -19,4 +18,9 @@ export interface PutCheckInTime{
 export interface PutCheckOutTime{
     attId:number;
     checkOutTime:string|null;
+}
+
+export interface VacType{
+    vacCode:number;
+    vacName:string;
 }

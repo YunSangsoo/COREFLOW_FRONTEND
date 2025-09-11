@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { Attendance, PutCheckInTime, PutCheckOutTime } from "../types/attendance";
+import type { Attendance, PostCheckInTime, PutCheckOutTime, VacType} from "../types/attendance";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -62,7 +62,7 @@ export const loginUserAttendance = async (year:number,month:number) => {
 }
 
 // 출근시간 넣기
-export const checkIn = async (checkInRequest : PutCheckInTime) => {
+export const checkIn = async (checkInRequest : PostCheckInTime) => {
     const response = await api.post('/attendance/checkIn',checkInRequest);
     return response.data;
 }
@@ -71,4 +71,10 @@ export const checkIn = async (checkInRequest : PutCheckInTime) => {
 export const checkOut = async (checkOutRequest : PutCheckOutTime) => {
     const response = await api.patch('/attendance/checkOut',checkOutRequest);
     return response.status;
+}
+
+// 비고 종류 조회
+export const vacType = async () => {
+    const response = await api.get<VacType[]>('/attendance/vacType');
+    return response.data;
 }

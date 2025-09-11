@@ -56,13 +56,13 @@ export const vacInfo = async () => {
 
 // 모든 사원 휴가 내역 조회
 export const memVacationAll = async (year:number, month:number) => {
-    const response = await api.get<MemberVacation[]>(`/vacation`,{params:{year,month}});
+    const response = await api.get<MemberVacation[]>(`/vacation/member`,{params:{year,month}});
     return response.data;
 }
 
 // 사원 조회
 export const memChoice = async (userName:string) => {
-    const response = await api.get<MemberChoice[]>(`/vacation/member?userName=${userName}`);
+    const response = await api.get<MemberChoice[]>(`/vacation/member/search?userName=${userName}`);
     return response.data;
 }
 
