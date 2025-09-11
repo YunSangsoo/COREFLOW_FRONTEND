@@ -29,32 +29,19 @@ export default function Login() {
         api
         .post("/auth/login", {email, password})
         .then(res => {
-            console.log(res);
+            console.log(res.data);
             dispatch(loginSuccess(res.data));
             console.log("로그인 디스패치 : ", loginSuccess(res.data));
             navigate("/", {state:{flash:"로그인 성공"}});
         })
         .catch((err:AxiosError) => {
             if(err.response?.status === 404){
-                const doSignup = confirm("등록된 계정이 없습니다. 현재 입력한 이메일/비밀번호로 회원가입 할까요?");
+                const doSignup = confirm("등록된 계정이 없습니다.");
                 if(!doSignup){
                     setError("계정을 다시 확인해주세요");
                     setLoading(false);
                     return;
                 }
-                //자동 회원가입 요청
-                api.post("/auth/signup", {email, password})
-                .then(res => {
-                    console.log(res);
-                    dispatch(loginSuccess(res.data));
-                    navigate("/", {state:{flash:"로그인 성공"}});
-                })
-                .catch(err => {
-                    setError("회원가입에 실패했습니다 나중에 다시 실행해 주세요");
-                })
-                .finally(() => {
-                    setLoading(false);
-                })
             }
             else if(err.response?.status){
                 setError("비밀번호가 잘못입력되었습니다");

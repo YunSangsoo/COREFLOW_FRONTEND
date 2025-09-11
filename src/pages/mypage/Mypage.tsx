@@ -1,27 +1,22 @@
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
+import { type RootState } from "../../store/store";
 import { useEffect, useState } from "react";
 import { MemberControll } from "../../components/MemberControll";
 import { api } from "../../api/coreflowApi";
-import { loginSuccess, setUser } from "../../features/authSlice";
+import { loginSuccess } from "../../features/authSlice";
 import type { LoginResponse } from "../../types/type";
 
 export default function Mypage() {
     const auth = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch();
-    const [phone, setPhone] = useState(auth.user?.phone ?? "");
+    const [phone, setPhone] = useState("");
     const [roadAddr, setRoadAddr] = useState("");
     const [detailAddr, setDetailAddr] = useState("");
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [profile, setProfile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
-    const [dbProfileUrl, setDbProfileUrl] = useState(auth.user?.profile ?? "/default-profile.png");
-
-    useEffect(()=>{
-
-    console.log(auth);
-    },[])
+    const [dbProfileUrl, setDbProfileUrl] = useState("/default-profile.png");
 
     const [isEditingPhone, setIsEditingPhone] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -37,29 +32,28 @@ export default function Mypage() {
 
     useEffect(() => {
         api.get("/auth/me")
-            .then((res) => {
-                // Redux store 갱신 (LoginResponse 그대로)
-                dispatch(setUser(res.data));
-
+            .then(res => {
+                console.log(loginSuccess(res.data));
                 // UI 상태 갱신
                 setPhone(res.data.user.phone ?? "");
                 setRoadAddr(res.data.user.address ?? "");
-                setDetailAddr("");
-                setDbProfileUrl(res.data.user.profile ?? "/default-profile.png");
+                setDetailAddr(res.data.user.addressDetail ?? "");
+                setDbProfileUrl(res.data.user.profile ?? "/default.png");
             })
             .catch(() => {
                 console.error("사용자 정보를 불러오지 못했습니다.");
             });
+    }, []);
 
-        // 프로필 미리보기 관리
-        if (!profile) {
+    useEffect(() => {
+        if (profile) {
+            const objectUrl = URL.createObjectURL(profile);
+            setPreview(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl);
+        } else {
             setPreview(null);
-            return;
         }
-        const objectUrl = URL.createObjectURL(profile);
-        setPreview(objectUrl);
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [profile, dispatch]);
+    }, [profile]);
 
     const handleUpdatePhone = () => {
         api.put(`/auth/${auth.user?.userNo}/phone`, { phone })
@@ -71,16 +65,19 @@ export default function Mypage() {
     };
 
     const handleUpdateAddress = () => {
-        const fullAddress = `${roadAddr} ${detailAddr}`;
-        api.put(`/auth/${auth.user?.userNo}/address`, { address: fullAddress })
+        api.put(`/auth/${auth.user?.userNo}/address`, { 
+            address: roadAddr,
+            addressDetail: detailAddr 
+        })
             .then(() => {
                 alert("주소가 수정되었습니다.")
                 setIsEditingAddress(false);
                 dispatch(
                     loginSuccess({
                         ...auth.user,
-                        address: fullAddress,
-                    } as LoginResponse & { address: string })
+                        address: roadAddr,
+                        addressDetail: detailAddr,
+                    } as LoginResponse & { address: string; addressDetail: string })
                 );
             })
             .catch(() => alert("주소 수정 실패"));
@@ -90,7 +87,7 @@ export default function Mypage() {
         new window.daum.Postcode({
             oncomplete: (data: any) => {
                 setRoadAddr(data.address);
-                setDetailAddr("");
+                setDetailAddr(data.addressdetail);
             },
         }).open();
     };
@@ -216,7 +213,7 @@ export default function Mypage() {
             {!isEditingAddress ? (
                 <MemberControll
                     title="주소"
-                    value={roadAddr}
+                    value={roadAddr || detailAddr}
                     readOnly
                     renderAction={
                         <button
@@ -241,7 +238,7 @@ export default function Mypage() {
                     />
                     <MemberControll
                         title="상세주소"
-                        value={detailAddr}
+                        value={detailAddr ?? ""}
                         onChange={(e) => setDetailAddr(e.target.value)}
                         readOnly={false}
                         renderAction={
