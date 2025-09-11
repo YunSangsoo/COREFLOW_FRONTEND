@@ -197,7 +197,7 @@ export default function AiMain() {
                     </div>
                     <div className={style["input-container"]}>
                         <input className={style["ai-input"]} type="text" id="question" placeholder="질문을 입력하세요..." ref={promptRef}
-                            onKeyDown={(e) => { if (e.key === "Enter") { sendQuery() } }} />
+                        onKeyDown={(e) => { if (e.key === "Enter") { sendQuery() } }} />
                         <button className={style["ai-button"]} onClick={sendQuery}>전송</button>
                     </div>
                 </div>
