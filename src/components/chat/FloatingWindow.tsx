@@ -12,11 +12,13 @@ interface FloatingWindowProps {
     zIndex: number;
     position: { top: number, left: number };
     children: React.ReactNode;
+    w : number;
+    h : number;
 }
 
-const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, children }: FloatingWindowProps) => {
+const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, children,w,h }: FloatingWindowProps) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
-    const [size, setSize] = useState({ width: 320, height: 400 });
+    const [size, setSize] = useState({ width: w, height: h });
 
     const style = {
         zIndex: zIndex,

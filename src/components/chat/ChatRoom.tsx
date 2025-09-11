@@ -134,7 +134,7 @@ const ChatRoom = (props : ChatRoomProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {messages.map((msg, index) => {
           const prevMsg = messages[index - 1];
           const showDateSeparator = !isSameDay(prevMsg?.sentAt, msg.sentAt);

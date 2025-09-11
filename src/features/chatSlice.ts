@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ChatRooms } from '../types/chat'; // ChatRooms 타입 경로
+import type { RootState } from '../store/store';
 
 interface ChatState {
   chatRooms: ChatRooms[];
@@ -29,4 +30,6 @@ const chatSlice = createSlice({
 });
 
 export const { setChatRooms, updateChatRoom } = chatSlice.actions;
+export const selectTotalUnreadCount = (state: RootState) => 
+  state.chat.chatRooms.reduce((total, room) => total + (room.unreadCount || 0), 0);
 export default chatSlice.reducer; // reducer를 default export 합니다.

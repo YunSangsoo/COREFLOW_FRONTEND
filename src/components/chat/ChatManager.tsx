@@ -12,22 +12,23 @@ import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
 
 
 const ChatManager = ({ onClose }: ChatManagerProps) => {
-  const initialWidth = 320;
-  const initialHeight = 400;
+  const initialWidth = 480;
+  const initialHeight = 600;
   const initialTop = (window.innerHeight - initialHeight) / 2;
   const initialLeft = (window.innerWidth - initialWidth) / 2;
   const [windows, setWindows] = useState<WindowState[]>([{
     id: "chat-menu",
     title: "채팅",
     zIndex: 10,
-    position: { top: initialTop, left: initialLeft }
+    position: { top: initialTop, left: initialLeft },
+    width : 480,
+    height : 620,
   }]);
   const [nextZIndex, setNextZIndex] = useState(11);
 
   const [myProfile, setMyProfile] = useState<chatProfile>();
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
-  //const [allChatRooms, setAllChatRooms] = useState<ChatRooms[]>([]);
 
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
@@ -45,7 +46,6 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       setAllUsers(userRes.data);
       setFavoriteUsers(favRes.data);
       dispatch(setChatRooms(roomRes.data));
-      //setAllChatRooms(roomRes.data);
     }).catch(error => {
       console.error("초기 데이터를 불러오는 데 실패했습니다:", error);
     });
@@ -78,16 +78,14 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         position: { top: initialTop, left: initialLeft },
         partner: chatRoomData.partner,
         chatRoomInfo : chatRoomData,
+        width : 320,
+        height : 600
       };
       setWindows([...windows, newWindow]);
       setNextZIndex(nextZIndex + 1);
 
       dispatch(updateChatRoom(chatRoomData));
 
-      // setAllChatRooms(prevRooms => {
-      //   const roomExists = prevRooms.some(room => room.roomId === chatRoomData.roomId);
-      //   return roomExists ? prevRooms : [chatRoomData, ...prevRooms];
-      // });
     } catch(err){
       console.error("채팅방 정보를 가져오는 데 실패했습니다:", err);
       // 사용자에게 에러 알림을 보여주는 등의 처리
@@ -110,6 +108,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       partner : chatRoom.partner,
       position: { top: initialTop, left: initialLeft },
       chatRoomInfo: chatRoom,
+      width : 320,
+      height : 600
     };
     setWindows([...windows, newWindow]);
     setNextZIndex(nextZIndex + 1);
@@ -127,6 +127,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         title: "새 채팅방 생성",
         zIndex: nextZIndex,
         position: { top: initialTop, left: initialLeft },
+        width : 600,
+        height : 400
     };
     setWindows([...windows, newWindow]);
     setNextZIndex(nextZIndex + 1);
@@ -213,6 +215,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         zIndex: nextZIndex,
         position: { top: initialTop, left: initialLeft },
         chatRoomInfo: newChatRoom,
+        width : 320,
+        height : 600
       };
 
       return [...windowsWithoutCreator, newWindow];
@@ -233,6 +237,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             onFocus={handleFocusWindow}
             zIndex={window.zIndex}
             position={window.position}
+            w={window.width}
+            h={window.height}
           >
           {window.id === 'chat-menu' ? (
             <ChatMenu

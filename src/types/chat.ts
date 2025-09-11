@@ -33,6 +33,8 @@ export interface WindowState {
   position: { top: number, left: number };
   partner?: chatProfile[];
   chatRoomInfo? : ChatRooms;
+  width : number;
+  height : number;
 }
 
 export interface ChatManagerProps {
