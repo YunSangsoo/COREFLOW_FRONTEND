@@ -45,4 +45,5 @@ export const mapStatus = (status: number): "대기중" | "완료" | "반려" => 
         case 2: return "반려";
         default: return "대기중";
     }
+    
 };

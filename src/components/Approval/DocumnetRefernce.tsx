@@ -40,13 +40,15 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents}) => {
                 ))
             ) : (
                 <tr>
-                    <td>표시할 문서가 없습니다.</td>
+                    <td colSpan={4}
+                     style={{textAlign: 'center'}}
+                    >표시할 문서가 없습니다.</td>
                 </tr>
             )}
         </tbody>
     </table>
-    )
-}
+    );
+};
 interface PaginationProps {
     currentPage: number;
     totalPages:number;
@@ -60,12 +62,12 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
 
     return (
         <div>
-            {pageNumbers.map(Number => (
+            {pageNumbers.map(pageNumber => (
                 <button
-                key={Number}
-                onClick={() => onPageChange(Number)}
-                className="={currentPage === number ? 'active' : ''}"
-                >{Number}</button>
+                key={pageNumber}
+                onClick={() => onPageChange(pageNumber)}
+                className={currentPage === pageNumber ? 'active' : ''}
+                >{pageNumber}</button>
             ))}
         </div>
     )
@@ -82,9 +84,9 @@ function DocumentPage() {
     return documents.filter(doc => doc.type === '휴가원');
   }, [activeTab]);
 
-  const currentDocumentes.slice(
+  const currentDocumentes = filteredDocuments.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-currentPage * ITEMS_PER_PAGE);
+    currentPage * ITEMS_PER_PAGE);
 
 const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE);
 
@@ -106,6 +108,7 @@ return (
             휴가원
         </button>
         </div>
+        <DocumentTable documents={currentDocumentes}/>
     <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
