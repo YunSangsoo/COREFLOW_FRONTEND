@@ -28,7 +28,8 @@ api.interceptors.response.use(
         const originalRequest = err.config;
 
         // api 서버로부터 응답받은 상태코드가 401인 경우 refresh토큰을 활용한 accessToken 재발급
-        if(err.response?.status === 401){
+        if(err.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
             try{
                 const response = await axios.post(`http://localhost:8081/api/auth/refresh`, {}, {
                     withCredentials:true
