@@ -32,19 +32,19 @@ export default function MemberMain() {
         userNo: 0,
         email: '',             // string
         userName: '',          // string
-        depId: undefined,
-        posId: undefined,
-        profile: undefined,
+        depId: 0,
+        posId: 0,
+        profile: '',
         roles: [],             // string[]
-        hireDate: undefined,
+        hireDate: new Date(),
         phone: undefined,
         address: undefined,
-        status: undefined
+        status: ''
     });
     const [emailInput, setEmailInput] = useState('');
     const [userNameInput, setUserNameInput] = useState('');
-    const [depIdInput, setDepIdInput] = useState<number | undefined>(undefined);
-    const [posIdInput, setPosIdInput] = useState<number | undefined>(undefined);
+    const [depIdInput, setDepIdInput] = useState(0);
+    const [posIdInput, setPosIdInput] = useState(0);
     const [phoneInput, setPhoneInput] = useState('');
     const [addressInput, setAddressInput] = useState('');
     const [addressDetailInput, setAddressDetailInput] = useState('');

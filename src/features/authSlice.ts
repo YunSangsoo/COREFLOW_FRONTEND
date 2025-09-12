@@ -17,6 +17,10 @@ const authSlice = createSlice({
             state.user = null;
             state.isAuthenticated = false;
         },
+        updateUser: (state, action: PayloadAction<Partial<User>>) => {
+            if (!state.user) return;
+            state.user = { ...state.user, ...action.payload };
+        }
     }
 });
 
