@@ -16,7 +16,8 @@ import MemberMain from './pages/member_main/MemberMain';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
-import Attendance from './pages/member_attendance/Attendance';
+import AttendanceMember from './pages/member_attendance/AttendanceMember';
+import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 import type { RootState } from './store/store';
 import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 
@@ -77,13 +78,17 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-                <Route path='/members' element={<MemberMain/>}></Route>
-                <Route path='/vacation'>
-                    <Route path='info' element={<VacationInfo/>}></Route>
-                    <Route path='member' element={<VacationMember/>}></Route>
-                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                <Route path='/members'>
+                    <Route path='' element={<MemberMain/>}/>                
                 </Route>
-                <Route path='/attendance' element={<Attendance/>}>
+                <Route path='/vacation'>
+                    <Route path='info' element={<VacationInfo/>}/>
+                    <Route path='member' element={<VacationMember/>}/>
+                    <Route path='personal' element={<VacationPersonal/>}/>
+                </Route>
+                <Route path='/attendance'>
+                    <Route path="member" element={<AttendanceMember/>}/>
+                    <Route path="personal" element={<AttendancePersonal/>}/>
                 </Route>
             </Routes>
 
