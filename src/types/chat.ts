@@ -6,6 +6,7 @@ export interface chatProfile {
 
 // ChatMenu 컴포넌트가 받을 props의 타입을 정의합니다.
 export interface ChatMenuProps {
+  myProfile:chatProfile;
   allUsers: chatProfile[];
   favoriteUsers: chatProfile[];
   allChatRooms: ChatRooms[];
@@ -17,6 +18,8 @@ export interface ChatMenuProps {
   event: React.MouseEvent,
   isCurrentlyFavorite: boolean
   ) => void;
+  onSetState : (state:string) => void;
+  onSearchUser :(query: string) => Promise<chatProfile[]>;
 }
 
 // 모달 상태를 위한 타입 정의

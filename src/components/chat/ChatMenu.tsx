@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
 import type { ChatMenuProps, chatProfile, ModalState } from '../../types/chat';
-import UserActionModal from './UserActionModal';
+import UserActionModal, { UserStateModal } from './UserActionModal';
+import { useQuery } from '@tanstack/react-query';
+import { useDebounce } from '../../hooks/useDebounce';
 
 
-const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRoomClick, onMakeChatRoomClick, onToggleFavorite }: ChatMenuProps) => {
+const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRoomClick, onMakeChatRoomClick, onToggleFavorite,onSetState , onSearchUser }: ChatMenuProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('사원'); // '사원' 또는 '채팅방'
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms 지연, 컴포넌트가 자주 업데이트되지 않도록 제어
+
+  const {data: searchedUsers,isLoading: isSearching} = useQuery({
+    queryKey: ['searchChatUsers', debouncedSearchTerm],
+    queryFn: () => onSearchUser(debouncedSearchTerm),
+    enabled: !!debouncedSearchTerm.trim(),
+  });
+
   const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    user: null,
+    position: { top: 0, left: 0 },
+  });
+  const [myState, setMyState] = useState<ModalState>({
     isOpen: false,
     user: null,
     position: { top: 0, left: 0 },
@@ -40,6 +55,23 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
   const handleViewProfile = (user: chatProfile) => {
     console.log(`${user.userName}의 프로필 조회`);
   };
+
+  const handleSetState = (event: React.MouseEvent<HTMLButtonElement>) =>{
+    event.preventDefault();
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMyState({
+      isOpen: true,
+      user: myProfile,
+      position: {
+        top: rect.bottom + 8,
+        left: rect.left - (rect.width / 2),
+      },
+    });
+  }
+  const handlecloseSetModal = () => {
+    setMyState({ isOpen: false, user: null, position: { top: 0, left: 0 } });
+  };
   
   
   const favoriteNoSet = new Set(favoriteUsers.map(fav => fav.userNo));
@@ -49,10 +81,16 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
       <div className="flex justify-between items-center p-2 bg-white border-b">
         <div className="flex justify-between items-center space-x-2 w-full">
           <div>
-            <span className="text-gray-800 font-bold">온라인</span>
+            <span className="text-gray-800 font-bold">{myProfile.status}</span>
+            <button
+            onClick={(e) => handleSetState(e)}
+            >▼</button>
+            <></>
           </div>
           <div>
-            <button onClick={()=>onMakeChatRoomClick()}>새 채팅</button>
+            <button className="shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10
+            hover:bg-gray-200
+            " onClick={()=>onMakeChatRoomClick()}>새 채팅</button>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -78,6 +116,7 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
       {/* 목록 컨텐츠 영역 */}
       <div className="flex-1 overflow-y-auto p-2">
         {activeTab === '사원' && (
+
           <div>
             {/* 검색창 영역 */}
             <div className="p-2">
@@ -96,53 +135,86 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
                 </span>
               </div>
             </div>
-            {/* 즐겨찾기 목록 */}
-            <h3 className="font-semibold text-gray-700 py-2">즐겨찾기</h3>
-            <ul className="space-y-2">
-              {favoriteUsers.map((user) => (
-                <li 
-                  key={`fav-${user.userNo}`} 
-                  onClick={(e) => handleUserClick(user, e)}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
-                    <div>
-                      <p className="font-medium">{user.userName}</p>
-                      <p className="text-sm text-gray-500">{user.status}</p>
-                    </div>
-                  </div>
-                  <span>⭐️</span>
-                </li>
-              ))}
-            </ul>
-            {/* 전체 사원 목록 */}
-            <h3 className="font-semibold text-gray-700 py-2 mt-4">사원</h3>
-            <ul className="space-y-2">
-              {allUsers.map((user) => {
-                const isFavorite = favoriteNoSet.has(user.userNo);
-                return(
-                  <li 
-                    key={user.userNo} 
-                    onClick={(e) => handleUserClick(user, e)}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
-                      <div>
-                        <p className="font-medium">{user.userName}</p>
-                        <p className="text-sm text-gray-500">{user.status}</p>
+              {debouncedSearchTerm.trim() ? (
+              // --- 검색 결과 뷰 ---
+              <div>
+                <h3 className="font-semibold text-gray-700 py-2">검색 결과</h3>
+                {isSearching && <p className="text-center text-gray-500">검색 중...</p>}
+                <ul className="space-y-2">
+                  {searchedUsers?.map((user) => {
+                    const isFavorite = favoriteNoSet.has(user.userNo);
+                    return(
+                      <li 
+                        key={user.userNo} 
+                        onClick={(e) => handleUserClick(user, e)}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                          <div>
+                            <p className="font-medium">{user.userName}</p>
+                            <p className="text-sm text-gray-500">{user.status}</p>
+                          </div>
+                        </div>
+                        <span onClick={(e) => onToggleFavorite(user, e, isFavorite)} className="text-2xl">
+                          {isFavorite ? '⭐️' : '✩'}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ):(
+
+              <div>
+                {/* 즐겨찾기 목록 */}
+                <h3 className="font-semibold text-gray-700 py-2">즐겨찾기</h3>
+                <ul className="space-y-2">
+                  {favoriteUsers.map((user) => (
+                    <li 
+                      key={`fav-${user.userNo}`} 
+                      onClick={(e) => handleUserClick(user, e)}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium">{user.userName}</p>
+                          <p className="text-sm text-gray-500">{user.status}</p>
+                        </div>
                       </div>
-                    </div>
-                    <span onClick={(e) => onToggleFavorite(user, e, isFavorite)} className="text-2xl">
-                      {isFavorite ? '⭐️' : '✩'}
-                    </span>
-              </li>
-                );
-                })
-              }
-            </ul>
-          </div>
+                      <span>⭐️</span>
+                    </li>
+                  ))}
+                </ul>
+                {/* 전체 사원 목록 */}
+                <h3 className="font-semibold text-gray-700 py-2 mt-4">사원</h3>
+                <ul className="space-y-2">
+                  {allUsers.map((user) => {
+                    const isFavorite = favoriteNoSet.has(user.userNo);
+                    return(
+                      <li 
+                        key={user.userNo} 
+                        onClick={(e) => handleUserClick(user, e)}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                          <div>
+                            <p className="font-medium">{user.userName}</p>
+                            <p className="text-sm text-gray-500">{user.status}</p>
+                          </div>
+                        </div>
+                        <span onClick={(e) => onToggleFavorite(user, e, isFavorite)} className="text-2xl">
+                          {isFavorite ? '⭐️' : '✩'}
+                        </span>
+                      </li>
+                    );
+                    })
+                  }
+                </ul>
+              </div>)}
+            </div>
         )}
         {activeTab === '채팅방' && (
           <ul className="space-y-1">
@@ -171,7 +243,22 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
                   {/* 채팅방 정보 영역 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <p className="font-semibold text-gray-800 truncate">{room.roomName}</p>
+                        <p className="font-semibold text-gray-800 truncate flex items-center">
+                          {room.roomType === "PRIVATE" ? (
+                              <span 
+                                  className="flex-shrink-0 px-2 py-1 bg-sky-200 text-gray-800 text-sm rounded-full mr-2"
+                              >
+                                  개인
+                              </span>
+                          ) : (
+                              <span 
+                                  className="flex-shrink-0 px-2 py-1 bg-red-200 text-gray-800 text-sm rounded-full mr-2"
+                              >
+                                  그룹
+                              </span>
+                          )}
+                          <span>{room.roomName}</span>
+                      </p>
                       <p className="text-xs text-gray-400 flex-shrink-0 ml-2">{room.lastMessage?.sentAt && new Date(room.lastMessage.sentAt).toLocaleDateString()}</p>
                     </div>
                     <div className="flex justify-between items-center">
@@ -201,6 +288,14 @@ const ChatMenu = ({ allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRo
           onClose={handleCloseModal}
           onStartChat={handleStartChat}
           onViewProfile={handleViewProfile}
+        />
+      )}
+      {myState.isOpen && myProfile && (
+        <UserStateModal
+          user={myProfile}
+          position={myState.position}
+          onClose={handlecloseSetModal}
+          onSetState={onSetState}
         />
       )}
     </div>

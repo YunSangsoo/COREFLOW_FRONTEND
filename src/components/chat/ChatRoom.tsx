@@ -1,12 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
-import type { ChatMessage, chatProfile, ChatRooms } from '../../types/chat';
+import type { ChatMessage, chatProfile, ChatRooms, ModalState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
 import stompClient from '../../api/webSocketApi';
+import { ChatRoomModal } from './UserActionModal';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store/store';
+import SettingsIcon from './SvgSettingIcon';
 
 interface ChatRoomProps extends ChatRooms {
   myProfile: chatProfile;
   onNewMessage: (room: ChatRooms, message: ChatMessage) => void;
+  onRoomUserList: (roomId:number, users:chatProfile[]) => void;
 }
 
 const formatTime = (dateString: string | Date): string => {
@@ -17,6 +22,7 @@ const formatTime = (dateString: string | Date): string => {
     hour12: true,
   });
 };
+
 const isSameDay = (date1?: string | Date, date2?: string | Date): boolean => {
   if (!date1 || !date2) {
     return false;
@@ -44,12 +50,23 @@ const markAsRead = (roomId:Number) => {
 };
 
 const ChatRoom = (props : ChatRoomProps) => {
-  const { roomId, myProfile, partner, onNewMessage } = props;
+  const { roomId, myProfile, partner, onNewMessage, onRoomUserList } = props;
+  
   // 채팅 메시지 목록을 저장할 state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   // 입력창의 내용을 저장할 state
   const [newMessage, setNewMessage] = useState('');
   // 메시지 목록 스크롤을 위한 ref
+  const [users,setUsers] = useState<chatProfile[]>([]);
+
+  const [roomConfig, setRoomConfig] = useState<ModalState>({
+      isOpen: false,
+      user: null,
+      position: { top: 0, left: 0 },
+    });
+
+  const thisChatRoom = useSelector((state: RootState) => state.chat.chatRooms).find(chatRoom=>chatRoom.roomId === roomId);
+
   const messageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // 메시지 목록이 업데이트될 때마다 맨 아래로 스크롤
@@ -57,6 +74,10 @@ const ChatRoom = (props : ChatRoomProps) => {
   }, [messages]);
   useEffect(() => {
 
+    api.get(`/chatting/room/${roomId}/user`).then(res=>{
+      setUsers(res.data);
+      console.log(res.data);
+    });
 
     const fetchPreviousMessages = async () => {
       try {
@@ -131,83 +152,123 @@ const ChatRoom = (props : ChatRoomProps) => {
     }
   };
 
+  const handleOpenConfig = (event: React.MouseEvent<HTMLButtonElement>) =>{
+      event.preventDefault();
+      event.stopPropagation();
+      const rect = event.currentTarget.getBoundingClientRect();
+      setRoomConfig({
+        isOpen: true,
+        user: null,
+        position: {
+          top: rect.bottom + 8,
+          left: rect.left - (rect.width / 2),
+        },
+      });
+    }
+
+  const handlecloseSetModal = () => {
+    setRoomConfig({ isOpen: false, user: null, position: { top: 0, left: 0 } });
+  };
+
+  const handleRoomUserList = () =>{
+    onRoomUserList(roomId,users);
+  }
+
   return (
-    <div className="flex flex-col h-full">
-      {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-2">
-        {messages.map((msg, index) => {
-          const prevMsg = messages[index - 1];
-          const showDateSeparator = !isSameDay(prevMsg?.sentAt, msg.sentAt);
+    <>
+      <button className="absolute bg-gray-200 hover:bg-gray-400 text-gray-800 hover:text-black"
+      onClick={handleOpenConfig}>
+        <SettingsIcon size={15} />
+      </button>
+      <div className="flex flex-col h-full">
+        {/* 메시지 목록 */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-2">
 
-          return (
-            <React.Fragment key={index}>
-              {/* 📅 날짜 구분선 */}
-              {showDateSeparator && (
-                <div className="text-center my-4">
-                  <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
-                    {formatDateSeparator(msg.sentAt)}
-                  </span>
-                </div>
-              )}
+          {messages.map((msg, index) => {
+            const prevMsg = messages[index - 1];
+            const showDateSeparator = !isSameDay(prevMsg?.sentAt, msg.sentAt);
 
-              {/* 메시지 본문 */}
-              <div className={`flex items-end space-x-2 ${msg.userNo === myProfile.userNo ? 'justify-end' : 'justify-start'}`}>
-                {msg.type !== 'TALK' ? (
-                  <div className="text-center text-xs text-gray-500 w-full py-1">
-                    <p>{msg.messageText}</p>
-                  </div>
-                ) : msg.userNo === myProfile.userNo ? (
-                  <div className="flex items-end space-x-2">
-                    {/* 시간 표시 */}
-                    <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
-                    <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs">
-                      <p className="break-all">{msg.messageText}</p>
-                    </div>
-                  </div>
-                ) : (
-                  // 상대방이 보낸 메시지
-                  <div className="flex items-end space-x-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
-                    <div>
-                      {index>0 && prevMsg.userName===msg.userName ? <></> :
-                      <p className="text-sm font-semibold">{msg.userName}</p>
-                      }
-                      <div className="flex items-end space-x-2">
-                        <div className="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
-                          <p className="break-all">{msg.messageText}</p>
-                        </div>
-                        {/* 시간 표시 */}
-                        <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
-                      </div>
-                    </div>
+            return (
+              <React.Fragment key={index}>
+                {/* 📅 날짜 구분선 */}
+                {showDateSeparator && (
+                  <div className="text-center my-4">
+                    <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+                      {formatDateSeparator(msg.sentAt)}
+                    </span>
                   </div>
                 )}
-              </div>
-            </React.Fragment>
-          );
-        })}
-        {/* 스크롤을 맨 아래로 이동시키기 위한 빈 div */}
-        <div ref={messageEndRef} />
-      </div>
 
-      {/* 메시지 입력창 */}
-      <div className="p-2 border-t flex">
-        <input 
-          type="text" 
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-          placeholder="메시지를 입력하세요..."
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        <button 
-          onClick={sendMessage}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          전송
-        </button>
+                {/* 메시지 본문 */}
+                <div className={`flex items-end space-x-2 ${msg.userNo === myProfile.userNo ? 'justify-end' : 'justify-start'}`}>
+                  {msg.type !== 'TALK' ? (
+                    <div className="text-center text-xs text-gray-500 w-full py-1">
+                      <p>{msg.messageText}</p>
+                    </div>
+                  ) : msg.userNo === myProfile.userNo ? (
+                    <div className="flex items-end space-x-2">
+                      {/* 시간 표시 */}
+                      <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
+                      <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs">
+                        <p className="break-all">{msg.messageText}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    // 상대방이 보낸 메시지
+                    <div className="flex items-end space-x-2">
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                      <div>
+                        {index>0 && prevMsg.userName===msg.userName ? <></> :
+                        <p className="text-sm font-semibold">{msg.userName}</p>
+                        }
+                        <div className="flex items-end space-x-2">
+                          <div className="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
+                            <p className="break-all">{msg.messageText}</p>
+                          </div>
+                          {/* 시간 표시 */}
+                          <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
+          {/* 스크롤을 맨 아래로 이동시키기 위한 빈 div */}
+          <div ref={messageEndRef} />
+        </div>
+
+        {/* 메시지 입력창 */}
+        <div className="p-2 border-t flex">
+          <input 
+            type="text" 
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="메시지를 입력하세요..."
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button 
+            onClick={sendMessage}
+            className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            전송
+          </button>
+        </div>
       </div>
-    </div>
+      {roomConfig.isOpen && myProfile && thisChatRoom && (
+              <ChatRoomModal
+                chatRooms={thisChatRoom}
+                users={users}
+                onUsersUpdate={setUsers}
+                position={roomConfig.position}
+                onClose={handlecloseSetModal}
+                onRoomUserList={handleRoomUserList}
+              />
+              )}
+      
+    </>
   );
 };
 

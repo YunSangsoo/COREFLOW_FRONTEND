@@ -9,6 +9,7 @@ import NewChat from './NewChat';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
+import { WindowContent } from './WindowContentProps';
 
 
 const ChatManager = ({ onClose }: ChatManagerProps) => {
@@ -29,6 +30,10 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   const [myProfile, setMyProfile] = useState<chatProfile>();
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
+
+  const [searchKeyword, setSearchKeyword] = useState({
+    keyword:''
+  })
 
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
@@ -60,7 +65,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   };
 
   const handleOpenChatFromUser = async (user: chatProfile) => {
-    const windowId = `chat-${user.userNo}`;
+    const windowId = `room-${user.userNo}`;
     const existingWindow = windows.find(win => win.id === windowId);
     if (existingWindow) {
       handleFocusWindow(windowId);
@@ -95,7 +100,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
 
 
   const handleOpenChatFromRoom = async (chatRoom: ChatRooms) => {
-    const windowId = `chat-${chatRoom.roomId}`;
+    const windowId = `room-${chatRoom.roomId}`;
     const existingWindow = windows.find(win => win.id === windowId);
     if (existingWindow) {
       handleFocusWindow(windowId);
@@ -115,6 +120,26 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     setNextZIndex(nextZIndex + 1);
   };
 
+  const handleOpenChatRoomUserList = (roomId:number, users:chatProfile[]) => {
+    const windowId = `chat-userList-${roomId}`
+    const existingWindow = windows.find(win => win.id === windowId);
+    if (existingWindow) {
+      handleFocusWindow(windowId);
+      return;
+    }
+    const newWindow: WindowState = {
+      id: windowId,
+      title: "참여자 목록", // 채팅방 이름을 제목으로 사용
+      zIndex: nextZIndex,
+      partner : users,
+      position: { top: initialTop, left: initialLeft },
+      width : 200,
+      height : 500
+    };
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  }
+
   const handleMakeChatRoom = () => {
     const windowId = "new-chat";
     const existingWindow = windows.find(win => win.id === windowId);
@@ -127,8 +152,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         title: "새 채팅방 생성",
         zIndex: nextZIndex,
         position: { top: initialTop, left: initialLeft },
-        width : 600,
-        height : 400
+        width : 420,
+        height : 450
     };
     setWindows([...windows, newWindow]);
     setNextZIndex(nextZIndex + 1);
@@ -203,7 +228,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   }
 
   const handleCreationComplete = (newChatRoom: ChatRooms) => {
-    const windowId = `chat-${newChatRoom.roomId}`;
+    const windowId = `room-${newChatRoom.roomId}`;
     
     // 함수형 업데이트로 창 상태 변경 (닫고 열기)
     setWindows(prevWindows => {
@@ -224,6 +249,26 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     dispatch(updateChatRoom(newChatRoom));
     setNextZIndex(prevZIndex => prevZIndex + 1);
   };
+  
+  const setState = async (state:string) =>{
+    
+    try {
+      const res = await api.post(`/chatting/state`,{state:state});
+      console.log(res);
+      setMyProfile(res.data);
+    } catch (error) {
+      console.error("Failed to update state:", error);
+      alert('프로필 상태 변경에 실패했습니다.');
+    }
+  }
+
+  const handleSearchUsers = async (query: string): Promise<chatProfile[]> => {
+    if (!query) return []; // 검색어가 없으면 빈 배열 반환
+    const { data } = await api.get<chatProfile[]>('/chatting/searchUser', {
+      params: { query }
+    });
+    return data;
+  };
 
   return (
     <div className="fixed inset-0 z-40 pointer-events-none">
@@ -240,35 +285,23 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             w={window.width}
             h={window.height}
           >
-          {window.id === 'chat-menu' ? (
-            <ChatMenu
+            {/* ✅ 복잡한 삼항 연산자 대신 WindowContent 컴포넌트를 사용 */}
+            <WindowContent
+              window={window}
+              myProfile={myProfile}
               allUsers={allUsers}
               favoriteUsers={favoriteUsers}
               allChatRooms={allChatRooms}
-              onUserClick={handleOpenChatFromUser}
-              onChatRoomClick={handleOpenChatFromRoom}
-              onMakeChatRoomClick={handleMakeChatRoom}
-              onToggleFavorite={handleAddFavorite} 
+              handleOpenChatFromUser={handleOpenChatFromUser}
+              handleOpenChatFromRoom={handleOpenChatFromRoom}
+              handleMakeChatRoom={handleMakeChatRoom}
+              handleAddFavorite={handleAddFavorite}
+              setState={setState}
+              handleSearchUsers={handleSearchUsers}
+              handleCreationComplete={handleCreationComplete}
+              handleNewMessage={handleNewMessage}
+              handleOpenChatRoomUserList={handleOpenChatRoomUserList}
             />
-            ) : (
-              window.id==='new-chat'? (
-              <>
-                <NewChat
-                  myProfile={myProfile}
-                  onCreationComplete={handleCreationComplete}
-                />
-              </>
-              ) : (
-                window.chatRoomInfo ? (
-                  <ChatRoom
-                    {...window.chatRoomInfo}
-                    myProfile={myProfile}
-                    onNewMessage={handleNewMessage}
-                  />
-                ) : (<p>채팅 정보를 불러오는 중입니다...</p>)
-                )
-            )
-          }
           </FloatingWindow>
         ))}
       </DndContext>
