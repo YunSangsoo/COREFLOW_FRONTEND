@@ -80,7 +80,7 @@ export const vacType = async () => {
 }
 
 // 비고 바꾸기
-export const vacTypeUpdate = async ({attId,vacCode} : VacTypeUpdate) => {
-    const response = await api.patch<VacTypeUpdate>(`/attendance/vacType/${attId}`,{vacCode});
+export const vacTypeUpdate = async (typeUpdate : VacTypeUpdate) => {
+    const response = await api.patch<VacTypeUpdate>('/attendance/vacType',typeUpdate);
     return response.data;
 }

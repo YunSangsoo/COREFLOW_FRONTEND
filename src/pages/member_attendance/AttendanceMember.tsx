@@ -7,7 +7,7 @@ import AttSideBar from "../../components/member_attendance/attSideBar";
 import SearchMember from "../../components/member_vacation/SearchMember";
 import type { MemberChoice, VacType } from "../../types/vacation";
 import AttDate from "../../components/member_attendance/AttDate";
-import { vacType } from "../../api/vacationApi";
+import { vacType } from "../../api/attendanceApi";
 
 export default function AttendanceMember () {
     const queryClient = useQueryClient();
@@ -31,7 +31,7 @@ export default function AttendanceMember () {
 
     const mutation = useMutation({
         mutationFn : vacTypeUpdate,
-        onSuccess:(data) => {
+        onSuccess:() => {
             queryClient.invalidateQueries({
                 queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo]
             });
@@ -65,8 +65,7 @@ export default function AttendanceMember () {
     const handleVacSelect = (attId:number, vacCode:number) => {
         mutation.mutate({
             attId,
-            vacCode,
-            vacName:''
+            vacCode
         })
     }
 

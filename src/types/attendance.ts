@@ -24,3 +24,8 @@ export interface VacType{
     vacCode:number;
     vacName:string;
 }
+
+export interface VacTypeUpdate{
+    attId:number;
+    vacCode:number;
+}

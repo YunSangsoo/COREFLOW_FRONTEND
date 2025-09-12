@@ -12,7 +12,7 @@ interface AttButtonProps{
 export default function AttButton({loginUserProfile,loginUserAtt}:AttButtonProps) {
     const queryClient = useQueryClient();
 
-    const todayAttendance = loginUserAtt?.find(todayAttData => dayjs(todayAttData.attDate).isSame(dayjs(),'day'));
+    const todayAttendance = Array.isArray(loginUserAtt) ? loginUserAtt?.find(todayAttData => dayjs(todayAttData.attDate).isSame(dayjs(),'day')) : undefined;
     const attId = todayAttendance && todayAttendance.checkInTime && !todayAttendance.checkOutTime ? todayAttendance.attId : null;
 
     const checkInMutation = useMutation({

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Attendance } from "../../types/attendance";
 import dayjs from "dayjs";
 import AttSideBar from "../../components/member_attendance/attSideBar";
