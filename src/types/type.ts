@@ -2,10 +2,15 @@ export interface User {
     userNo: number;
     email: string;
     userName: string;
-    profile: string;
-    phone: string;
+    depId?: number;
+    posId?: number;
+    profile?: string;
     roles: string[];
-    address: string;
+    hireDate?: Date;
+    phone?: string;
+    address?: string;
+    addressDetail?: string;
+    status?: string;
 }
 
 export interface LoginResponse {

@@ -2,7 +2,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import Login from './pages/login/Login';
 import MainPage from './mainPage/MainPage'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
@@ -18,12 +18,15 @@ import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
 import AttendanceMember from './pages/member_attendance/AttendanceMember';
 import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
+import type { RootState } from './store/store';
+import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 
 
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
+
 
     useEffect(() => {
         api.post("/auth/refresh")
@@ -33,7 +36,23 @@ function App() {
             .catch(err => {
                 dispatch(logout(err.data));
             })
-    }, [])
+    }, [dispatch])
+
+    
+    const auth = useSelector((state: RootState) => state.auth);
+    useEffect(() => {
+      if (auth.accessToken) {
+        console.log("Attempting to connect WebSocket...");
+        connectWebSocket();
+      } else {
+        console.log("Disconnecting WebSocket...");
+        disconnectWebSocket();
+      }
+
+      return () => {
+        disconnectWebSocket();
+      }
+    }, [auth.accessToken]);
 
     //어떤 페이지에서든 채팅을 구현하기 위해 App페이지에서 변수를 관리함
     const [isChatOpen, setIsChatOpen] = useState(false);

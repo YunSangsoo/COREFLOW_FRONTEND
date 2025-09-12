@@ -2,14 +2,14 @@ import { useState } from "react";
 import { api } from "../../api/coreflowApi";
 
 const FindPwd = () => {
-    const [name, setName] = useState("");
+    const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
     const sendTempPwd = async () => {
         try {
-            const res = await api.post("/auth/find-pwd", { name, email });
+            const res = await api.post("/auth/find-pwd", { userName, email });
             setSuccessMessage(res.data);
             setErrorMessage("");
         } catch (err: any) {
@@ -23,8 +23,8 @@ const FindPwd = () => {
             <h2>비밀번호 찾기</h2>
             <input
                 placeholder="이름"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
             />
             <input
                 placeholder="이메일"
