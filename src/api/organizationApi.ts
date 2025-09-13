@@ -1,7 +1,8 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { Department, DepartmentDetail } from "../types/member";
+import type { MemberResponse } from "../types/member";
+import type { Department, DepartmentDetail } from "../types/organization";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -49,15 +50,19 @@ api.interceptors.response.use(
 )
 
 // 1. 부서 조회
-export const deptList = async () => {
+export const parentDeptList = async () => {
     const response = await api.get<Department[]>('/organization/departments');
     return response.data;
 }
 
 // 2. 부서별 팀 조회
-export const deptDetailList = async (parentId:number) => {
+export const childDeptList = async (parentId:number) => {
     const response = await api.get<DepartmentDetail[]>(`/organization/departments/${parentId}`);
     return response.data;
 }
 
 // 3. 팀별 사원 조회
+export const memberList = async (depId:number) => {
+    const response = await api.get<MemberResponse[]>(`/organization/members/${depId}`);
+    return response.data;
+}
