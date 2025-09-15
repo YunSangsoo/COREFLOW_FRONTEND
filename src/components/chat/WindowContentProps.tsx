@@ -1,5 +1,6 @@
 import type { ChatMessage, chatProfile, ChatRooms, WindowState } from "../../types/chat";
 import ChatMenu from "./ChatMenu";
+import { ProfileWindow } from "./ChatProfile";
 import ChatRoom from "./ChatRoom";
 import { ChatRoomUserInfo } from "./ChatRoomUserInfo";
 import NewChat from "./NewChat";
@@ -19,6 +20,7 @@ interface WindowContentProps {
     handleCreationComplete: (newChatRoom: ChatRooms) => void;
     handleNewMessage: (room: ChatRooms, message: ChatMessage) => void;
     handleOpenChatRoomUserList: (roomId:number, users:chatProfile[] ) => void; 
+    handleOpenProfile:(user: chatProfile) =>void;
 
 }
 
@@ -37,6 +39,7 @@ export const WindowContent = (props: WindowContentProps) => {
         onToggleFavorite={rest.handleAddFavorite}
         onSetState={rest.setState}
         onSearchUser={rest.handleSearchUsers}
+        onOpenProfile={rest.handleOpenProfile}
     />;
   }
 
@@ -48,7 +51,9 @@ export const WindowContent = (props: WindowContentProps) => {
   }
   
   if (window.id.startsWith('chat-userList-')&&window.partner) {
-    return<ChatRoomUserInfo users={window.partner}
+    return<ChatRoomUserInfo
+    users={window.partner}
+    onOpenProfile={rest.handleOpenProfile}
     />;
   }
 
@@ -58,6 +63,13 @@ export const WindowContent = (props: WindowContentProps) => {
     myProfile={rest.myProfile} 
     onNewMessage={rest.handleNewMessage}
     onRoomUserList={rest.handleOpenChatRoomUserList}
+    />;
+  }
+
+  if (window.id.startsWith('profile-') && window.profileUser) {
+    return <ProfileWindow 
+      user={window.profileUser}
+      onStartChat={rest.handleOpenChatFromUser}
     />;
   }
 

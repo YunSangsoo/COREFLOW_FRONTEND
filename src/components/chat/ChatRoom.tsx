@@ -176,7 +176,7 @@ const ChatRoom = (props : ChatRoomProps) => {
 
   return (
     <>
-      <button className="absolute bg-gray-200 hover:bg-gray-400 text-gray-800 hover:text-black"
+      <button className="absolute bg-indigo-300 hover:bg-indigo-600 text-indigo-700 hover:text-white"
       onClick={handleOpenConfig}>
         <SettingsIcon size={15} />
       </button>

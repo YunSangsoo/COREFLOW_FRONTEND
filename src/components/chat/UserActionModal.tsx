@@ -213,7 +213,7 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
 
   const handleClosePicker = useCallback(() => {
     setPickerOpen(false);
-  }, []); // 의존성이 없으면 빈 배열
+  }, []);
 
   const modalContent = (
     <>

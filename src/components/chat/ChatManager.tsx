@@ -134,7 +134,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       partner : users,
       position: { top: initialTop, left: initialLeft },
       width : 200,
-      height : 500
+      height : 350
     };
     setWindows([...windows, newWindow]);
     setNextZIndex(nextZIndex + 1);
@@ -270,6 +270,29 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     return data;
   };
 
+  const handleOpenProfile = (user: chatProfile) => {
+    const windowId = `profile-${user.userNo}`;
+    const existingWindow = windows.find(win => win.id === windowId);
+
+    if (existingWindow) {
+      handleFocusWindow(windowId);
+      return;
+    }
+
+    const newWindow: WindowState = {
+      id: windowId,
+      title: "프로필",
+      zIndex: nextZIndex,
+      position: { top: initialTop, left: initialLeft },
+      width: 320, // UI에 맞는 적절한 너비
+      height: 480, // UI에 맞는 적절한 높이
+      profileUser: user, // ✅ 창에 표시할 사용자 정보를 담아줍니다.
+    };
+
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  };
+
   return (
     <div className="fixed inset-0 z-40 pointer-events-none">
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -285,7 +308,6 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             w={window.width}
             h={window.height}
           >
-            {/* ✅ 복잡한 삼항 연산자 대신 WindowContent 컴포넌트를 사용 */}
             <WindowContent
               window={window}
               myProfile={myProfile}
@@ -301,6 +323,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               handleCreationComplete={handleCreationComplete}
               handleNewMessage={handleNewMessage}
               handleOpenChatRoomUserList={handleOpenChatRoomUserList}
+              handleOpenProfile={handleOpenProfile}
             />
           </FloatingWindow>
         ))}

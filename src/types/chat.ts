@@ -2,6 +2,8 @@ export interface chatProfile {
     userNo : number;
     userName : string;
     status : string;
+    email : string;
+    phone : string;
 }
 
 // ChatMenu 컴포넌트가 받을 props의 타입을 정의합니다.
@@ -20,6 +22,7 @@ export interface ChatMenuProps {
   ) => void;
   onSetState : (state:string) => void;
   onSearchUser :(query: string) => Promise<chatProfile[]>;
+  onOpenProfile : (user: chatProfile) =>void;
 }
 
 // 모달 상태를 위한 타입 정의
@@ -36,6 +39,7 @@ export interface WindowState {
   position: { top: number, left: number };
   partner?: chatProfile[];
   chatRoomInfo? : ChatRooms;
+  profileUser?: chatProfile;
   width : number;
   height : number;
 }

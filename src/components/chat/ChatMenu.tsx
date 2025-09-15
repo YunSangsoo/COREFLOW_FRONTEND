@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '../../hooks/useDebounce';
 
 
-const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRoomClick, onMakeChatRoomClick, onToggleFavorite,onSetState , onSearchUser }: ChatMenuProps) => {
+const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRoomClick, onMakeChatRoomClick, onToggleFavorite,onSetState , onSearchUser, onOpenProfile }: ChatMenuProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('사원'); // '사원' 또는 '채팅방'
 
@@ -54,6 +54,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
 
   const handleViewProfile = (user: chatProfile) => {
     console.log(`${user.userName}의 프로필 조회`);
+    onOpenProfile(user);
   };
 
   const handleSetState = (event: React.MouseEvent<HTMLButtonElement>) =>{

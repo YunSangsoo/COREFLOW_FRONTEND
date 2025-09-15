@@ -2,16 +2,18 @@ import type { chatProfile } from "../../types/chat"
 
 interface chatRoomUserInfoProps{
   users: chatProfile[];
+  onOpenProfile:(user: chatProfile) =>void;
 }
 
-export const ChatRoomUserInfo = ({users}:chatRoomUserInfoProps) => {
+export const ChatRoomUserInfo = ({users,onOpenProfile}:chatRoomUserInfoProps) => {
     
     return (
         <div className="flex flex-col h-full">
             <ul className="flex-grow space-y-1 p-2 overflow-y-auto">
                 {users.map((user) => (
                     <li 
-                    key={user.userNo} 
+                    key={user.userNo}
+                    onClick={() => onOpenProfile(user)}
                     className="flex items-center justify-between p-2 rounded-lg hover:bg-sky-200 cursor-pointer"
                     >
                     <div className="flex items-center space-x-2">
