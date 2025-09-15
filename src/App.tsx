@@ -76,7 +76,7 @@ function App() {
                 <Route path="/approval/ApprovalForm" element={<ApprovalForm />} />
                 <Route path='/my-documents' element={<DocumentTable/>}/>
                 <Route path='/document/:id' element={<DocumentDetailPage/>}/>
-                <Route path="/received-documents" element={<ReceivedDocumentTable />} />
+                <Route path="/received-documents" element={<ReceivedDocumentTable/>} />
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
