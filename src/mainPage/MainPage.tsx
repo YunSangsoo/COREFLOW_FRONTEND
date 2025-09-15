@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/coreflowApi";
 import type { RootState } from "../store/store"
 import { logout } from "../features/authSlice";
+import NoticeMain from "../components/notice.tsx/NoticeMain";
 
 export default function MainPage() {
     const auth = useSelector((state: RootState) => state.auth);
@@ -59,6 +60,8 @@ export default function MainPage() {
                 )
             }
             </div>
+            <NoticeMain/>
+            
         </>
     )
 }
