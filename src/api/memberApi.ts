@@ -56,7 +56,7 @@ export const depList = async () => {
 
 // 자식 부서 조회
 export const depDetailList = async (parentId:number) => {
-    const response = await api.get<Department[]>(`/departments/${parentId}`);
+    const response = await api.get<DepartmentDetail[]>(`/departments/${parentId}`);
     return response.data;
 }
 
