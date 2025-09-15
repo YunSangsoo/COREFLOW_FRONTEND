@@ -20,6 +20,7 @@ import AttendanceMember from './pages/member_attendance/AttendanceMember';
 import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 import type { RootState } from './store/store';
 import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
+import Organization from './pages/member_organization/Organization';
 
 
 function App() {
@@ -78,9 +79,7 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-                <Route path='/members'>
-                    <Route path='' element={<MemberMain/>}/>                
-                </Route>
+                <Route path='/members' element={<MemberMain/>}/>
                 <Route path='/vacation'>
                     <Route path='info' element={<VacationInfo/>}/>
                     <Route path='member' element={<VacationMember/>}/>
@@ -90,6 +89,7 @@ function App() {
                     <Route path="member" element={<AttendanceMember/>}/>
                     <Route path="personal" element={<AttendancePersonal/>}/>
                 </Route>
+                <Route path="/organization" element={<Organization/>}/>
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
