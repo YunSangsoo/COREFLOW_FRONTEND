@@ -73,7 +73,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
   const handlecloseSetModal = () => {
     setMyState({ isOpen: false, user: null, position: { top: 0, left: 0 } });
   };
-  
+  console.log(myProfile);
   
   const favoriteNoSet = new Set(favoriteUsers.map(fav => fav.userNo));
   return (
@@ -81,12 +81,14 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
       {/* 최상단 헤더 영역 */}
       <div className="flex justify-between items-center p-2 bg-white border-b">
         <div className="flex justify-between items-center space-x-2 w-full">
-          <div>
+          <div className="flex items-center space-x-2">
+            <img 
+            onClick={() => handleViewProfile(myProfile)}
+            src={`${import.meta.env.VITE_API_BASE_URL}/images/${myProfile.profile.imageCode}/${myProfile.profile.changeName}`} className="size-14 bg-gray-300 rounded-xl flex-shrink-0"/>
             <span className="text-gray-800 font-bold">{myProfile.status}</span>
             <button
             onClick={(e) => handleSetState(e)}
             >▼</button>
-            <></>
           </div>
           <div>
             <button className="shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10
@@ -144,6 +146,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
                 <ul className="space-y-2">
                   {searchedUsers?.map((user) => {
                     const isFavorite = favoriteNoSet.has(user.userNo);
+                    const profilePath = import.meta.env.VITE_API_BASE_URL + "/images/" + user.profile.imageCode + "/"+ user.profile.changeName;
                     return(
                       <li 
                         key={user.userNo} 
@@ -151,7 +154,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
                       >
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                          <img src={profilePath} className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"/>
                           <div>
                             <p className="font-medium">{user.userName}</p>
                             <p className="text-sm text-gray-500">{user.status}</p>
@@ -178,7 +181,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
                       className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
                     >
                       <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                        <img src={`${import.meta.env.VITE_API_BASE_URL}/images/${user.profile.imageCode}/${user.profile.changeName}`} className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"/>
                         <div>
                           <p className="font-medium">{user.userName}</p>
                           <p className="text-sm text-gray-500">{user.status}</p>
@@ -200,7 +203,7 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
                         className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
                       >
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                          <img src={`${import.meta.env.VITE_API_BASE_URL}/images/${user.profile.imageCode}/${user.profile.changeName}`} className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"/>
                           <div>
                             <p className="font-medium">{user.userName}</p>
                             <p className="text-sm text-gray-500">{user.status}</p>

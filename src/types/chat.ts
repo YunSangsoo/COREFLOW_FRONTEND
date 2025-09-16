@@ -1,9 +1,16 @@
+import type { customFile } from "./type";
+
 export interface chatProfile {
     userNo : number;
     userName : string;
     status : string;
+    profile : customFile;
+}
+export interface chatProfileDetail extends chatProfile{
     email : string;
     phone : string;
+    depName : string;
+    posName : string;
 }
 
 // ChatMenu 컴포넌트가 받을 props의 타입을 정의합니다.
@@ -62,7 +69,7 @@ export interface ChatRooms {
 
 // 메시지 타입을 정의합니다.
 export interface ChatMessage {
-  type: 'ENTER' | 'EXIT' | 'TALK';
+  type: 'ENTER' | 'EXIT' | 'TALK' | 'FILE';
   userNo: number;
   messageText: string;
   userName: string;

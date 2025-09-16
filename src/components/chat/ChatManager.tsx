@@ -51,6 +51,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       setAllUsers(userRes.data);
       setFavoriteUsers(favRes.data);
       dispatch(setChatRooms(roomRes.data));
+
     }).catch(error => {
       console.error("초기 데이터를 불러오는 데 실패했습니다:", error);
     });
@@ -286,7 +287,28 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       position: { top: initialTop, left: initialLeft },
       width: 320, // UI에 맞는 적절한 너비
       height: 480, // UI에 맞는 적절한 높이
-      profileUser: user, // ✅ 창에 표시할 사용자 정보를 담아줍니다.
+      profileUser: user,
+    };
+
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  };
+
+  const handleOpenFileUpload = (chatRoom: ChatRooms) => {
+    const windowId = `file-upload-${chatRoom.roomId}`;
+    if (windows.some(win => win.id === windowId)) {
+      handleFocusWindow(windowId);
+      return;
+    }
+
+    const newWindow: WindowState = {
+      id: windowId,
+      title: `"${chatRoom.roomName}" 파일 전송`,
+      zIndex: nextZIndex,
+      position: { top: initialTop + 20, left: initialLeft + 20 }, // 기존 창과 약간 겹치지 않게
+      width: 350,
+      height: 400,
+      chatRoomInfo: chatRoom,
     };
 
     setWindows([...windows, newWindow]);
@@ -324,6 +346,9 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               handleNewMessage={handleNewMessage}
               handleOpenChatRoomUserList={handleOpenChatRoomUserList}
               handleOpenProfile={handleOpenProfile}
+              handleSetMyProfile={setMyProfile}
+              handleOpenFileUpload={handleOpenFileUpload}
+              handleCloseWindow={handleCloseWindow}
             />
           </FloatingWindow>
         ))}

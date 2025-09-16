@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import type { chatProfile, ChatRooms } from '../../types/chat';
 import ChatPeoplePickerDialog from './ChatPeoplePickerDialog';
 import { api } from '../../api/coreflowApi';
+import { ChatRoomUploadFile } from './ChatRoomUploadFile';
 
 interface UserActionModalProps {
   user: chatProfile;
@@ -24,6 +25,7 @@ interface chatRoomModalProps {
   onClose :()=>void;
   onUsersUpdate :(user:chatProfile[]) => void;
   onRoomUserList :() => void;
+  onOpenFileUpload: (chatRoom: ChatRooms) => void;
 }
 
 
@@ -151,7 +153,7 @@ export const UserStateModal = ({ user, position, onClose, onSetState }: UserStat
 
 const EMPTY_USER_LIST: chatProfile[] = [];
 
-export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList}: chatRoomModalProps) => {
+export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload}: chatRoomModalProps) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -242,7 +244,14 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
             </li>
             ) : (<></>)
           }
-          
+          <li>
+            <button
+              onClick={() =>{onOpenFileUpload(chatRooms);onClose();}}
+              className="w-full text-left block px-4 py-2 hover:bg-gray-100"
+            >
+              파일 전송
+            </button>
+          </li>
           <li>
             <button
               className="w-full text-left block px-4 py-2 hover:bg-gray-100"

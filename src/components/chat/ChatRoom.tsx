@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Client, type IMessage } from '@stomp/stompjs';
 import type { ChatMessage, chatProfile, ChatRooms, ModalState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
@@ -12,6 +12,8 @@ interface ChatRoomProps extends ChatRooms {
   myProfile: chatProfile;
   onNewMessage: (room: ChatRooms, message: ChatMessage) => void;
   onRoomUserList: (roomId:number, users:chatProfile[]) => void;
+  onOpenProfile: (user:chatProfile)=>void;
+  onOpenFileUpload: (chatRoom: ChatRooms) => void;
 }
 
 const formatTime = (dateString: string | Date): string => {
@@ -50,7 +52,7 @@ const markAsRead = (roomId:Number) => {
 };
 
 const ChatRoom = (props : ChatRoomProps) => {
-  const { roomId, myProfile, partner, onNewMessage, onRoomUserList } = props;
+  const { roomId, myProfile, partner, onNewMessage, onRoomUserList,onOpenProfile, onOpenFileUpload } = props;
   
   // 채팅 메시지 목록을 저장할 state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -66,6 +68,10 @@ const ChatRoom = (props : ChatRoomProps) => {
     });
 
   const thisChatRoom = useSelector((state: RootState) => state.chat.chatRooms).find(chatRoom=>chatRoom.roomId === roomId);
+
+  const userProfileMap = useMemo(() => {
+    return new Map(users.map(user => [user.userNo, user]));
+  }, [users]);
 
   const messageEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -113,6 +119,7 @@ const ChatRoom = (props : ChatRoomProps) => {
             roomId:roomId,
             sentAt: new Date(),
             messageText: '',
+            type: 'ENTER',
           }),
         });
       
@@ -126,6 +133,7 @@ const ChatRoom = (props : ChatRoomProps) => {
             roomId:roomId,
             sentAt: new Date(),
             messageText: '',
+            type: 'EXIT',
           }),
         });
         subscription.unsubscribe();
@@ -187,6 +195,7 @@ const ChatRoom = (props : ChatRoomProps) => {
           {messages.map((msg, index) => {
             const prevMsg = messages[index - 1];
             const showDateSeparator = !isSameDay(prevMsg?.sentAt, msg.sentAt);
+            const senderProfile = userProfileMap.get(msg.userNo);
 
             return (
               <React.Fragment key={index}>
@@ -216,7 +225,16 @@ const ChatRoom = (props : ChatRoomProps) => {
                   ) : (
                     // 상대방이 보낸 메시지
                     <div className="flex items-end space-x-2">
-                      <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                      {senderProfile ? (
+                        <img
+                          onClick={()=>onOpenProfile(senderProfile)}
+                          src={`${import.meta.env.VITE_API_BASE_URL}/images/${senderProfile.profile.imageCode}/${senderProfile.profile.changeName}`}
+                          alt={senderProfile.userName}
+                          className="w-8 h-8 rounded-full flex-shrink-0 object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
+                      )}
                       <div>
                         {index>0 && prevMsg.userName===msg.userName ? <></> :
                         <p className="text-sm font-semibold">{msg.userName}</p>
@@ -265,6 +283,7 @@ const ChatRoom = (props : ChatRoomProps) => {
                 position={roomConfig.position}
                 onClose={handlecloseSetModal}
                 onRoomUserList={handleRoomUserList}
+                onOpenFileUpload={onOpenFileUpload}
               />
               )}
       

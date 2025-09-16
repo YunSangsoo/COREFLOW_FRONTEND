@@ -2,6 +2,7 @@ import type { ChatMessage, chatProfile, ChatRooms, WindowState } from "../../typ
 import ChatMenu from "./ChatMenu";
 import { ProfileWindow } from "./ChatProfile";
 import ChatRoom from "./ChatRoom";
+import { ChatRoomUploadFile } from "./ChatRoomUploadFile";
 import { ChatRoomUserInfo } from "./ChatRoomUserInfo";
 import NewChat from "./NewChat";
 
@@ -21,6 +22,9 @@ interface WindowContentProps {
     handleNewMessage: (room: ChatRooms, message: ChatMessage) => void;
     handleOpenChatRoomUserList: (roomId:number, users:chatProfile[] ) => void; 
     handleOpenProfile:(user: chatProfile) =>void;
+    handleSetMyProfile:(user: chatProfile) =>void;
+    handleOpenFileUpload: (chatRoom: ChatRooms) => void;
+    handleCloseWindow: (id: string) => void
 
 }
 
@@ -63,6 +67,8 @@ export const WindowContent = (props: WindowContentProps) => {
     myProfile={rest.myProfile} 
     onNewMessage={rest.handleNewMessage}
     onRoomUserList={rest.handleOpenChatRoomUserList}
+    onOpenProfile={rest.handleOpenProfile}
+    onOpenFileUpload={rest.handleOpenFileUpload}
     />;
   }
 
@@ -70,6 +76,15 @@ export const WindowContent = (props: WindowContentProps) => {
     return <ProfileWindow 
       user={window.profileUser}
       onStartChat={rest.handleOpenChatFromUser}
+      onSetMyProfile={rest.handleSetMyProfile}
+    />;
+  }
+
+  if (window.id.startsWith('file-upload-') && window.chatRoomInfo) {
+    return <ChatRoomUploadFile
+      chatRoom={window.chatRoomInfo}
+      myProfile={rest.myProfile}
+      onUploadComplete={() => rest.handleCloseWindow(window.id)}
     />;
   }
 
