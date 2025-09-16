@@ -50,21 +50,31 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         {isApprovalOpen && (
                             <ul className="ml-4 mt-2 space-y-1 text-sm">
                                 <li>
-                                    <Link to="/approval" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    <Link to="/approvals/my-documents" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         문서목록
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/approval/ApprovalForm" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    <Link to="/approvals/new" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         문서 작성
                                     </Link>
                                 </li>
+                                <Link to="approvals/temp" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        임시저장함
+                                    </Link>
                                 <li>
-                                    <Link to="/received-documents" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    <Link to="approvals/received" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         결재 관리
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="approvals/processed" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        결재 완료함
                                     </Link>
                                 </li>
                             </ul>

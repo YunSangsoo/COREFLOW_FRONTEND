@@ -37,7 +37,7 @@ const DocumentTable: React.FC = () => {
                     type: item.approvalType, 
                     title: item.approvalTitle,
                     date: item.startDate ? new Date(item.startDate).toLocaleDateString() : "",
-                    status: item.approvalStatus === 1 ? "진행중" : item.approvalStatus === 2 ? "완료" : "반려" // 임시 상태 매핑
+                    status: item.approvalStatus === 1 ? "진행중" : item.approvalStatus === 2 ? "승인" : "반려" // 임시 상태 매핑
                 }));
                 setDocuments(mappedDocs);
             } catch(err) {
@@ -86,7 +86,7 @@ const DocumentTable: React.FC = () => {
                         <tr key={doc.id}>
                             <td>{doc.type}</td>
                             <td>
-                              <Link to={`/document/${doc.id}`}>{doc.title}</Link>
+                              <Link to={`/approvals/${doc.id}`}>{doc.title}</Link>
                             </td>
                             <td>{doc.date}</td>
                             <td>

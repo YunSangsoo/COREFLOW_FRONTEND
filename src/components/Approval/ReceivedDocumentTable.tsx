@@ -105,7 +105,7 @@ const ReceivedDocumentTable: React.FC = () => {
                             <tr key={doc.id}>
                                 <td>{doc.type}</td>
                                 <td>
-                                    <Link to={`/document/${doc.id}`}>{doc.title}</Link>
+                                    <Link to={`/approvals/${doc.id}`}>{doc.title}</Link>
                                 </td>
                                 <td>{doc.drafter}</td>
                                 <td>{doc.date}</td>

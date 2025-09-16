@@ -21,6 +21,8 @@ import DocumentTable from './components/Approval/DocumentTable';
 import ApprovalForm from './components/Approval/ApprovalForm';
 import DocumentDetailPage from './components/Approval/DocumentDetailPage';
 import ReceivedDocumentTable from './components/Approval/ReceivedDocumentTable';
+import ProcessedDocumentTable from './components/Approval/ProcessedDocumentTable';
+import TempDocumentTable from './components/Approval/TempDocumentTable';
 
 function App() {
     const dispatch = useDispatch();
@@ -69,14 +71,15 @@ function App() {
                 </Route>
                 <Route path='/attendance' element={<Attendance/>}>
                 </Route>
-                <Route path='/approval'>
-                    <Route path='' element={<DocumentTable />} />
-                    <Route path='approval' element={<DocumentTable  />} />
+                <Route path='/approvals'>
+                    <Route path="my-documents" element={<DocumentTable />} />
+                    <Route path="received" element={<ReceivedDocumentTable />} />
+                    <Route path="processed" element={<ProcessedDocumentTable />} />
+                    <Route path="new" element={<ApprovalForm />} />
+                    <Route path="temp" element={<TempDocumentTable />} />
+                    <Route path="edit/:id" element={<ApprovalForm />} />
+                    <Route path=":id" element={<DocumentDetailPage />} />
                 </Route>
-                <Route path="/approval/ApprovalForm" element={<ApprovalForm />} />
-                <Route path='/my-documents' element={<DocumentTable/>}/>
-                <Route path='/document/:id' element={<DocumentDetailPage/>}/>
-                <Route path="/received-documents" element={<ReceivedDocumentTable/>} />
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
