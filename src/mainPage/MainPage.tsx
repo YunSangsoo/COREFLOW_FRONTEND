@@ -4,11 +4,14 @@ import { api } from "../api/coreflowApi";
 import type { RootState } from "../store/store"
 import { logout } from "../features/authSlice";
 import NoticeMain from "../components/notice.tsx/NoticeMain";
+import { useState } from "react";
 
 export default function MainPage() {
     const auth = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
 
     const handleLogout = () => {
         api.post("/auth/logout")
@@ -17,6 +20,14 @@ export default function MainPage() {
                 navigate("/");
             })
     };
+
+    const openNoticeModal = () => {
+        setIsNoticeMainOpen(true);
+    }
+
+    const closeNoticeModal = () => {
+        setIsNoticeMainOpen(false);
+    }
 
     return (
         <>
@@ -60,7 +71,11 @@ export default function MainPage() {
                 )
             }
             </div>
-            {/* <NoticeMain/> */}
+            <div
+                onClick={openNoticeModal} 
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold"> 공지 썸네일이 될 공간
+            </div>
+                {isNoticeMainOpen && <NoticeMain onClose={closeNoticeModal}/>}
         </>
     )
 }

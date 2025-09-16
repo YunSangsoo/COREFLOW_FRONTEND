@@ -2,13 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import type { NoticeResponse } from "../../types/notice";
 import { notiList } from "../../api/noticeApi";
 
-export default function NoticeMain() {
+interface NoticeMainProps{
+    onClose : () => void;
+}
+
+export default function NoticeMain({onClose} : NoticeMainProps) {
 
     const { data: noticeList } = useQuery<NoticeResponse[]>({
         queryKey: ['notices'],
         queryFn: notiList
     })
-
 
 
     return (
@@ -17,8 +20,8 @@ export default function NoticeMain() {
                 <div className="flex justify-between items-center pb-4 border-b border-gray-200 mb-6">
                     <h2 className="text-2xl font-semibold text-gray-800">공지 조회</h2>
                     <button
-                        className="text-gray-500 hover:text-gray-800 text-3xl font-light leading-none"
-                    >
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-800 text-3xl font-light leading-none">
                         &times;
                     </button>
                 </div>
