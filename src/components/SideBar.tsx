@@ -41,6 +41,9 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                 <li>
                                     <Link to="/attendance/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>근태관리</Link>
                                 </li>
+                                <li>
+                                    <Link to="/organization" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>조직도</Link>
+                                </li>
                             </ul>
                         )}
                     </li>
