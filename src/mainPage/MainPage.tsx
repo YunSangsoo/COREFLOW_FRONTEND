@@ -60,8 +60,7 @@ export default function MainPage() {
                 )
             }
             </div>
-            <NoticeMain/>
-            
+            {/* <NoticeMain/> */}
         </>
     )
 }
