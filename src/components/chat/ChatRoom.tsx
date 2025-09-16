@@ -180,7 +180,7 @@ const ChatRoom = (props : ChatRoomProps) => {
   const handleRoomUserList = () =>{
     onRoomUserList(roomId,users);
   }
-
+  console.log(messages);
   return (
     <>
       <button className="absolute bg-indigo-300 hover:bg-indigo-600 text-indigo-700 hover:text-white"
@@ -209,7 +209,7 @@ const ChatRoom = (props : ChatRoomProps) => {
 
                 {/* 메시지 본문 */}
                 <div className={`flex items-end space-x-2 ${msg.userNo === myProfile.userNo ? 'justify-end' : 'justify-start'}`}>
-                  {msg.type !== 'TALK' ? (
+                  {msg.type === 'ENTER' || msg.type==='EXIT' ? (
                     <div className="text-center text-xs text-gray-500 w-full py-1">
                       <p>{msg.messageText}</p>
                     </div>
@@ -218,7 +218,30 @@ const ChatRoom = (props : ChatRoomProps) => {
                       {/* 시간 표시 */}
                       <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
                       <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs">
-                        <p className="break-all">{msg.messageText}</p>
+                        {msg.type==='FILE'&& msg.file?
+                        (msg.file.mimeType.startsWith('image/') ? (
+                            <a href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} target="_blank" rel="noopener noreferrer">
+                              <img 
+                                src={`${import.meta.env.VITE_API_BASE_URL}/images/${msg.file.imageCode}/${msg.file.changeName}`}
+                                alt={msg.file.originName}
+                                className="w-full h-auto max-h-64 rounded-lg object-cover cursor-pointer"/>
+                            </a>
+                          ) : (
+                            <a 
+                              href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} 
+                              download={msg.file.originName || "download"}
+                              className={`flex items-center space-x-2 p-3 rounded-lg max-w-xs cursor-pointer
+                                      ${myProfile.userNo ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                            >
+                              {/* 파일 아이콘 */}
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                              </svg>
+                              <span className="break-all">{msg.file.originName}</span>
+                            </a>
+                          )
+                        )
+                        :(<p className="break-all">{msg.messageText}</p>)}
                       </div>
                     </div>
                   ) : (
@@ -240,7 +263,30 @@ const ChatRoom = (props : ChatRoomProps) => {
                         }
                         <div className="flex items-end space-x-2">
                           <div className="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
-                            <p className="break-all">{msg.messageText}</p>
+                            {msg.type==='FILE' && msg.file?
+                              (msg.file.mimeType.startsWith('image/') ? (
+                                  <a href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} target="_blank" rel="noopener noreferrer">
+                                    <img 
+                                      src={`${import.meta.env.VITE_API_BASE_URL}/images/${msg.file.imageCode}/${msg.file.changeName}`}
+                                      alt={msg.file.originName}
+                                      className="w-full h-auto max-h-64 rounded-lg object-cover cursor-pointer"/>
+                                  </a>
+                                ) : (
+                                  <a 
+                                    href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} 
+                                    download={msg.file.originName || "download"}
+                                    className={`flex items-center space-x-2 p-3 rounded-lg max-w-xs cursor-pointer
+                                            ${myProfile.userNo ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                                  >
+                                    {/* 파일 아이콘 */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                    </svg>
+                                    <span className="break-all">{msg.file.originName}</span>
+                                  </a>
+                                )
+                              )
+                              :(<p className="break-all">{msg.messageText}</p>)}
                           </div>
                           {/* 시간 표시 */}
                           <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>

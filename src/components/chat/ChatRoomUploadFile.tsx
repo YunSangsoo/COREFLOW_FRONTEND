@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { api } from '../../api/coreflowApi';
-import type { chatProfile, ChatRooms } from '../../types/chat';
+import type { ChatMessage, chatProfile, ChatRooms } from '../../types/chat';
 import stompClient from '../../api/webSocketApi';
+import type { customFile } from '../../types/type';
 
 interface ChatRoomUploadFileProps {
   chatRoom: ChatRooms;
@@ -37,18 +38,19 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete }: Cha
       }
     }
   };
-
-  const handleUploadComplete = () => {
+  const handleUploadComplete = (message:ChatMessage) => {
 
     if (stompClient?.connected) {
       stompClient?.publish({
         destination: `/app/chat/file/${chatRoom.roomId}`, // 메시지 전송용 엔드포인트
         body: JSON.stringify({
+          messageId:message.messageId,
           roomId:chatRoom.roomId,
           userName : myProfile.userName,
-          messageText: '',
+          messageText: message.messageText,
           sentAt: new Date(),
           type: 'FILE',
+          isFile: message.file?.changeName,
         }),
       });
       onUploadComplete();
@@ -63,11 +65,11 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete }: Cha
     setIsUploading(true);
 
     try {
-      await api.post(`/chatting/room/${chatRoom.roomId}/file`, formData, {
+      const response = await api.post(`/chatting/room/${chatRoom.roomId}/file`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('파일 전송에 성공했습니다.');
-      handleUploadComplete();
+      handleUploadComplete(response.data);
     } catch (error) {
       alert('파일 전송에 실패했습니다.');
     } finally {

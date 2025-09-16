@@ -28,7 +28,6 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
     position: { top: 0, left: 0 },
   });
 
-
   const handleUserClick = (user: chatProfile, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation(); // 이벤트가 부모로 전파되는 것을 막습니다.

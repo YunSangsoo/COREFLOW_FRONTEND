@@ -69,10 +69,12 @@ export interface ChatRooms {
 
 // 메시지 타입을 정의합니다.
 export interface ChatMessage {
+  messageId:number;
   type: 'ENTER' | 'EXIT' | 'TALK' | 'FILE';
   userNo: number;
   messageText: string;
   userName: string;
   sentAt: Date;
+  file?: customFile;
   // ... 기타 필드
 }
