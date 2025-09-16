@@ -9,6 +9,7 @@ import NewChat from './NewChat';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
+import { WindowContent } from './WindowContentProps';
 
 
 const ChatManager = ({ onClose }: ChatManagerProps) => {
@@ -30,6 +31,10 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
 
+  const [searchKeyword, setSearchKeyword] = useState({
+    keyword:''
+  })
+
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
 
@@ -46,8 +51,9 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       setAllUsers(userRes.data);
       setFavoriteUsers(favRes.data);
       dispatch(setChatRooms(roomRes.data));
+
     }).catch(error => {
-      console.error("초기 데이터를 불러오는 데 실패했습니다:", error);
+      alert("초기 데이터를 불러오는 데 실패했습니다:");
     });
   }, [dispatch]);
 
@@ -60,7 +66,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   };
 
   const handleOpenChatFromUser = async (user: chatProfile) => {
-    const windowId = `chat-${user.userNo}`;
+    const windowId = `room-${user.userNo}`;
     const existingWindow = windows.find(win => win.id === windowId);
     if (existingWindow) {
       handleFocusWindow(windowId);
@@ -87,15 +93,14 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       dispatch(updateChatRoom(chatRoomData));
 
     } catch(err){
-      console.error("채팅방 정보를 가져오는 데 실패했습니다:", err);
-      // 사용자에게 에러 알림을 보여주는 등의 처리
+      alert("채팅방 정보를 가져오는 데 실패했습니다");
     }
   };
 
 
 
   const handleOpenChatFromRoom = async (chatRoom: ChatRooms) => {
-    const windowId = `chat-${chatRoom.roomId}`;
+    const windowId = `room-${chatRoom.roomId}`;
     const existingWindow = windows.find(win => win.id === windowId);
     if (existingWindow) {
       handleFocusWindow(windowId);
@@ -115,6 +120,26 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     setNextZIndex(nextZIndex + 1);
   };
 
+  const handleOpenChatRoomUserList = (roomId:number, users:chatProfile[]) => {
+    const windowId = `chat-userList-${roomId}`
+    const existingWindow = windows.find(win => win.id === windowId);
+    if (existingWindow) {
+      handleFocusWindow(windowId);
+      return;
+    }
+    const newWindow: WindowState = {
+      id: windowId,
+      title: "참여자 목록", // 채팅방 이름을 제목으로 사용
+      zIndex: nextZIndex,
+      partner : users,
+      position: { top: initialTop, left: initialLeft },
+      width : 200,
+      height : 350
+    };
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  }
+
   const handleMakeChatRoom = () => {
     const windowId = "new-chat";
     const existingWindow = windows.find(win => win.id === windowId);
@@ -127,8 +152,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         title: "새 채팅방 생성",
         zIndex: nextZIndex,
         position: { top: initialTop, left: initialLeft },
-        width : 600,
-        height : 400
+        width : 420,
+        height : 450
     };
     setWindows([...windows, newWindow]);
     setNextZIndex(nextZIndex + 1);
@@ -195,15 +220,13 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         await api.post('/chatting/favorites', { favoriteUserNo: user.userNo });
       }
     } catch (error) {
-      console.error("Failed to update favorite:", error);
-      //에러 발생 시, 복사해둔 원래 배열로 state를 되돌리기
       setFavoriteUsers(originalFavorites);
       alert('즐겨찾기 처리에 실패했습니다.');
     }
   }
 
   const handleCreationComplete = (newChatRoom: ChatRooms) => {
-    const windowId = `chat-${newChatRoom.roomId}`;
+    const windowId = `room-${newChatRoom.roomId}`;
     
     // 함수형 업데이트로 창 상태 변경 (닫고 열기)
     setWindows(prevWindows => {
@@ -224,6 +247,68 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     dispatch(updateChatRoom(newChatRoom));
     setNextZIndex(prevZIndex => prevZIndex + 1);
   };
+  
+  const setState = async (state:string) =>{
+    
+    try {
+      const res = await api.post(`/chatting/state`,{state:state});
+      setMyProfile(res.data);
+    } catch (error) {
+      alert('프로필 상태 변경에 실패했습니다.');
+    }
+  }
+
+  const handleSearchUsers = async (query: string): Promise<chatProfile[]> => {
+    if (!query) return []; // 검색어가 없으면 빈 배열 반환
+    const { data } = await api.get<chatProfile[]>('/chatting/searchUser', {
+      params: { query }
+    });
+    return data;
+  };
+
+  const handleOpenProfile = (user: chatProfile) => {
+    const windowId = `profile-${user.userNo}`;
+    const existingWindow = windows.find(win => win.id === windowId);
+
+    if (existingWindow) {
+      handleFocusWindow(windowId);
+      return;
+    }
+
+    const newWindow: WindowState = {
+      id: windowId,
+      title: "프로필",
+      zIndex: nextZIndex,
+      position: { top: initialTop, left: initialLeft },
+      width: 320, // UI에 맞는 적절한 너비
+      height: 480, // UI에 맞는 적절한 높이
+      profileUser: user,
+    };
+
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  };
+
+  const handleOpenFileUpload = (chatRoom: ChatRooms) => {
+    const windowId = `file-upload-${chatRoom.roomId}`;
+    if (windows.some(win => win.id === windowId)) {
+      handleFocusWindow(windowId);
+      return;
+    }
+
+    const newWindow: WindowState = {
+      id: windowId,
+      title: `"${chatRoom.roomName}" 파일 전송`,
+      zIndex: nextZIndex,
+      position: { top: initialTop + 20, left: initialLeft + 20 }, // 기존 창과 약간 겹치지 않게
+      width: 350,
+      height: 400,
+      chatRoomInfo: chatRoom,
+    };
+
+    setWindows([...windows, newWindow]);
+    setNextZIndex(nextZIndex + 1);
+  };
 
   return (
     <div className="fixed inset-0 z-40 pointer-events-none">
@@ -240,35 +325,26 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             w={window.width}
             h={window.height}
           >
-          {window.id === 'chat-menu' ? (
-            <ChatMenu
+            <WindowContent
+              window={window}
+              myProfile={myProfile}
               allUsers={allUsers}
               favoriteUsers={favoriteUsers}
               allChatRooms={allChatRooms}
-              onUserClick={handleOpenChatFromUser}
-              onChatRoomClick={handleOpenChatFromRoom}
-              onMakeChatRoomClick={handleMakeChatRoom}
-              onToggleFavorite={handleAddFavorite} 
+              handleOpenChatFromUser={handleOpenChatFromUser}
+              handleOpenChatFromRoom={handleOpenChatFromRoom}
+              handleMakeChatRoom={handleMakeChatRoom}
+              handleAddFavorite={handleAddFavorite}
+              setState={setState}
+              handleSearchUsers={handleSearchUsers}
+              handleCreationComplete={handleCreationComplete}
+              handleNewMessage={handleNewMessage}
+              handleOpenChatRoomUserList={handleOpenChatRoomUserList}
+              handleOpenProfile={handleOpenProfile}
+              handleSetMyProfile={setMyProfile}
+              handleOpenFileUpload={handleOpenFileUpload}
+              handleCloseWindow={handleCloseWindow}
             />
-            ) : (
-              window.id==='new-chat'? (
-              <>
-                <NewChat
-                  myProfile={myProfile}
-                  onCreationComplete={handleCreationComplete}
-                />
-              </>
-              ) : (
-                window.chatRoomInfo ? (
-                  <ChatRoom
-                    {...window.chatRoomInfo}
-                    myProfile={myProfile}
-                    onNewMessage={handleNewMessage}
-                  />
-                ) : (<p>채팅 정보를 불러오는 중입니다...</p>)
-                )
-            )
-          }
           </FloatingWindow>
         ))}
       </DndContext>

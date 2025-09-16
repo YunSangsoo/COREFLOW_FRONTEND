@@ -34,3 +34,13 @@ export const initialState:AuthState = {
     user: null,
     isAuthenticated: false
 }
+
+export interface customFile {
+    imgId:number;
+    imageCode:string;
+    originName:string;
+    changeName:string;
+    imgOrder?:number;
+    refId:number;
+    mimeType: string;
+}

@@ -48,7 +48,7 @@ export default function ChatPeoplePickerDialog({
   useEffect(() => {
     if (!open) return;
     // 채팅 가능한 전체 유저를 불러오는 API (백엔드에 /chatting/user가 이미 존재)
-    api.get<chatProfile[]>('/chatting/user', { params: { query: debouncedQuery } })
+    api.get<chatProfile[]>('/chatting/searchUser', { params: { query: debouncedQuery } })
       .then(res => {
         // 제외할 유저(excludeNos)와 이미 선택된 유저를 제외하고 목록 필터링
         const availableUsers = res.data.filter(

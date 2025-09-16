@@ -51,8 +51,9 @@ export default function AiMain() {
         if (sessionId == 0) {
             await createTitle(prompt)
                 .then(res => {
-                    title = res.message.content;
-                    tokensUsed += res.eval_count + res.prompt_eval_count;
+                    title = res;
+                    // title = res.message.content;
+                    // tokensUsed += res.eval_count + res.prompt_eval_count;
                 })
                 .catch(err => console.log(err));
 
@@ -71,10 +72,11 @@ export default function AiMain() {
         // 채팅하기
         await sendPrompt(messages)
             .then(res => {
-                modelResponse = res.message.content;
+                modelResponse = res;
+                // modelResponse = res.message.content;
                 messages.push({ "role": "assistant", "content": modelResponse });
                 setMessages([...messages]);
-                tokensUsed += res.eval_count + res.prompt_eval_count;
+                // tokensUsed += res.eval_count + res.prompt_eval_count;
             })
             .catch(err => console.log(err))
             .finally(() => {
