@@ -48,12 +48,10 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
   };
   
   const handleStartChat = (user: chatProfile) => {
-    console.log(`${user.userName}와(과) 1:1 채팅 시작`);
     onUserClick(user);
   };
 
   const handleViewProfile = (user: chatProfile) => {
-    console.log(`${user.userName}의 프로필 조회`);
     onOpenProfile(user);
   };
 
@@ -73,7 +71,6 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
   const handlecloseSetModal = () => {
     setMyState({ isOpen: false, user: null, position: { top: 0, left: 0 } });
   };
-  console.log(myProfile);
   
   const favoriteNoSet = new Set(favoriteUsers.map(fav => fav.userNo));
   return (

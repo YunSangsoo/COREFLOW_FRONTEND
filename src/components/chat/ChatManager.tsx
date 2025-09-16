@@ -53,7 +53,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       dispatch(setChatRooms(roomRes.data));
 
     }).catch(error => {
-      console.error("초기 데이터를 불러오는 데 실패했습니다:", error);
+      alert("초기 데이터를 불러오는 데 실패했습니다:");
     });
   }, [dispatch]);
 
@@ -93,8 +93,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       dispatch(updateChatRoom(chatRoomData));
 
     } catch(err){
-      console.error("채팅방 정보를 가져오는 데 실패했습니다:", err);
-      // 사용자에게 에러 알림을 보여주는 등의 처리
+      alert("채팅방 정보를 가져오는 데 실패했습니다");
     }
   };
 
@@ -221,8 +220,6 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         await api.post('/chatting/favorites', { favoriteUserNo: user.userNo });
       }
     } catch (error) {
-      console.error("Failed to update favorite:", error);
-      //에러 발생 시, 복사해둔 원래 배열로 state를 되돌리기
       setFavoriteUsers(originalFavorites);
       alert('즐겨찾기 처리에 실패했습니다.');
     }
@@ -255,10 +252,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     
     try {
       const res = await api.post(`/chatting/state`,{state:state});
-      console.log(res);
       setMyProfile(res.data);
     } catch (error) {
-      console.error("Failed to update state:", error);
       alert('프로필 상태 변경에 실패했습니다.');
     }
   }

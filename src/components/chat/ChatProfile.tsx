@@ -69,7 +69,6 @@ export const ProfileWindow = ({ user, onStartChat, onSetMyProfile }: ProfileWind
     setIsUploading(true);
     try {
       const response = await api.post('/chatting/profile/image', formData);
-      console.log('업로드 성공:', response.data);
       alert('프로필 이미지가 변경되었습니다.');
       // TODO: 업로드 성공 후 updatedUser 또는 user 상태를 업데이트하여 화면에 즉시 반영
       const newProfileDetail = response.data;
@@ -82,7 +81,6 @@ export const ProfileWindow = ({ user, onStartChat, onSetMyProfile }: ProfileWind
       
 
     } catch (error) {
-      console.error('업로드 실패:', error);
       alert('업로드 중 오류가 발생했습니다.');
     } finally {
       setIsUploading(false);

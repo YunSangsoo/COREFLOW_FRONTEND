@@ -69,7 +69,6 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete }: Cha
       alert('파일 전송에 성공했습니다.');
       handleUploadComplete();
     } catch (error) {
-      console.error('파일 전송 실패:', error);
       alert('파일 전송에 실패했습니다.');
     } finally {
       setIsUploading(false);

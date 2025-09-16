@@ -82,7 +82,6 @@ const ChatRoom = (props : ChatRoomProps) => {
 
     api.get(`/chatting/room/${roomId}/user`).then(res=>{
       setUsers(res.data);
-      console.log(res.data);
     });
 
     const fetchPreviousMessages = async () => {
@@ -92,7 +91,7 @@ const ChatRoom = (props : ChatRoomProps) => {
           setMessages(res.data);// 받아온 데이터로 메시지 목록 초기화
         })
       } catch (error) {
-        console.error("이전 대화 내역을 불러오는 데 실패했습니다:", error);
+        alert("이전 대화 내역을 불러오는 데 실패했습니다");
       }
     };
     // 함수 실행

@@ -207,7 +207,6 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
       }
     } catch (error) {
       // 4. 요청 실패 시 에러 처리
-      console.error('채팅방 초대 실패:', error);
       alert('참여자 초대에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
 
