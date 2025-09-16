@@ -58,7 +58,12 @@ function App() {
     //어떤 페이지에서든 채팅을 구현하기 위해 App페이지에서 변수를 관리함
     const [isChatOpen, setIsChatOpen] = useState(false);
     const handleToggleChat = () => {
-        setIsChatOpen(!isChatOpen);
+        if (auth.accessToken) {
+            setIsChatOpen(!isChatOpen);
+        } else {
+            console.error("채팅 기능은 로그인이 필요합니다.");
+            alert("채팅을 이용하려면 먼저 로그인해주세요.");
+        }
     };
 
     return (

@@ -13,7 +13,6 @@ const stompClient = new Client({
   heartbeatOutgoing: 4000,
   // 디버깅 메시지
   debug: (str) => {
-    console.log(new Date(), str);
   },
 });
 
@@ -24,13 +23,11 @@ let isConnected = false;
 export const connectWebSocket = () => {
   // 이미 연결되어 있다면 아무것도 하지 않음
   if (stompClient.connected || isConnected) {
-    console.log('WebSocket is already connected.');
     return;
   }
 
   const accessToken = store.getState().auth.accessToken;
   if (!accessToken) {
-    console.error('No access token found, WebSocket connection aborted.');
     return;
   }
 
@@ -41,7 +38,6 @@ export const connectWebSocket = () => {
     },
     onConnect: () => {
       isConnected = true;
-      console.log('WebSocket connection successful!');
       stompClient.subscribe('/user/queue/updates', (message) => {
         const updatedRoom = JSON.parse(message.body);
         store.dispatch(updateChatRoom(updatedRoom));
@@ -49,11 +45,8 @@ export const connectWebSocket = () => {
     },
     onDisconnect: () => {
       isConnected = false;
-      console.log('WebSocket disconnected.');
     },
     onStompError: (frame) => {
-      console.error('Broker reported error: ' + frame.headers['message']);
-      console.error('Additional details: ' + frame.body);
     },
   });
 
