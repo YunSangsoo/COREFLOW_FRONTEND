@@ -2,7 +2,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import Login from './pages/login/Login';
 import MainPage from './mainPage/MainPage'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { loginSuccess, logout } from './features/authSlice';
 import { api } from './api/coreflowApi';
@@ -20,14 +20,19 @@ import MemberMain from './pages/member_main/MemberMain';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
-import Attendance from './pages/member_attendance/Attendance';
 import RoomsPage from './pages/rooms/RoomsPage';
+import AttendanceMember from './pages/member_attendance/AttendanceMember';
+import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
+import type { RootState } from './store/store';
+import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
+import Organization from './pages/member_organization/Organization';
 
 
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
+
 
     useEffect(() => {
         api.post("/auth/refresh")
@@ -37,12 +42,33 @@ function App() {
             .catch(err => {
                 dispatch(logout(err.data));
             })
-    }, [])
+    }, [dispatch])
+
+    
+    const auth = useSelector((state: RootState) => state.auth);
+    useEffect(() => {
+      if (auth.accessToken) {
+        console.log("Attempting to connect WebSocket...");
+        connectWebSocket();
+      } else {
+        console.log("Disconnecting WebSocket...");
+        disconnectWebSocket();
+      }
+
+      return () => {
+        disconnectWebSocket();
+      }
+    }, [auth.accessToken]);
 
     //어떤 페이지에서든 채팅을 구현하기 위해 App페이지에서 변수를 관리함
     const [isChatOpen, setIsChatOpen] = useState(false);
     const handleToggleChat = () => {
-        setIsChatOpen(!isChatOpen);
+        if (auth.accessToken) {
+            setIsChatOpen(!isChatOpen);
+        } else {
+            console.error("채팅 기능은 로그인이 필요합니다.");
+            alert("채팅을 이용하려면 먼저 로그인해주세요.");
+        }
     };
 
 
@@ -69,13 +95,17 @@ function App() {
                     <Route path='/rooms' element={<RoomsPage/>}/>
                 </Route>
                 <Route path='/members' element={<MemberMain/>}></Route>
+                <Route path='/members' element={<MemberMain/>}/>
                 <Route path='/vacation'>
-                    <Route path='info' element={<VacationInfo/>}></Route>
-                    <Route path='member' element={<VacationMember/>}></Route>
-                    <Route path='member:userNo' element={<VacationPersonal/>}></Route>
+                    <Route path='info' element={<VacationInfo/>}/>
+                    <Route path='member' element={<VacationMember/>}/>
+                    <Route path='personal' element={<VacationPersonal/>}/>
                 </Route>
-                <Route path='/attendance' element={<Attendance/>}>
+                <Route path='/attendance'>
+                    <Route path="member" element={<AttendanceMember/>}/>
+                    <Route path="personal" element={<AttendancePersonal/>}/>
                 </Route>
+                <Route path="/organization" element={<Organization/>}/>
             </Routes>
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}

@@ -16,7 +16,7 @@ export default function VacationInfo() {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
-            <h1 className="text-2xl font-bold mb-6">연차관리</h1>
+            <h1 className="text-2xl font-bold mb-6">휴가관리</h1>
             
             <div className="flex gap-6">
                 <VacSideBar/>

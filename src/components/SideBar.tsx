@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { selectTotalUnreadCount } from '../features/chatSlice';
 
 
 // onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
@@ -9,6 +11,7 @@ interface SidebarProps {
 
 const Sidebar = ({ onChatClick }: SidebarProps) => {
     const [isApprovalOpen, setIsApprovalOpen] = useState(false);
+    const totalUnreadCount = useSelector(selectTotalUnreadCount);
     return (
         <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
@@ -33,10 +36,13 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>사원관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/vacation/info" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>연차관리</Link>
+                                    <Link to="/vacation/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>휴가관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/attendance" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>출결관리</Link>
+                                    <Link to="/attendance/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>근태관리</Link>
+                                </li>
+                                <li>
+                                    <Link to="/organization" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>조직도</Link>
                                 </li>
                             </ul>
                         )}
@@ -59,6 +65,9 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                     <li className="px-4">
                         <div onClick={onChatClick} className="block py-2 px-3 rounded hover:bg-gray-700 cursor-pointer" style={{ color: "white" }}>
                             채팅
+                            {totalUnreadCount > 0 && (
+                                <span className="w-2 h-2 float-right bg-red-500 rounded-full"></span>
+                            )}
                         </div>
                     </li>
                 </ul>

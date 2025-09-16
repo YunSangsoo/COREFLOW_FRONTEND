@@ -12,11 +12,13 @@ interface FloatingWindowProps {
     zIndex: number;
     position: { top: number, left: number };
     children: React.ReactNode;
+    w : number;
+    h : number;
 }
 
-const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, children }: FloatingWindowProps) => {
+const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, children,w,h }: FloatingWindowProps) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
-    const [size, setSize] = useState({ width: 320, height: 400 });
+    const [size, setSize] = useState({ width: w, height: h });
 
     const style = {
         zIndex: zIndex,
@@ -55,7 +57,7 @@ const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, childre
                 // ResizableBox는 크기만 조절하고 내부는 100% 채우도록 함
                 style={{width: '100%', height: '100%'}} 
             >
-                <div className="flex justify-between items-center p-3 bg-gray-100 border-b">
+                <div className="flex justify-between items-center px-3 py-1 bg-gray-500 border-b text-white">
                     <div 
                         className="handle flex-grow cursor-grab"
                         {...attributes}
@@ -65,7 +67,7 @@ const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, childre
                     </div>
                     <button 
                         onClick={() => onClose(id)}
-                        className="p-1 ml-2"
+                        className="p-1 ml-2 bg-gray-600 text-white"
                     >
                         &times;
                     </button>

@@ -16,7 +16,7 @@ const authSlice = createSlice({
             state.refreshToken = null;
             state.user = null;
             state.isAuthenticated = false;
-        }
+        },
     }
 });
 

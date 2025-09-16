@@ -314,7 +314,7 @@ export default function MemberMain() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={9} className="px-6 py-4 whitespace-nowrap text-center text-gray-600">-</td>
+                                <td colSpan={9} className="px-6 py-4 whitespace-nowrap text-center text-gray-600">조회하려는 사원이 없습니다.</td>
                             </tr>
                         )}
                     </tbody>

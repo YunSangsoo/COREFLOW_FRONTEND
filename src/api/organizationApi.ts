@@ -1,7 +1,8 @@
 import axios from "axios";
-import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
+import type { MemberResponse } from "../types/member";
+import type { Department, DepartmentDetail } from "../types/organization";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -48,43 +49,20 @@ api.interceptors.response.use(
     }
 )
 
-// 부모 부서 조회
-export const depList = async () => {
-    const response = await api.get<Department[]>("/departments");
+// 1. 부서 조회
+export const parentDeptList = async () => {
+    const response = await api.get<Department[]>('/organization/departments');
     return response.data;
 }
 
-// 자식 부서 조회
-export const depDetailList = async (parentId:number) => {
-    const response = await api.get<DepartmentDetail[]>(`/departments/${parentId}`);
+// 2. 부서별 팀 조회
+export const childDeptList = async (parentId:number) => {
+    const response = await api.get<DepartmentDetail[]>(`/organization/departments/${parentId}`);
     return response.data;
 }
 
-// 직위 목록 조회
-export const posList = async () => {
-    const response = await api.get<Position[]>("/positions");
+// 3. 팀별 사원 조회
+export const memberList = async (depId:number) => {
+    const response = await api.get<MemberResponse[]>(`/organization/members/${depId}`);
     return response.data;
-}
-
-// 사원 목록 조회
-export const memberList = async function(searchParams:{userName:string,depName:string,posName:string,status:string}) {
-    const response = await api.get<MemberResponse[]>("/members",{params : searchParams});
-    return response.data;
-}
-
-// 사원 상세 조회
-export const memberDetail = async (userNo:number) => {
-    const response = await api.get<MemberDetail>(`/members/${userNo}`)
-    return response.data;
-}
-
-// 사원 정보 수정
-export const memberUpdate = async (userNo:number, updatedMember:MemberPatch) => {
-    const response = await api.patch<void>(`/members/${userNo}`,updatedMember)
-    return response.status;
-}
-
-export const memberDelete = async (userNo:number) => {
-    const response = await api.delete<void>(`/members/${userNo}`)
-    return response.status;
 }
