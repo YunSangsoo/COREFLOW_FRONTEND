@@ -9,6 +9,10 @@ import { api } from './api/coreflowApi';
 import FindPwd from './pages/login/Find-pwd'
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
+import { getPolicies } from './api/companyPolicyApi';
+
+
+import CalendarPage from './pages/calendar/CalendarPage';
 import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
@@ -16,6 +20,7 @@ import MemberMain from './pages/member_main/MemberMain';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
+import RoomsPage from './pages/rooms/RoomsPage';
 import AttendanceMember from './pages/member_attendance/AttendanceMember';
 import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 import type { RootState } from './store/store';
@@ -66,6 +71,7 @@ function App() {
         }
     };
 
+
     return (
         <div className="container">
             {!isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
@@ -84,6 +90,11 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
+                <Route>
+                    <Route path='/calendar' element={<CalendarPage/>}/>
+                    <Route path='/rooms' element={<RoomsPage/>}/>
+                </Route>
+                <Route path='/members' element={<MemberMain/>}></Route>
                 <Route path='/members' element={<MemberMain/>}/>
                 <Route path='/vacation'>
                     <Route path='info' element={<VacationInfo/>}/>
