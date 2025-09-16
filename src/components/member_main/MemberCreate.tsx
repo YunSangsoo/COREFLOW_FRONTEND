@@ -5,12 +5,15 @@ import type { Position } from '../../types/member';
 import DepartmentMap from './DepartmentMap';
 import styles from './MemberDetail.module.css';
 
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
 export type CreateUser = {
     email: string;
     userName: string;
     depName?: string;
     posName?: string;
     hireDate: string;
+    extension: string;
     phone?: string;
     address?: string;
     addressDetail?: string;
@@ -31,6 +34,7 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
         depName: '',
         posName: '',
         hireDate: new Date().toISOString().split('T')[0],
+        extension: '',
         phone: '',
         address: '',
         addressDetail: '',
@@ -117,6 +121,12 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
             <div className={styles.modalContent}>
                 <h2 className="text-xl font-semibold mb-4">사원 등록</h2>
 
+                    <div className={styles.profileSection}>
+                        <div className={styles.profileImage}>
+                            <img src="/path/to/profile/image.jpg" alt="Profile" />
+                            <button className={styles.plusIcon}>+</button>
+                        </div>
+                    </div>
                 <div className={styles.infoGrid}>
                     <div className={styles.infoRow}>
                         <span>이메일</span>
@@ -156,6 +166,10 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
                     <div className={styles.infoRow}>
                         <span>전화번호</span>
                         <input type="text" name="phone" value={createUser.phone || ''} onChange={handleChange} />
+                    </div>
+                    <div className={styles.infoRow}>
+                        <span>내선번호</span>
+                        <input type="text" name='extension' value={createUser.extension || ''} onChange={handleChange} />
                     </div>
                     <div className={styles.infoRow}>
                         <span>입사일</span>
