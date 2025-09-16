@@ -1,10 +1,10 @@
 // src/api/calendarApi.ts
 import { api } from "./coreflowApi";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 // 서버 표준 형식: YYYY-MM-DDTHH:mm:ss (로컬 KST)
 export const fmt = (d: Date | string) =>
-  dayjs(d).format("YYYY-MM-DDTHH:mm:ss");
+  dayjs(d).format("YYYY-MM-DD HH:mm:ss");
 
 export type CalendarSummary = {
   calId: number;
@@ -61,6 +61,34 @@ export type EventTypeOption = {
   typeId: number;
   typeCode: string;
   typeName: string;
+};
+
+// 상세 타입
+export type EventDetail = {
+  eventId: number;
+  calId: number;
+  title: string;
+  startAt: string;
+  endAt: string;
+  allDayYn: "Y" | "N";
+  locationText?: string;
+  note?: string;
+  roomId?: number;
+  status?: string;
+  labelId?: number;
+  typeId?: string;
+  createByUserNo?: number;
+  room?: {
+    roomId: number;
+    roomName: string;
+    buildingName?: string;
+    floor?: string;
+    roomNo?: string;
+    capacity?: number;
+    detailLocation?: string; // SVG URL
+  };
+  canEdit: boolean;
+  canDelete: boolean;
 };
 
 function unwrap<T = any>(res: any): T {
@@ -183,6 +211,46 @@ export async function createEvent(req: {
   return { eventId: num(data.eventId ?? data.EVENT_ID) };
 }
 
+export type RoomReservationCreateReq = {
+  eventId?: number | null;
+  roomId: number;
+  startAt: string | Dayjs | Date; // ← 문자열/Dayjs/Date 모두 허용
+  endAt: string | Dayjs | Date;
+  title?: string;
+};
+
+function toIsoSecs(v: string | Dayjs | Date): string {
+  if (dayjs.isDayjs(v)) return (v as Dayjs).format("YYYY-MM-DD[T]HH:mm:ss");
+  if (v instanceof Date) return dayjs(v).format("YYYY-MM-DD[T]HH:mm:ss");
+  let s = String(v).trim();
+  // "YYYY-MM-DD HH:mm:ss" → "YYYY-MM-DDTHH:mm:ss"
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(" ", "T");
+  // 이미 ISO면 그대로 반환
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(s)) return s;
+  // 그 외도 마지막으로 dayjs 파싱 시도
+  return dayjs(s).format("YYYY-MM-DD[T]HH:mm:ss");
+}
+
+export async function createRoomReservation(
+  input: RoomReservationCreateReq
+): Promise<{ reservationId: number }> {
+  const body = {
+    roomId: input.roomId,
+    startAt: toIsoSecs(input.startAt),
+    endAt: toIsoSecs(input.endAt),
+    title: input.title,
+    eventId: input.eventId ?? null,
+  };
+
+  const r = await api.post("/rooms/reservations", body);
+  const data = (r?.data ?? r) as any;
+  const id =
+    typeof data === "number"
+      ? data
+      : Number(data.id ?? data.reservationId ?? data.RESV_ID ?? 0);
+  return { reservationId: id };
+}
+
 // ── 일정 수정
 export async function updateEvent(
   eventId: string | number,
@@ -202,6 +270,11 @@ export async function fetchDepartments(): Promise<Department[]> {
     depName: String(d.depName ?? d.DEP_NAME ?? ""),
     parentId: d.parentId ?? d.PARENT_ID ?? null,
   }));
+}
+
+export async function getEventDetail(eventId: number): Promise<EventDetail> {
+  const res = await api.get(`/events/${eventId}/detail`);
+  return res.data as EventDetail;
 }
 
 // ── 일정 삭제

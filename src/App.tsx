@@ -21,6 +21,7 @@ import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
 import Attendance from './pages/member_attendance/Attendance';
+import RoomsPage from './pages/rooms/RoomsPage';
 
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
                 </Route>
                 <Route>
                     <Route path='/calendar' element={<CalendarPage/>}/>
+                    <Route path='/rooms' element={<RoomsPage/>}/>
                 </Route>
                 <Route path='/members' element={<MemberMain/>}></Route>
                 <Route path='/vacation'>

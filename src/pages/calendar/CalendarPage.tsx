@@ -1,4 +1,4 @@
-// src/pages/calendar/calendarpage.tsx
+// src/pages/calendar/CalendarPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -29,6 +29,8 @@ import {
   searchMembers,
   type Department,
   fetchDepartments,
+  // ✅ 회의실 예약 API 추가
+  createRoomReservation,
 } from "../../api/calendarApi";
 import { fetchLabels } from "../../api/labelApi";
 
@@ -46,6 +48,7 @@ import type {
 } from "../../types/calendar/calendar";
 import { generateOccurrences } from "../../utils/calendar/recurrence";
 import { useSelector } from "react-redux";
+import EventDetailDialog from "../../components/dialogs/calendar/EventDetailDialog";
 
 // 큰 카테고리(유형) 기본값
 const DEFAULT_EVENT_TYPE = "MEETING";
@@ -73,6 +76,14 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+
+  // ✅ onBeforeSave → onSave 사이 값 보존용
+  const pendingRoomRef = useRef<{
+    needsRoom: boolean;
+    selectedRoom: { roomId: number; roomName: string } | null;
+  } | null>(null);
 
   // 라벨 색상 캐시
   const [labelColorMap, setLabelColorMap] = useState<Map<number, string>>(new Map());
@@ -146,7 +157,7 @@ export default function CalendarPage() {
 
   // 최초: 캘린더 목록 로딩
   useEffect(() => {
-    if (!userNo)  return;
+    if (!userNo) return;
     (async () => {
       try {
         setLoading(true); setError(null);
@@ -164,8 +175,8 @@ export default function CalendarPage() {
   // 현재 뷰 범위의 이벤트 로딩
   const handleViewDidMount = async () => {
     const fcApi = calendarRef.current?.getApi(); if (!fcApi) return;
-    const start = dayjs(fcApi.view.activeStart).format("YYYY-MM-DDTHH:mm:ss");
-    const end = dayjs(fcApi.view.activeEnd).format("YYYY-MM-DDTHH:mm:ss");
+    const start = dayjs(fcApi.view.activeStart).format("YYYY-MM-DD HH:mm:ss");
+    const end = dayjs(fcApi.view.activeEnd).format("YYYY-MM-DD HH:mm:ss");
     const selectedCalIds = visibleCals.filter((c) => c.checked).map((c) => c.calId);
     if (selectedCalIds.length === 0) { setEvents([]); return; }
 
@@ -249,13 +260,18 @@ export default function CalendarPage() {
     const base = miniDate || dayjs();
     openEventModal({ start: base.hour(9).minute(0).second(0), end: base.hour(10).minute(0).second(0), allDay: false });
   };
-  const handleSelect = (arg: DateSelectArg) =>
-    openEventModal({ start: dayjs(arg.start), end: dayjs(arg.end), allDay: !!arg.allDay });
-  const handleDateClick = (arg: DateClickArg) => {
-    const s = dayjs(arg.date).startOf("day");
-    openEventModal({ start: s, end: s.add(1, "day"), allDay: true });
+  const handleSelect = (arg: DateSelectArg) => {
+    // month 뷰에서도 시간형으로 만들기: 시작 09:00, 드래그 길이 유지
+    const start = dayjs(arg.start).hour(9).minute(0).second(0);
+    const rawMs = dayjs(arg.end).diff(dayjs(arg.start), "millisecond");
+    const durMs = Math.max(rawMs, 60 * 60 * 1000); // 최소 1시간
+    const end = start.add(durMs, "millisecond");
+    openEventModal({ start, end, allDay: false });
   };
-
+  const handleDateClick = (arg: DateClickArg) => {
+    const s = dayjs(arg.date).hour(9).minute(0).second(0);
+    openEventModal({ start: s, end: s.add(1, "hour"), allDay: false });
+  };
   // 사람 선택 모달 (생략: 기존과 동일)
   const openPeoplePicker = (mode: "ATTENDEE" | "SHARER", _query = "") => {
     setPickMode(mode);
@@ -284,7 +300,7 @@ export default function CalendarPage() {
   }, [pickOpen, pickDeptId, pickQuery]);
   const togglePick = (m: Member) =>
     setPickSelectedMembers(prev => (prev.some(x => x.userNo === m.userNo) ? prev.filter(x => x.userNo !== m.userNo) : [...prev, m]));
-  
+
   const confirmPick = () => {
     // 반대 목록에 이미 있는 멤버는 선택 불가(추가 방어)
     const dedup = (arr: Member[]) => {
@@ -321,7 +337,7 @@ export default function CalendarPage() {
       const m = found[0];
       // 교차 중복 방지
       if (
-        (mode === "ATTENDEE" && !selectedAttendees.some(a => a.userNo === m.userNo) && !selectedSharers.some(s => s.userNo === m.userNo)) ||
+        (mode === "ATTENDEE" && !selectedAttendees.some(a => a.userNo === m.userNo) && !selectedSharers.some(m2 => m2.userNo === m.userNo)) ||
         (mode === "SHARER" && !selectedSharers.some(s => s.userNo === m.userNo) && !selectedAttendees.some(a => a.userNo === m.userNo))
       ) {
         if (mode === "ATTENDEE") setSelectedAttendees(prev => [...prev, m]);
@@ -364,8 +380,8 @@ export default function CalendarPage() {
       if (!recurrence.enabled) {
         const res = await createEvent({
           calId: baseCalId, title: title.trim(),
-          startAt: start.format("YYYY-MM-DDTHH:mm:ss"),
-          endAt: end.format("YYYY-MM-DDTHH:mm:ss"),
+          startAt: start.format("YYYY-MM-DD HH:mm:ss"),
+          endAt: end.format("YYYY-MM-DD HH:mm:ss"),
           allDayYn: allDay ? "Y" : "N",
           labelId: labelToUse,
           typeId: typeToUse,              // ✅ 전송
@@ -374,13 +390,28 @@ export default function CalendarPage() {
           shareUserNos: selectedSharers.map(m => m.userNo),
         });
 
+        // ✅ 일정 생성 직후 회의실 예약(선택 시)
+        try {
+          const pr = pendingRoomRef.current;
+          if (pr?.needsRoom && pr.selectedRoom) {
+            await createRoomReservation({
+              eventId: res.eventId,
+              roomId: pr.selectedRoom.roomId,
+              startAt: start.format("YYYY-MM-DD HH:mm:ss"),
+              endAt: end.format("YYYY-MM-DD HH:mm:ss"),
+            });
+          }
+        } finally {
+          pendingRoomRef.current = null; // 사용 후 초기화
+        }
+
         const base = getEventBaseColor(baseCalId, labelToUse, labelColorMap);
         const text = pickTextColor(base);
         setEvents(prev => [...prev, {
           id: String(res.eventId), eventId: res.eventId, calId: baseCalId,
           labelId: labelToUse ?? null, title: title.trim(),
-          start: start.format("YYYY-MM-DDTHH:mm:ss"),
-          end: end.format("YYYY-MM-DDTHH:mm:ss"),
+          start: start.format("YYYY-MM-DD HH:mm:ss"),
+          end: end.format("YYYY-MM-DD HH:mm:ss"),
           allDay, backgroundColor: base, borderColor: base, textColor: text,
         } as CalendarEvent]);
         setEventOpen(false);
@@ -404,18 +435,37 @@ export default function CalendarPage() {
           endAt: o.end,
           allDayYn: allDay ? "Y" : "N",
           labelId: labelToUse,
-          typeId: typeToUse,             
+          typeId: typeToUse,
           locationText, note,
           attendeeUserNos: selectedAttendees.map(m => m.userNo),
           shareUserNos: selectedSharers.map(m => m.userNo),
         })));
+
+        // ✅ 생성된 각 인스턴스에 대해 예약 확정도 병렬로 실행
+        const pr = pendingRoomRef.current;
+        const reservationPromises: Promise<any>[] = [];
+
         results.forEach((r, idx) => {
           if (r.status === "fulfilled") {
             const ok = r.value;
             createdEvents.push({ eventId: ok.eventId, start: chunk[idx].start, end: chunk[idx].end });
+
+            if (pr?.needsRoom && pr.selectedRoom) {
+              reservationPromises.push(
+                createRoomReservation({
+                  eventId: ok.eventId,
+                  roomId: pr.selectedRoom.roomId,
+                  startAt: chunk[idx].start,
+                  endAt: chunk[idx].end,
+                })
+              );
+            }
           }
         });
+
+        await Promise.allSettled(reservationPromises);
       }
+      pendingRoomRef.current = null; // 반복 생성 끝나면 초기화
 
       const baseColor = getEventBaseColor(baseCalId, labelToUse, labelColorMap);
       const textColor = pickTextColor(baseColor);
@@ -449,8 +499,8 @@ export default function CalendarPage() {
       const ev = info.event;
       await updateEvent(ev.id!, {
         title: ev.title,
-        startAt: dayjs(ev.start!).format("YYYY-MM-DDTHH:mm:ss"),
-        endAt: ev.end ? dayjs(ev.end).format("YYYY-MM-DDTHH:mm:ss") : dayjs(ev.start!).format("YYYY-MM-DDTHH:mm:ss"),
+        startAt: dayjs(ev.start!).format("YYYY-MM-DD HH:mm:ss"),
+        endAt: ev.end ? dayjs(ev.end).format("YYYY-MM-DD HH:mm:ss") : dayjs(ev.start!).format("YYYY-MM-DD HH:mm:ss"),
         allDayYn: ev.allDay ? "Y" : "N",
       });
     } catch (e: any) { setError(e?.message ?? "일정 이동 실패"); info.revert(); }
@@ -462,18 +512,18 @@ export default function CalendarPage() {
       const ev = info.event;
       await updateEvent(ev.id!, {
         title: ev.title,
-        startAt: dayjs(ev.start!).format("YYYY-MM-DDTHH:mm:ss"),
-        endAt: ev.end ? dayjs(ev.end).format("YYYY-MM-DDTHH:mm:ss") : dayjs(ev.start!).format("YYYY-MM-DDTHH:mm:ss"),
+        startAt: dayjs(ev.start!).format("YYYY-MM-DD HH:mm:ss"),
+        endAt: ev.end ? dayjs(ev.end).format("YYYY-MM-DD HH:mm:ss") : dayjs(ev.start!).format("YYYY-MM-DD HH:mm:ss"),
         allDayYn: ev.allDay ? "Y" : "N",
       });
     } catch (e: any) { setError(e?.message ?? "일정 기간 변경 실패"); info.revert(); }
     finally { setLoading(false); }
   };
-  const handleEventClick = async (arg: EventClickArg) => {
-    if (!window.confirm("이 일정을 삭제할까요?")) return;
-    try { setLoading(true); setError(null); await deleteEvent(arg.event.id!); setEvents((prev) => prev.filter((e) => String(e.eventId) !== String(arg.event.id))); }
-    catch (e: any) { setError(e?.message ?? "일정 삭제 실패"); }
-    finally { setLoading(false); }
+  const handleEventClick = (arg: EventClickArg) => {
+    const id = Number(arg.event.id);
+    if (!id) return;
+    setSelectedEventId(id);
+    setDetailOpen(true);
   };
 
   // 캘린더 체크 변경/기간 변경 시 재조회
@@ -496,15 +546,14 @@ export default function CalendarPage() {
         ".fc .fc-timegrid-axis-cushion": { fontSize: 12, color: "#6b7280" },
         ".fc .fc-timegrid-slot": { height: "38px" },
         ".calendar-right, .calendar-right .fc, .calendar-right .fc-view-harness, .calendar-right .fc-scrollgrid": { width: "100%" },
-          ".cf-calstripe": { position: "relative" },
-  ".cf-calstripe::before": {
-    content: '""',
-    position: "absolute",
-    left: 0, top: 0, bottom: 0,
-    width: "7px",                    // 필요하면 2px로 더 얇게
-    background: "var(--cf-cal)",     // 캘린더색
-    // borderRadius: "8px 0 0 8px"      // 둥글게
-  }
+        ".cf-calstripe": { position: "relative" },
+        ".cf-calstripe::before": {
+          content: '""',
+          position: "absolute",
+          left: 0, top: 0, bottom: 0,
+          width: "7px",
+          background: "var(--cf-cal)",
+        }
       }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "280px minmax(900px, 1fr)", gap: 24, alignItems: "start", width: "100%" }}>
@@ -553,7 +602,7 @@ export default function CalendarPage() {
             views={{
               dayGridMonth: { dayMaxEventRows: 3 },
               timeGridWeek: { slotMinTime: "08:00:00", slotMaxTime: "20:00:00", slotDuration: "00:30:00", expandRows: true },
-              timeGridDay:  { slotMinTime: "08:00:00", slotMaxTime: "20:00:00", slotDuration: "00:30:00", expandRows: true },
+              timeGridDay: { slotMinTime: "08:00:00", slotMaxTime: "20:00:00", slotDuration: "00:30:00", expandRows: true },
             }}
             selectable editable weekends selectMirror dayMaxEvents
             moreLinkClick="popover" moreLinkText={(n: number) => `+${n}개`}
@@ -564,8 +613,8 @@ export default function CalendarPage() {
             select={handleSelect} dateClick={handleDateClick}
             eventDrop={handleEventDrop} eventResize={handleEventResize} eventClick={handleEventClick}
             datesSet={handleViewDidMount}
-            eventClassNames={() => ["cf-calstripe"]}   // ✅ 모든 이벤트에 클래스 부여
-            eventDidMount={(info) => {                 // ✅ 캘린더색만 CSS 변수로 주입
+            eventClassNames={() => ["cf-calstripe"]}
+            eventDidMount={(info) => {
               const calId = info.event.extendedProps?.calId as number;
               const calHex = findCalColor(calId) || "#64748b";
               (info.el as HTMLElement).style.setProperty("--cf-cal", calHex);
@@ -595,47 +644,47 @@ export default function CalendarPage() {
             start: eventForm.start,
             end: eventForm.end,
             label: selectedLabel,
-            typeId: eventForm.typeId,       
+            typeId: eventForm.typeId,
             locationText: eventForm.locationText,
             note: eventForm.note,
           }}
           onChange={(patch) => {
-           // 1) 종일 토글
-if ("allDay" in patch) {
-  const toAllDay = !!patch.allDay;
-  setEventForm(f => {
-    // 현재 기간(밀리초) 유지
-    const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
-    if (toAllDay) {
-      const s = f.start.startOf("day");
-      // 최소 1일은 보장(드래그가 1일 미만일 수도 있으니)
-      const safeDur = Math.max(durMs, 24 * 60 * 60 * 1000);
-      const e = s.add(safeDur, "millisecond");
-      return { ...f, allDay: true, start: s, end: e };
-    } else {
-      // 타임 이벤트로 전환 시 최소 1시간 보장
-      const s = f.start;
-      const safeDur = Math.max(durMs, 60 * 60 * 1000);
-      const e = s.add(safeDur, "millisecond");
-      return { ...f, allDay: false, start: s, end: e };
-    }
-  });
-  return;
-}
+            // 1) 종일 토글
+            if ("allDay" in patch) {
+              const toAllDay = !!patch.allDay;
+              setEventForm(f => {
+                // 현재 기간(밀리초) 유지
+                const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
+                if (toAllDay) {
+                  const s = f.start.startOf("day");
+                  // 최소 1일 보장
+                  const safeDur = Math.max(durMs, 24 * 60 * 60 * 1000);
+                  const e = s.add(safeDur, "millisecond");
+                  return { ...f, allDay: true, start: s, end: e };
+                } else {
+                  // 타임 이벤트: 최소 1시간 보장
+                  const s = f.start;
+                  const safeDur = Math.max(durMs, 60 * 60 * 1000);
+                  const e = s.add(safeDur, "millisecond");
+                  return { ...f, allDay: false, start: s, end: e };
+                }
+              });
+              return;
+            }
 
-// 2) 시작시간 변경
-if (patch.start) {
-  const newStart = patch.start;
-  setEventForm(f => {
-    // 기간 유지(종일이면 n일, 타임이면 기존 ms)
-    const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
-    const minDur = f.allDay ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
-    const safeDur = Math.max(durMs, minDur);
-    const newEnd = newStart.add(safeDur, "millisecond");
-    return { ...f, start: newStart, end: newEnd };
-  });
-  return;
-}
+            // 2) 시작시간 변경
+            if (patch.start) {
+              const newStart = patch.start;
+              setEventForm(f => {
+                // 기간 유지(종일이면 n일, 타임이면 기존 ms)
+                const durMs = Math.max(f.end.diff(f.start, "millisecond"), 0);
+                const minDur = f.allDay ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+                const safeDur = Math.max(durMs, minDur);
+                const newEnd = newStart.add(safeDur, "millisecond");
+                return { ...f, start: newStart, end: newEnd };
+              });
+              return;
+            }
             // 3) 라벨 선택
             if ("label" in patch) {
               const lab = patch.label ?? null;
@@ -645,6 +694,10 @@ if (patch.start) {
             }
             // 4) 나머지(유형 포함)
             setEventForm(f => ({ ...f, ...(patch as Partial<EventFormState>) }));
+          }}
+          onBeforeSave={(info) => {
+            // ✅ 예약 의도/선택 방 보존
+            pendingRoomRef.current = { needsRoom: info.needsRoom, selectedRoom: info.selectedRoom };
           }}
           onSave={handleEventSave}
           attendees={selectedAttendees}
@@ -673,7 +726,7 @@ if (patch.start) {
         departments={pickDepartments as any}
         members={pickMembers as any}
         selected={pickSelectedMembers as any}
-        blockedUserNos={                           
+        blockedUserNos={
           pickMode === "ATTENDEE"
             ? selectedSharers.map(s => s.userNo)   // 공유자에 있으면 참석자로 선택 불가
             : selectedAttendees.map(a => a.userNo) // 참석자에 있으면 공유자로 선택 불가
@@ -685,6 +738,30 @@ if (patch.start) {
         onToggle={(m: any) => togglePick(m)}
         onQueryChange={(q) => setPickQuery(q)}
         onDeptChange={(id) => setPickDeptId(id)}
+      />
+      <EventDetailDialog
+        open={detailOpen}
+        eventId={selectedEventId}
+        onClose={() => setDetailOpen(false)}
+        onUpdated={(patch) => {
+          if (!selectedEventId) return;
+          // 프론트 메모리 내 일정 업데이트
+          setEvents(prev => prev.map(ev =>
+            Number(ev.eventId) === Number(selectedEventId)
+              ? {
+                  ...ev,
+                  title: patch.title ?? ev.title,
+                  start: patch.startAt ?? (ev.start as string),
+                  end:   patch.endAt ?? (ev.end as string),
+                  allDay: patch.allDayYn ? patch.allDayYn === "Y" : ev.allDay,
+                }
+              : ev
+          ));
+        }}
+        onDeleted={() => {
+          if (!selectedEventId) return;
+          setEvents(prev => prev.filter(ev => Number(ev.eventId) !== Number(selectedEventId)));
+        }}
       />
     </LocalizationProvider>
   );
