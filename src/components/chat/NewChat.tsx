@@ -13,6 +13,11 @@ const NewChat = ({ myProfile, onCreationComplete }: NewChatProps) => {
   const [selectedUsers, setSelectedUsers] = useState<chatProfile[]>([]);
   const [isPickerOpen, setPickerOpen] = useState(false);
 
+  const handleDeselectUser = (userToRemove: chatProfile) => {
+    setSelectedUsers(prevSelected => 
+      prevSelected.filter(user => user.userNo !== userToRemove.userNo)
+    );
+  };
   
   // 사용자 선택 모달에서 '선택 완료'를 눌렀을 때 호출될 함수
   const handleConfirmPicker = (pickedUsers: chatProfile[]) => {
@@ -43,7 +48,6 @@ const NewChat = ({ myProfile, onCreationComplete }: NewChatProps) => {
 
       onCreationComplete(newChatRoom);
     } catch (error) {
-      console.error('채팅방 생성에 실패했습니다:', error);
       alert('채팅방 생성에 실패했습니다.');
     }
   };
@@ -75,13 +79,18 @@ const NewChat = ({ myProfile, onCreationComplete }: NewChatProps) => {
         </div>
         
         {/* 선택된 사용자 표시 */}
-        <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[120px] bg-gray-50">
+        <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-gray-50">
           {selectedUsers.map(user => (
             <span 
               key={user.userNo}
-              className="flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full"
-            >
+              className="flex items-center
+              px-2 py-1 bg-gray-100 text-gray-800
+              text-sm font-medium rounded-full
+              shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
               {user.userName}
+              <p onClick={() => handleDeselectUser(user)} className="ml-1">
+                &times;
+              </p>
             </span>
           ))}
         </div>
@@ -90,7 +99,7 @@ const NewChat = ({ myProfile, onCreationComplete }: NewChatProps) => {
         <div className="flex-grow flex items-end justify-end">
           <button
             onClick={handleCreateRoom}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700"
+            className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700"
           >
             생성하기
           </button>

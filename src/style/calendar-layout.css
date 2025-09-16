@@ -1,0 +1,50 @@
+/* 전역: 박스사이징 통일 */
+:root { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
+
+/* 2열 레이아웃: 왼쪽 고정폭, 오른쪽 가변 */
+.calendar-layout {
+  display: flex;
+  align-items: flex-start;   /* 위쪽 정렬 */
+  gap: 16px;
+  width: 100%;
+  outline: 2px dashed red;
+}
+
+/* 왼쪽(작은 달력) - 고정폭 */
+.calendar-left {
+  flex: 0 0 260px;           /* width:260px 과 같음 */
+  max-width: 260px;
+  /* 겹침 방지용(필요 시) */
+  position: relative;
+  z-index: 2;
+}
+
+/* 오른쪽(큰 달력) - 가변폭 */
+.calendar-right {
+  flex: 1 1 auto;
+  min-width: 0;              /* flex/grid 컨테이너에서 넘침 방지 핵심 */
+  overflow: hidden;          /* 내부 요소가 밖으로 삐져나오지 않도록 */
+}
+
+/* FullCalendar가 컨테이너 너비에 맞게 */
+.calendar-right .fc {
+  width: 100%;               /* 강제 100% */
+}
+
+/* 좁은 화면에선 세로 스택 */
+@media (max-width: 900px) {
+  .calendar-layout {
+    flex-direction: column;
+  }
+  .calendar-left {
+    flex: 0 0 auto;
+    max-width: none;
+  }
+}
+
+/* index.css의 전역 중앙정렬을 무력화 */
+body { display: block; place-items: unset; }
+
+/* 루트가 컨테이너처럼 꽉 차도록 */
+#root { width: 100%; min-height: 100vh; }

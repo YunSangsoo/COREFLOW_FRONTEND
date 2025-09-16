@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { ChatRooms } from '../types/chat'; // ChatRooms 타입 경로
+import type { chatProfile, ChatRooms } from '../types/chat'; // ChatRooms 타입 경로
 import type { RootState } from '../store/store';
 
 interface ChatState {
@@ -26,10 +26,17 @@ const chatSlice = createSlice({
       // 목록의 가장 맨 위에 업데이트된 방을 추가하여 새로운 상태를 만듦
       state.chatRooms = [updatedRoom, ...filteredRooms];
     },
+    updateChatRoomParticipants: (state, action: PayloadAction<{ roomId: number; newParticipants: chatProfile[] }>) => {
+      const { roomId, newParticipants } = action.payload;
+      const roomIndex = state.chatRooms.findIndex(room => room.roomId === roomId);
+      if (roomIndex !== -1) {
+        state.chatRooms[roomIndex].partner = newParticipants;
+      }
+    },
   },
 });
 
-export const { setChatRooms, updateChatRoom } = chatSlice.actions;
+export const { setChatRooms, updateChatRoom,updateChatRoomParticipants } = chatSlice.actions;
 export const selectTotalUnreadCount = (state: RootState) => 
   state.chat.chatRooms.reduce((total, room) => total + (room.unreadCount || 0), 0);
 export default chatSlice.reducer; // reducer를 default export 합니다.
