@@ -33,10 +33,14 @@ const chatSlice = createSlice({
         state.chatRooms[roomIndex].partner = newParticipants;
       }
     },
+    removeChatRoom: (state, action: PayloadAction<number>) => {
+      const roomIdToRemove = action.payload;
+      state.chatRooms = state.chatRooms.filter(room => room.roomId !== roomIdToRemove);
+    },
   },
 });
 
-export const { setChatRooms, updateChatRoom,updateChatRoomParticipants } = chatSlice.actions;
+export const { setChatRooms, updateChatRoom,updateChatRoomParticipants, removeChatRoom } = chatSlice.actions;
 export const selectTotalUnreadCount = (state: RootState) => 
   state.chat.chatRooms.reduce((total, room) => total + (room.unreadCount || 0), 0);
 export default chatSlice.reducer; // reducer를 default export 합니다.

@@ -14,6 +14,7 @@ interface ChatRoomProps extends ChatRooms {
   onRoomUserList: (roomId:number, users:chatProfile[]) => void;
   onOpenProfile: (user:chatProfile)=>void;
   onOpenFileUpload: (chatRoom: ChatRooms) => void;
+  onLeaveRoom: (roomId : number) => void;
 }
 
 const formatTime = (dateString: string | Date): string => {
@@ -52,7 +53,7 @@ const markAsRead = (roomId:Number) => {
 };
 
 const ChatRoom = (props : ChatRoomProps) => {
-  const { roomId, myProfile, partner, onNewMessage, onRoomUserList,onOpenProfile, onOpenFileUpload } = props;
+  const { roomId, myProfile, partner, onNewMessage, onRoomUserList,onOpenProfile, onOpenFileUpload, onLeaveRoom } = props;
   
   // 채팅 메시지 목록을 저장할 state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -180,7 +181,6 @@ const ChatRoom = (props : ChatRoomProps) => {
   const handleRoomUserList = () =>{
     onRoomUserList(roomId,users);
   }
-  console.log(messages);
   return (
     <>
       <button className="absolute bg-indigo-300 hover:bg-indigo-600 text-indigo-700 hover:text-white"
@@ -329,6 +329,7 @@ const ChatRoom = (props : ChatRoomProps) => {
                 onClose={handlecloseSetModal}
                 onRoomUserList={handleRoomUserList}
                 onOpenFileUpload={onOpenFileUpload}
+                onLeaveRoom={onLeaveRoom}
               />
               )}
       

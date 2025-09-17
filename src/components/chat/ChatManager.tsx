@@ -8,7 +8,7 @@ import ChatRoom from './ChatRoom';
 import NewChat from './NewChat';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
+import { removeChatRoom, setChatRooms, updateChatRoom } from '../../features/chatSlice';
 import { WindowContent } from './WindowContentProps';
 
 
@@ -97,7 +97,24 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     }
   };
 
-
+  const handleLeaveRoom = async (roomId: number) => {
+    if (!window.confirm("정말로 채팅방을 나가시겠습니까?")) {
+      return;
+    }
+    try {
+      // 1. 백엔드 API 호출
+      await api.delete(`/chatting/room/${roomId}/leave`);
+      // 2. Redux store에서 해당 채팅방 제거
+      dispatch(removeChatRoom(roomId));
+      // 3. 열려있는 채팅방 창 닫기
+      const windowId = `room-${roomId}`;
+      handleCloseWindow(windowId);
+      alert("채팅방에서 나갔습니다.");
+    } catch (error) {
+      console.error("채팅방 나가기 실패:", error);
+      alert("채팅방을 나가는 데 실패했습니다.");
+    }
+  };
 
   const handleOpenChatFromRoom = async (chatRoom: ChatRooms) => {
     const windowId = `room-${chatRoom.roomId}`;
@@ -344,6 +361,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               handleSetMyProfile={setMyProfile}
               handleOpenFileUpload={handleOpenFileUpload}
               handleCloseWindow={handleCloseWindow}
+              handleLeaveRoom={handleLeaveRoom}
             />
           </FloatingWindow>
         ))}

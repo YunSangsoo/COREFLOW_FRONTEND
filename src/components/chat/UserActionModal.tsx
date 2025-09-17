@@ -26,6 +26,7 @@ interface chatRoomModalProps {
   onUsersUpdate :(user:chatProfile[]) => void;
   onRoomUserList :() => void;
   onOpenFileUpload: (chatRoom: ChatRooms) => void;
+  onLeaveRoom:(roomId : number) => void;
 }
 
 
@@ -153,7 +154,7 @@ export const UserStateModal = ({ user, position, onClose, onSetState }: UserStat
 
 const EMPTY_USER_LIST: chatProfile[] = [];
 
-export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload}: chatRoomModalProps) => {
+export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload, onLeaveRoom}: chatRoomModalProps) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -251,13 +252,16 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
               파일 전송
             </button>
           </li>
-          <li>
+          {chatRooms.roomType==='PUBLIC' ? 
+          (<li>
             <button
+              onClick={()=>{onLeaveRoom(chatRooms.roomId);onClose();}}
               className="w-full text-left block px-4 py-2 hover:bg-gray-100"
             >
               채팅방 나가기
             </button>
-          </li>
+          </li>) : (<></>)
+          }
         </ul>
       </div>
       <ChatPeoplePickerDialog

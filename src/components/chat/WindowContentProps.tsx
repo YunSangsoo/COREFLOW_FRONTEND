@@ -24,7 +24,8 @@ interface WindowContentProps {
     handleOpenProfile:(user: chatProfile) =>void;
     handleSetMyProfile:(user: chatProfile) =>void;
     handleOpenFileUpload: (chatRoom: ChatRooms) => void;
-    handleCloseWindow: (id: string) => void
+    handleCloseWindow: (id: string) => void;
+    handleLeaveRoom : (roomId : number) => void;
 
 }
 
@@ -63,12 +64,13 @@ export const WindowContent = (props: WindowContentProps) => {
 
   if (window.id.startsWith('room-')&&window.chatRoomInfo) {
     return <ChatRoom
-    {...window.chatRoomInfo} 
-    myProfile={rest.myProfile} 
-    onNewMessage={rest.handleNewMessage}
-    onRoomUserList={rest.handleOpenChatRoomUserList}
-    onOpenProfile={rest.handleOpenProfile}
-    onOpenFileUpload={rest.handleOpenFileUpload}
+      {...window.chatRoomInfo} 
+      myProfile={rest.myProfile} 
+      onNewMessage={rest.handleNewMessage}
+      onRoomUserList={rest.handleOpenChatRoomUserList}
+      onOpenProfile={rest.handleOpenProfile}
+      onOpenFileUpload={rest.handleOpenFileUpload}
+      onLeaveRoom={rest.handleLeaveRoom}
     />;
   }
 
