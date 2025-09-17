@@ -68,6 +68,7 @@ const DocumentTable: React.FC = () => {
 
     return (
         <div>
+            <br />
             <div className="arrbtn1">
                 <button className="arrbtn" onClick={() => setFilter("일반결재")}>일반문서</button>
                 <button className="arrbtn" onClick={() => setFilter("휴가원")}>휴가원</button>

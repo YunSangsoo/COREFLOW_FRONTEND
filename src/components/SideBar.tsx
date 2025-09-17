@@ -61,10 +61,6 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                         문서 작성
                                     </Link>
                                 </li>
-                                <Link to="approvals/temp" className="block py-1 px-2 rounded hover:bg-gray-600"
-                                    style={{ color: "white" }}>
-                                        임시저장함
-                                    </Link>
                                 <li>
                                     <Link to="approvals/received" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>

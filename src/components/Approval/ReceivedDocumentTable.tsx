@@ -84,7 +84,7 @@ const ReceivedDocumentTable: React.FC = () => {
 
     return (
         <div>
-            {/* 필터링 버튼은 기존과 동일하게 유지 */}
+            <br />
             <div className="arrbtn1">
                 <button className="arrbtn" onClick={() => setFilter("일반결재")}>일반문서</button>
                 <button className="arrbtn" onClick={() => setFilter("휴가원")}>휴가원</button>
@@ -117,9 +117,8 @@ const ReceivedDocumentTable: React.FC = () => {
                             </tr>
                         ))
                         ) : (
-                        // 데이터가 없을 경우, 테이블 규칙에 맞는 <tr>과 <td>를 렌더링
                         <tr>
-                            {/* colSpan은 aheadd>의 th 개수와 맞춰주세요 (현재 5개) */}
+                            
                             <td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>
                                 수신된 문서가 없습니다.
                             </td>

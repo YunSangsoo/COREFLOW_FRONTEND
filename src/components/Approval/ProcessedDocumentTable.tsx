@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import  Pagination  from './Pagination';
+import './Approval.css';
 
 const ProcessedDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<any[]>([]);
@@ -14,7 +15,6 @@ const ProcessedDocumentTable: React.FC = () => {
         const fetchDocuments = async () => {
             if (!accessToken) return;
             try {
-                // 새로 만든 API('/processed-documents')를 호출합니다.
                 const response = await axios.get('http://localhost:8081/api/approvals/processed-documents', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
@@ -38,7 +38,9 @@ const ProcessedDocumentTable: React.FC = () => {
     };
 
     return (
+        
         <div>
+            <br />
             <table>
                 <thead>
                     <tr>

@@ -182,10 +182,20 @@ const Toolbar: React.FC<{ editor: Editor | null }> = ({ editor }) => {
 
     return (
         <div className="edbtn">
-            <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'is-active' : ''}>B</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'is-active' : ''}>I</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'is-active' : ''}>U</button>
-            {/* ... 기타 툴바 버튼들 ... */}
+          <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'is-active' : ''}>B</button>
+          <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'is-active' : ''}>I</button>
+          <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'is-active' : ''}>U</button>
+          <button onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'is-active' : ''}>S</button>
+          <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}>Left</button>
+          <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}>Center</button>
+          <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}>Right</button>
+          <button onClick={() => editor.chain().focus().setTextAlign('justify').run()} className={editor.isActive({ textAlign: 'justify' }) ? 'is-active' : ''}>Justify</button>
+          <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'is-active' : ''}>Bullet</button>
+          <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'is-active' : ''}>Ordered</button>
+          <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive('blockquote') ? 'is-active' : ''}>Quote</button>
+          <button onClick={() => editor.chain().focus().setHorizontalRule().run()}>HR</button>
+          <button onClick={addImage}>Image</button>
+          <button onClick={addTable}>Table</button>
         </div>
     );
 };
@@ -331,39 +341,39 @@ const ApprovalForm: React.FC = () => {
 
     return (
         <div>
+          <br />
             <div>
-                <button type="button" onClick={() => window.location.reload()}>초기화</button>
-                <button type="button" onClick={() => handleSubmit("DRAFT")}>임시저장</button>
-                <button type="button" onClick={() => handleSubmit("SUBMIT")}>상신</button>
-                <button onClick={() => setIsApproverModalOpen(true)}>결재선</button>
-                <input type="file" id="file-attach" onChange={handleFileChange} style={{ display: 'none' }} />
-                <button onClick={() => document.getElementById('file-attach')?.click()}>파일첨부</button>
-                {attachedFile && <span>{attachedFile.name}</span>}
-            </div>
-            <div>
-                <div>
+                <div className="topinput">
                     <label>작성일자</label>
                     <input type="text" readOnly value={new Date().toLocaleDateString()} />
                 </div>
-                <div>
+                <div className="topinput">
                     <label>제목</label>
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목을 입력하세요" className="main33" />
                 </div>
-                <div>
+                <div className="topinput">
                     <label>문서 종류</label>
                     <select value={approvalType} onChange={(e) => setApprovalType(e.target.value)}>
                         <option value="일반결재">일반결재</option>
                         <option value="휴가원">휴가원</option>
                     </select>
                 </div>
-                <div>
+                <div className="topinput">
                     <label>결재자</label>
                     <input className="main34" type="button" value={approver} onClick={() => setIsApproverModalOpen(true)} readOnly />
                 </div>
-                <div>
+                <div className="topinput">
                     <label>참조자</label>
                     <input className="main34" type="button" value={cc} onClick={() => setIsCcModalOpen(true)} readOnly />
                 </div>
+            </div>
+             <div className="btnbtn">
+                <button className="topbtn" type="button" onClick={() => window.location.reload()}>초기화</button>
+                <button className="topbtn" onClick={() => setIsApproverModalOpen(true)}>결재선</button>
+                <input type="file" id="file-attach" onChange={handleFileChange} style={{ display: 'none' }} />
+                <button className="topbtn" onClick={() => document.getElementById('file-attach')?.click()}>파일첨부</button>
+                <button className="topbtn" type="button" onClick={() => handleSubmit("SUBMIT")}>상신</button>
+                {attachedFile && <span>{attachedFile.name}</span>}
             </div>
             <Toolbar editor={editor} />
             <EditorContent editor={editor} />

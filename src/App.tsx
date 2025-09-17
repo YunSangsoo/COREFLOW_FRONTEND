@@ -22,7 +22,6 @@ import ApprovalForm from './components/Approval/ApprovalForm';
 import DocumentDetailPage from './components/Approval/DocumentDetailPage';
 import ReceivedDocumentTable from './components/Approval/ReceivedDocumentTable';
 import ProcessedDocumentTable from './components/Approval/ProcessedDocumentTable';
-import TempDocumentTable from './components/Approval/TempDocumentTable';
 
 function App() {
     const dispatch = useDispatch();
@@ -76,8 +75,6 @@ function App() {
                     <Route path="received" element={<ReceivedDocumentTable />} />
                     <Route path="processed" element={<ProcessedDocumentTable />} />
                     <Route path="new" element={<ApprovalForm />} />
-                    <Route path="temp" element={<TempDocumentTable />} />
-                    <Route path="edit/:id" element={<ApprovalForm />} />
                     <Route path=":id" element={<DocumentDetailPage />} />
                 </Route>
             </Routes>
