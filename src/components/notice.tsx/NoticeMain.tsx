@@ -1,19 +1,44 @@
 import { useQuery } from "@tanstack/react-query";
-import type { NoticeResponse } from "../../types/notice";
+import type { NoticeResponse, SearchParams } from "../../types/notice";
 import { notiList } from "../../api/noticeApi";
+import { useState } from "react";
 
 interface NoticeMainProps{
     onClose : () => void;
 }
 
 export default function NoticeMain({onClose} : NoticeMainProps) {
-
-    const { data: noticeList } = useQuery<NoticeResponse[]>({
-        queryKey: ['notices'],
-        queryFn: notiList
+    
+    const [inputParams, setInputParams] = useState<SearchParams>({
+        searchType:"title",
+        keyword:""
     })
 
+    const [searchParams, setSearchParams] = useState<SearchParams>({
+        searchType:"title",
+        keyword:""
+    });
 
+    const { data: noticeList } = useQuery<NoticeResponse[]>({
+        queryKey: ['notices',searchParams],
+        queryFn: () => notiList(searchParams)
+    })
+
+    const handleInputChange = (e:React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
+        const {name, value} = e.target;
+        setInputParams(prev => ({
+            ...prev,[name]:value
+        }))
+    }
+    const handleSearch = () => {
+        setSearchParams(inputParams);
+    }
+
+    const handleReset = () => {
+        const resetParams = {searchType:"title", keyword:""} as SearchParams;
+        setInputParams(resetParams);
+        setSearchParams(resetParams);
+    }
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">
@@ -27,17 +52,18 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                 </div>
                 <div className="space-y-4 mb-6">
                     <div className="flex items-center space-x-2">
-                        <select className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">
-                            <option value="all">전체</option>
+                        <select
+                            name="searchType" value={inputParams.searchType} onChange={handleInputChange} 
+                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">
                             <option value="title">제목</option>
                             <option value="content">내용</option>
                             <option value="writer">작성자</option>
                         </select>
                         <input
-                            type="text"
+                            type="text" name="keyword" value={inputParams.keyword} onChange={handleInputChange}
                             className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                        <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">검색</button>
-                        <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">초기화</button>
+                        <button onClick={handleSearch} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">검색</button>
+                        <button onClick={handleReset} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">초기화</button>
                         <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
                     </div>
                 </div>
@@ -53,9 +79,9 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {noticeList && noticeList.map((notice,index) => (
-                                <tr key={notice.notiId}>
+                                <tr key={notice.notiId} className="hover:bg-gray-100 cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap">{index+1}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{notice.writer}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {notice.essential === 'T' && (
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
