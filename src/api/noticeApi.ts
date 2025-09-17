@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { NoticeResponse, SearchParams } from "../types/notice";
+import type { NotiInsert, NoticeResponse, SearchParams } from "../types/notice";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -53,3 +53,7 @@ export const notiList = async (params:SearchParams={}) => {
     return response.data;
 }
 
+export const notiInsert = async (params:NotiInsert) => {
+    const response = await api.post<NotiInsert>('/notice/insert',params)
+    return response.data;
+}

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { NoticeResponse, SearchParams } from "../../types/notice";
 import { notiList } from "../../api/noticeApi";
 import { useState } from "react";
+import NotiInsert from "./NoticeInsert";
 
 interface NoticeMainProps{
     onClose : () => void;
@@ -9,6 +10,16 @@ interface NoticeMainProps{
 
 export default function NoticeMain({onClose} : NoticeMainProps) {
     
+    const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
+    
+    const openNoticeModal = () => {
+        setIsNoticeInsertOpen(true);
+    }
+
+    const closeNoticeModal = () => {
+        setIsNoticeInsertOpen(false);
+    }
+
     const [inputParams, setInputParams] = useState<SearchParams>({
         searchType:"title",
         keyword:""
@@ -64,7 +75,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                             className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <button onClick={handleSearch} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">검색</button>
                         <button onClick={handleReset} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">초기화</button>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
+                        <button onClick={openNoticeModal} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded-md overflow-hidden overflow-y-auto max-h-[400px]">
@@ -99,6 +110,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                     </table>
                 </div>
             </div>
+            {isNoticeInsertOpen && <NotiInsert onClose={closeNoticeModal}/>}
         </div>
     );
 };
