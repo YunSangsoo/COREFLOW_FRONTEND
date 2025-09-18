@@ -9,18 +9,21 @@ export default function Mypage() {
         detailAddr, setDetailAddr,
         currentPassword, setCurrentPassword,
         newPassword, setNewPassword,
-        profile, setProfile,
         isEditingPhone, setIsEditingPhone,
         isEditingPassword, setIsEditingPassword,
-        isEditingAddress, setIsEditingAddress,
         isEditingProfile, setIsEditingProfile,
+        isEditingAddress, setIsEditingAddress,
+        dbProfile,
+        newProfileFile, setNewProfileFile,
+        preview, setPreview,
+        fileInputRef,
         currentProfileImage,
         handleFileChange,
-        handleUpdatePhone,
-        handleUpdatePassword,
-        handleUpdateAddress,
         handleUpdateProfile,
-        handleSearchAddress
+        handleSearchAddress,
+        handleUpdatePhone,
+        handleUpdateAddress,
+        handleUpdatePassword
     } = useMypageForm();
 
     return (
@@ -159,7 +162,6 @@ export default function Mypage() {
             {!isEditingProfile ? (
                 <MemberControll
                     label="프로필"
-                    value=""
                     isEditing={false}
                     children={
                         <>
@@ -177,7 +179,7 @@ export default function Mypage() {
                 <MemberControll label="프로필">
                     <>
                         <img src={currentProfileImage} alt="프로필" className="w-16 h-16 object-cover border mr-2" />
-                        <input type="file" accept="image/*" onChange={handleFileChange} />
+                        <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
                         <div className="flex gap-2 mt-2">
                             <button
                                 onClick={handleUpdateProfile}
@@ -188,7 +190,8 @@ export default function Mypage() {
                             <button
                                 onClick={() => {
                                     setIsEditingProfile(false);
-                                    setProfile(null);
+                                    setNewProfileFile(null);
+                                    setPreview(null);
                                 }}
                                 className="px-3 py-1 bg-gray-400 text-white rounded"
                             >

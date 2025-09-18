@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../store/store";
 import { api } from "../api/coreflowApi";
 import { loginSuccess } from "../features/authSlice";
+import type { customFile } from "./type";
 
 export const useMypageForm = () => {
     const auth = useSelector((state: RootState) => state.auth);
@@ -14,9 +15,11 @@ export const useMypageForm = () => {
     const [detailAddr, setDetailAddr] = useState("");
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const [profile, setProfile] = useState<File | null>(null);
+
+    const [dbProfile, setDbProfile] = useState<customFile | null>(null);
+    const [dbProfileUrl, setDbProfileUrl] = useState<string>("/default.png");
+    const [newProfileFile, setNewProfileFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
-    const [dbProfileUrl, setDbProfileUrl] = useState("/default.png");
 
     const [isEditingPhone, setIsEditingPhone] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -26,10 +29,9 @@ export const useMypageForm = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // 프로필 이미지 URL 처리
-    const getProfileUrl = (url: string | null) => {
-        if (!url) return "/default.png";
-        if (url.startsWith("http") || url.startsWith("/")) return url;
-        return `/images/p/${url}`;
+    const getProfileUrl = (file: customFile | null): string => {
+        if (!file) return `${import.meta.env.VITE_API_BASE_URL}/images/p/default.png`;
+        return `${import.meta.env.VITE_API_BASE_URL}/images/${file.imageCode}/${file.changeName}`;
     };
 
     // 사용자 정보 초기 로드
@@ -40,8 +42,15 @@ export const useMypageForm = () => {
                 setPhone(res.data.user.phone ?? "");
                 setRoadAddr(res.data.user.address ?? "");
                 setDetailAddr(res.data.user.addressDetail ?? "");
-                const profileUrl = typeof res.data.user.profile === "string" ? res.data.user.profile : null;
-                setDbProfileUrl(profileUrl ?? "/default.png");
+
+                const profile = res.data.user.profile;
+                if (profile && typeof profile === "object") {
+                    setDbProfileUrl(getProfileUrl(res.data.user.profile));
+                } else if (profile && typeof profile === "string") {
+                    setDbProfileUrl(res.data.user.profile);
+                } else {
+                    setDbProfileUrl(`${import.meta.env.VITE_API_BASE_URL}/images/p/default.png`);
+                }
             })
             .catch(() => console.error("사용자 정보를 불러오지 못했습니다."));
     }, [dispatch]);
@@ -49,7 +58,7 @@ export const useMypageForm = () => {
     // 파일 선택 시 미리보기
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-        setProfile(file);
+        setNewProfileFile(file);
 
         if (file) {
             const reader = new FileReader();
@@ -62,20 +71,23 @@ export const useMypageForm = () => {
 
     // 프로필 업데이트
     const handleUpdateProfile = () => {
-        if (!profile) return alert("업데이트할 프로필 이미지를 선택해주세요.");
+        if (!newProfileFile) return alert("업데이트할 프로필 이미지를 선택해주세요.");
         const formData = new FormData();
-        formData.append("profile", profile);
+        formData.append("profile", newProfileFile);
 
         api.put(`/auth/${auth.user?.userNo}/profile`, formData)
             .then(res => {
-                setDbProfileUrl(res.data.profile);
-                setProfile(null);
-                setPreview(null);
+                const profile = res.data.profile as customFile;
+                setDbProfile(profile); // 새 프로필 세팅
+                setNewProfileFile(null);
+                setPreview(`${import.meta.env.VITE_API_BASE_URL}/images/${profile.imageCode}/${profile.changeName}`);
                 setIsEditingProfile(false);
+                
                 alert("프로필 이미지가 변경되었습니다.");
             })
             .catch(() => alert("프로필 이미지 업로드 실패"));
     };
+    const currentProfileImage = preview || dbProfileUrl;
 
     // 주소 검색
     const handleSearchAddress = () => {
@@ -113,8 +125,6 @@ export const useMypageForm = () => {
             .catch(() => alert("비밀번호 변경 실패"));
     };
 
-    const currentProfileImage = preview || getProfileUrl(dbProfileUrl);
-
     return {
         auth,
         phone, setPhone,
@@ -126,9 +136,9 @@ export const useMypageForm = () => {
         isEditingPassword, setIsEditingPassword,
         isEditingProfile, setIsEditingProfile,
         isEditingAddress, setIsEditingAddress,
-        profile, setProfile,
-        preview,
-        dbProfileUrl,
+        dbProfile,
+        newProfileFile, setNewProfileFile,
+        preview, setPreview,
         fileInputRef,
         currentProfileImage,
         handleFileChange,

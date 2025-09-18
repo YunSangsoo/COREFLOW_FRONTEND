@@ -4,13 +4,13 @@ export interface User {
     userName: string;
     depId: number;
     posId: number;
-    profile: string;
     roles: string[];
     hireDate: Date;
     phone?: string;
     address?: string;
     addressDetail?: string;
     status: string;
+    profile: customFile;
 }
 
 export interface LoginResponse {
