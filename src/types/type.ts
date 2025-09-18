@@ -42,4 +42,5 @@ export interface customFile {
     changeName:string;
     imgOrder?:number;
     refId:number;
+    mimeType: string;
 }

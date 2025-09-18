@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { Client, type IMessage } from '@stomp/stompjs';
+import { Client, type IMessage, type StompSubscription } from '@stomp/stompjs';
 import type { ChatMessage, chatProfile, ChatRooms, ModalState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
 import stompClient from '../../api/webSocketApi';
@@ -7,13 +7,15 @@ import { ChatRoomModal } from './UserActionModal';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import SettingsIcon from './SvgSettingIcon';
+import { useDropzone } from 'react-dropzone';
 
 interface ChatRoomProps extends ChatRooms {
   myProfile: chatProfile;
   onNewMessage: (room: ChatRooms, message: ChatMessage) => void;
   onRoomUserList: (roomId:number, users:chatProfile[]) => void;
   onOpenProfile: (user:chatProfile)=>void;
-  onOpenFileUpload: (chatRoom: ChatRooms) => void;
+  onOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
+  onLeaveRoom: (roomId : number) => void;
 }
 
 const formatTime = (dateString: string | Date): string => {
@@ -52,7 +54,7 @@ const markAsRead = (roomId:Number) => {
 };
 
 const ChatRoom = (props : ChatRoomProps) => {
-  const { roomId, myProfile, partner, onNewMessage, onRoomUserList,onOpenProfile, onOpenFileUpload } = props;
+  const { roomId, myProfile, partner, onNewMessage, onRoomUserList,onOpenProfile, onOpenFileUpload, onLeaveRoom } = props;
   
   // 채팅 메시지 목록을 저장할 state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -60,6 +62,9 @@ const ChatRoom = (props : ChatRoomProps) => {
   const [newMessage, setNewMessage] = useState('');
   // 메시지 목록 스크롤을 위한 ref
   const [users,setUsers] = useState<chatProfile[]>([]);
+
+  //STOMP 구독 객체를 저장하기 위한 ref
+  const subscriptionRef = useRef<StompSubscription | null>(null);
 
   const [roomConfig, setRoomConfig] = useState<ModalState>({
       isOpen: false,
@@ -99,6 +104,12 @@ const ChatRoom = (props : ChatRoomProps) => {
 
     if (stompClient.connected&& roomId) {
       markAsRead(roomId);
+
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
+
       // 1. 특정 채팅방 토픽 구독
       const subscription = stompClient.subscribe(`/topic/room/${roomId}`, (message: IMessage) => {
         const receivedMessage: ChatMessage = JSON.parse(message.body);
@@ -106,6 +117,8 @@ const ChatRoom = (props : ChatRoomProps) => {
         const { onNewMessage, ...roomData } = props;
         onNewMessage({ ...roomData, unreadCount: 0 }, receivedMessage);
       });
+
+      subscriptionRef.current = subscription;
       
 
 
@@ -124,19 +137,21 @@ const ChatRoom = (props : ChatRoomProps) => {
       
       // 3. 컴포넌트가 사라질 때 구독을 해제하고 퇴장 메시지를 보냄
       return () => {
-        stompClient.publish({
-          destination: `/app/chat/exit/${roomId}`,
-          body: JSON.stringify({
-            userNo : myProfile.userNo,
-            userName : myProfile.userName,
-            roomId:roomId,
-            sentAt: new Date(),
-            messageText: '',
-            type: 'EXIT',
-          }),
-        });
-        subscription.unsubscribe();
-        markAsRead(roomId);
+        if (subscriptionRef.current) {
+          stompClient.publish({
+            destination: `/app/chat/exit/${roomId}`,
+            body: JSON.stringify({
+              userNo : myProfile.userNo,
+              userName : myProfile.userName,
+              roomId:roomId,
+              sentAt: new Date(),
+              messageText: '',
+              type: 'EXIT',
+            }),
+          });
+          subscription.unsubscribe();
+          markAsRead(roomId);
+        };
       };
     }
   }, [roomId, myProfile?.userNo]); // 방이나 유저가 바뀌면 연결을 다시 설정
@@ -181,13 +196,33 @@ const ChatRoom = (props : ChatRoomProps) => {
     onRoomUserList(roomId,users);
   }
 
+  const onDrop = ((acceptedFiles: File[]) => {
+      onOpenFileUpload(props,acceptedFiles);
+    });
+    
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+  });
+
+  const onPasteClipBoard = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    const fileList: FileList | null = event.clipboardData.files;
+    if(fileList){
+      const fileArray: File[] = Array.from(fileList);
+      onOpenFileUpload(props,fileArray);
+    }
+  }
+
   return (
     <>
       <button className="absolute bg-indigo-300 hover:bg-indigo-600 text-indigo-700 hover:text-white"
       onClick={handleOpenConfig}>
         <SettingsIcon size={15} />
       </button>
-      <div className="flex flex-col h-full">
+      <div 
+      {...getRootProps()}
+        onPaste={onPasteClipBoard}
+        tabIndex={0}
+      className="flex flex-col h-full">
         {/* 메시지 목록 */}
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
 
@@ -209,7 +244,7 @@ const ChatRoom = (props : ChatRoomProps) => {
 
                 {/* 메시지 본문 */}
                 <div className={`flex items-end space-x-2 ${msg.userNo === myProfile.userNo ? 'justify-end' : 'justify-start'}`}>
-                  {msg.type !== 'TALK' ? (
+                  {msg.type === 'ENTER' || msg.type==='EXIT' ? (
                     <div className="text-center text-xs text-gray-500 w-full py-1">
                       <p>{msg.messageText}</p>
                     </div>
@@ -218,7 +253,30 @@ const ChatRoom = (props : ChatRoomProps) => {
                       {/* 시간 표시 */}
                       <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
                       <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs">
-                        <p className="break-all">{msg.messageText}</p>
+                        {msg.type==='FILE'&& msg.file?
+                        (msg.file.mimeType.startsWith('image/') ? (
+                            <a href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} target="_blank" rel="noopener noreferrer">
+                              <img 
+                                src={`${import.meta.env.VITE_API_BASE_URL}/images/${msg.file.imageCode}/${msg.file.changeName}`}
+                                alt={msg.file.originName}
+                                className="w-full h-auto max-h-64 rounded-lg object-cover cursor-pointer"/>
+                            </a>
+                          ) : (
+                            <a 
+                              href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} 
+                              download={msg.file.originName || "download"}
+                              className={`flex items-center space-x-2 p-3 rounded-lg max-w-xs cursor-pointer
+                                      ${myProfile.userNo ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                            >
+                              {/* 파일 아이콘 */}
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                              </svg>
+                              <span className="break-all">{msg.file.originName}</span>
+                            </a>
+                          )
+                        )
+                        :(<p className="break-all">{msg.messageText}</p>)}
                       </div>
                     </div>
                   ) : (
@@ -240,7 +298,30 @@ const ChatRoom = (props : ChatRoomProps) => {
                         }
                         <div className="flex items-end space-x-2">
                           <div className="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
-                            <p className="break-all">{msg.messageText}</p>
+                            {msg.type==='FILE' && msg.file?
+                              (msg.file.mimeType.startsWith('image/') ? (
+                                  <a href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} target="_blank" rel="noopener noreferrer">
+                                    <img 
+                                      src={`${import.meta.env.VITE_API_BASE_URL}/images/${msg.file.imageCode}/${msg.file.changeName}`}
+                                      alt={msg.file.originName}
+                                      className="w-full h-auto max-h-64 rounded-lg object-cover cursor-pointer"/>
+                                  </a>
+                                ) : (
+                                  <a 
+                                    href={`${import.meta.env.VITE_API_BASE_URL}/download/${msg.file.imageCode}/${msg.file.changeName}`} 
+                                    download={msg.file.originName || "download"}
+                                    className={`flex items-center space-x-2 p-3 rounded-lg max-w-xs cursor-pointer
+                                            ${myProfile.userNo ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                                  >
+                                    {/* 파일 아이콘 */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 flex-shrink-0">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                    </svg>
+                                    <span className="break-all">{msg.file.originName}</span>
+                                  </a>
+                                )
+                              )
+                              :(<p className="break-all">{msg.messageText}</p>)}
                           </div>
                           {/* 시간 표시 */}
                           <span className="text-xs text-gray-400 mb-1 flex-shrink-0">{formatTime(msg.sentAt)}</span>
@@ -283,6 +364,7 @@ const ChatRoom = (props : ChatRoomProps) => {
                 onClose={handlecloseSetModal}
                 onRoomUserList={handleRoomUserList}
                 onOpenFileUpload={onOpenFileUpload}
+                onLeaveRoom={onLeaveRoom}
               />
               )}
       
