@@ -16,8 +16,9 @@ export interface NotiInsert{
     title:string;
     content:string;
     essential:'F'|'T';
-    endDate?:string;
-    endTime?:string;
+    endDate?:string|null;
+    endTime?:string|null;
+    depId?:number|null;
     parentDepId?:number|null;
     childDepId?:number|null;
     posId?:number|null;

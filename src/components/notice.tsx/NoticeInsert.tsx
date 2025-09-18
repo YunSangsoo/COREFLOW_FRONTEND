@@ -15,32 +15,25 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
     const [noticeForm, setNoticeForm] = useState<NotiInsert>({
         title: '',
         essential: 'F',
+        content: '',
         parentDepId: null,
         childDepId: null,
         posId: null,
-        endDate: '',
-        endTime: '',
-        content: '',
+        endDate: null,
+        endTime: null
     });
 
-    // 부모 부서 조회용 훅
     const { data: parentDep } = useQuery<Department[]>({
         queryKey: ['departments'],
         queryFn: depList
     })
 
-    // 자식 부서 조회용 훅
     const { data: childDep } = useQuery<DepartmentDetail[]>({
-    queryKey: ['departmentDetails', noticeForm.parentDepId],
-    queryFn: () => {
-        // enabled 조건 덕분에 이 함수가 실행될 때 parentDepId는 null이 아님을
-        // 타입스크립트에게 강제로 알리는 구문
-        return depDetailList(noticeForm.parentDepId!); 
-    },
-    enabled: noticeForm.parentDepId !== null
-});
+        queryKey: ['departmentDetails', noticeForm.parentDepId],
+        queryFn: () => (depDetailList(noticeForm.parentDepId!)),
+        enabled: noticeForm.parentDepId !== null
+    });
 
-    // 직위 목록 조회용 훅
     const { data: position } = useQuery<Position[]>({
         queryKey: ['positions'],
         queryFn: posList
@@ -50,7 +43,6 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
         const { name, value, type } = e.target;
         
         setNoticeForm(prevForm => {
-            // 부서 및 직위 ID는 숫자 또는 null로 처리
             if (name === 'parentDepId' || name === 'childDepId' || name === 'posId') {
                 return {
                     ...prevForm,
@@ -75,19 +67,22 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        // API 호출을 위해 단일 ID를 배열에 담아 전달
-        const dataToSubmit: NotiInsert = {
+        let depId:number|null = null;
+        if(noticeForm.parentDepId){
+            depId = noticeForm.childDepId === null ? noticeForm.parentDepId : noticeForm.childDepId
+        }
+
+        const dataSubmit: NotiInsert = {
             title: noticeForm.title,
-            content: noticeForm.content,
             essential: noticeForm.essential,
+            content: noticeForm.content,
             endDate: noticeForm.endDate || undefined,
             endTime: noticeForm.endTime || undefined,
-            parentDepId: noticeForm.parentDepId || undefined,
-            childDepId: noticeForm.childDepId || undefined,
-            posId: noticeForm.posId || undefined,
+            depId: depId,
+            posId: noticeForm.posId || undefined
         };
 
-        insertMutation.mutate(dataToSubmit);
+        insertMutation.mutate(dataSubmit);
     };
 
     const insertMutation = useMutation({
@@ -132,7 +127,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                                     <label className="flex items-center">
                                         <input
                                             type="radio"
-                                            name="noticeType"
+                                            name="essential"
                                             value="F"
                                             checked={noticeForm.essential === 'F'}
                                             onChange={handleChange}
@@ -143,7 +138,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                                     <label className="flex items-center">
                                         <input
                                             type="radio"
-                                            name="noticeType"
+                                            name="essential"
                                             value="T"
                                             checked={noticeForm.essential === 'T'}
                                             onChange={handleChange}
@@ -220,7 +215,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                                             <input
                                                 type="date"
                                                 name="endDate"
-                                                value={noticeForm.endDate}
+                                                value={noticeForm.endDate||''}
                                                 onChange={handleChange}
                                                 className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                             />
@@ -235,7 +230,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                                     <input
                                         type="time"
                                         name="endTime"
-                                        value={noticeForm.endTime}
+                                        value={noticeForm.endTime||''}
                                         onChange={handleChange}
                                         className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                     />

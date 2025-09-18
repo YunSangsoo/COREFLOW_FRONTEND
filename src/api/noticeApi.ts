@@ -54,6 +54,6 @@ export const notiList = async (params:SearchParams={}) => {
 }
 
 export const notiInsert = async (params:NotiInsert) => {
-    const response = await api.post<NotiInsert>('/notice/insert',params)
+    const response = await api.post<number>('/notice/insert',params)
     return response.data;
 }
