@@ -2,7 +2,6 @@ import axios from "axios";
 import type { Department, DepartmentDetail, MemberDetail, MemberPatch, MemberResponse, Position } from "../types/member";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { CreateUser } from "../components/member_main/MemberCreate"
 
 const api = axios.create({
     baseURL: "http://localhost:8081/api",
@@ -90,9 +89,9 @@ export const memberDelete = async (userNo: number) => {
     return response.status;
 }
 
-export const memberCreate = async (createUser: CreateUser) => {
+export const memberCreate = async (formData: FormData) => {
     try {
-        const response = await api.post('/members', createUser);
+        const response = await api.post('/members', formData);
         return response.data;
     } catch (error: any) {
         // 필요시 error 처리

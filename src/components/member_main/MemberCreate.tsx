@@ -28,6 +28,9 @@ interface MemberCreateModalProps {
 export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps) {
     const queryClient = useQueryClient();
 
+    const [newProfileFile, setNewProfileFile] = useState<File | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
+
     const [createUser, setCreateUser] = useState<CreateUser>({
         email: '',
         userName: '',
@@ -92,9 +95,23 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
         }).open();
     };
 
+    // 프로필
+    const handleChangeProfile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setNewProfileFile(file);
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => setPreview(reader.result as string);
+            reader.readAsDataURL(file);
+        } else {
+            setPreview(null);
+        }
+    }
+
     // 사원 등록 mutation
     const createMutation = useMutation({
-        mutationFn: (newUser: CreateUser) => memberCreate(newUser),
+        mutationFn: (formData: FormData) => memberCreate(formData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
             alert('사원 등록 완료');
@@ -111,7 +128,12 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
             alert('이메일과 이름은 필수입니다.');
             return;
         }
-        createMutation.mutate(createUser);
+        const formData = new FormData();
+        formData.append('data', new Blob([JSON.stringify(createUser)], { type: 'application/json' }));
+        if (newProfileFile) {
+        formData.append('profile', newProfileFile);
+        }
+        createMutation.mutate(formData);
     };
 
     if (!isOpen) return null;
@@ -121,12 +143,13 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
             <div className={styles.modalContent}>
                 <h2 className="text-xl font-semibold mb-4">사원 등록</h2>
 
-                    <div className={styles.profileSection}>
-                        <div className={styles.profileImage}>
-                            <img src="/path/to/profile/image.jpg" alt="Profile" />
-                            <button className={styles.plusIcon}>+</button>
-                        </div>
+                <div className={styles.profileSection}>
+                    <div className={styles.profileImage}>
+                        <img src={preview || "/path/to/default/image.png"} alt="Profile" />
+                        <label htmlFor="profile-image-upload" className={styles.plusIcon}>+</label>
+                        <input id="profile-image-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleChangeProfile} />
                     </div>
+                </div>
                 <div className={styles.infoGrid}>
                     <div className={styles.infoRow}>
                         <span>이메일</span>
