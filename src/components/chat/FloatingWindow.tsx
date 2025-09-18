@@ -54,7 +54,6 @@ const FloatingWindow = ({ id, title, onClose, onFocus, zIndex, position, childre
                 onResize={handleResize}
                 resizeHandles={['s', 'e', 'se']}
                 className="rounded-lg flex flex-col overflow-hidden bg-white"
-                // ResizableBox는 크기만 조절하고 내부는 100% 채우도록 함
                 style={{width: '100%', height: '100%'}} 
             >
                 <div className="flex justify-between items-center px-3 py-1 bg-gray-500 border-b text-white">
