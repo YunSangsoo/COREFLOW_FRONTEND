@@ -52,7 +52,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                 <li>
                                     <Link to="/approvals/my-documents" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
-                                        문서목록
+                                        작성문서목록
                                     </Link>
                                 </li>
                                 <li>
@@ -64,13 +64,19 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                 <li>
                                     <Link to="approvals/received" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
-                                        결재 관리
+                                        받은 문서함
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="approvals/processed" className="block py-1 px-2 rounded hover:bg-gray-600"
                                     style={{ color: "white" }}>
                                         결재 완료함
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="approvals/cc-documents" className="block py-1 px-2 rounded hover:bg-gray-600"
+                                    style={{ color: "white" }}>
+                                        참조문서함
                                     </Link>
                                 </li>
                             </ul>

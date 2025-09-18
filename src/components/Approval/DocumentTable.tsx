@@ -57,7 +57,7 @@ const DocumentTable: React.FC = () => {
     switch (status) {
         case "대기중": 
             return 'status-waiting';
-        case "완료":
+        case "승인":
             return 'status-completed';
         case "반려":
             return 'status-rejected';

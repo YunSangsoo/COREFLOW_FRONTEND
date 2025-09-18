@@ -11,6 +11,7 @@ interface Document {
     drafter: string;
     date: string;
     status: string;
+    
 }
 
 const mapStatusCodeToString = (statusCode: number): string => {

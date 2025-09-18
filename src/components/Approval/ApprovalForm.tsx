@@ -299,6 +299,7 @@ const ApprovalForm: React.FC = () => {
             approvalTitle: title,
             approvalDetail: editor.getHTML(),
             userNo: user.id,
+            userrName: user.name,
             approvalType: approvalType,
             approvalStatus: status === 'SUBMIT' ? 1 : 0,
             startDate: new Date().toISOString(),

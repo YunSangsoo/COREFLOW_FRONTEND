@@ -1,0 +1,87 @@
+전반적인 테이블 컨테이너 스타일
+.table-container { 
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Pretendard', sans-serif; 
+}
+
+/* 전역 스타일(전체 tsx에 적용되니까 조심!) */
+table {
+    
+    border-collapse: collapse; 
+    text-align: left;
+    color: #333;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+
+thead {
+    background-color: #f8f9fa; 
+    color: #555;
+    font-weight: 600;
+}
+
+thead th {
+    border-bottom: 2px solid #dee2e6;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+tbody tr:hover {
+    background-color: #f1f3f5; 
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+td a {
+    color: #007bff; 
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+}
+
+td a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.status {
+    /* height: 28px; */
+    width: 5%;
+    border-radius: 10px;
+    text-align: center;
+    display: inline-block; 
+    min-width: 50px;       
+    font-size: 12px;      
+    padding: 2px 6px;     
+    color: rgb(255, 255, 255);  
+    background-color: #FF8E1D;
+    /* margin-top: 5px */
+
+}
+.status-waiting {
+    background-color: #FF8E1D;
+}
+
+.status-completed {
+    background-color: #1D87FF; 
+       
+}
+
+.status-rejected {
+    background-color: #FF301D;
+}

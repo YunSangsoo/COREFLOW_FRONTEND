@@ -1,0 +1,171 @@
+.detail-page-container {
+    padding: 20px;
+    background-color: #f4f6f8;
+}
+
+.detailbox {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #fff;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.header-section {
+    padding: 24px 32px;
+    border-bottom: 1px solid #dfe3e8;
+}
+
+.title {
+    margin: 0 0 20px 0;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.meta-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+}
+
+.headpont {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.headpont strong {
+    font-weight: 500;
+    color: #333;
+    margin-right: 8px;
+}
+
+.detailbody {
+    padding: 32px;
+    line-height: 1.8;
+}
+
+.approval-lines-section {
+    padding: 20px 32px;
+    border-top: 1px solid #dfe3e8;
+    background-color: #f9fafb;
+}
+
+.line-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.member-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.member-tag {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.status-waiting { background-color: #fffbe6; border-color: #ffe58f; color: #d46b08; }
+.status-approved { background-color: #f6ffed; border-color: #b7eb8f; color: #389e0d; }
+.status-rejected { background-color: #fff1f0; border-color: #ffa39e; color: #cf1322; }
+.status-pending { background-color: #e6f7ff; border-color: #91d5ff; color: #096dd9; }
+
+
+.approvalbtn {
+    padding: 20px 32px;
+    border-top: 1px solid #dfe3e8;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.approvalbtn button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.approve-button { background-color: #1890ff; color: white; }
+.approve-button:hover { background-color: #40a9ff; }
+.reject-button { background-color: #f5222d; color: white; }
+.reject-button:hover { background-color: #ff4d4f; }
+
+.loading-container, .error-container {
+    padding: 40px;
+    text-align: center;
+    font-size: 18px;
+    color: #555;
+}
+
+.attachment-section {
+    margin-top: 24px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-top: 2px solid #eee;
+}
+
+.attachment-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+    font-size: 1.1em;
+    color: #333;
+    margin: 0 0 15px 0;
+}
+
+.attachment-section h3 span {
+    font-size: 0.9em;
+    color: #007bff;
+}
+
+.attachment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.attachment-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.attachment-list li:last-child {
+    border-bottom: none;
+}
+
+.download-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.download-button:hover {
+    background-color: #0056b3;
+}
+
+.no-attachments {
+    color: #888;
+}

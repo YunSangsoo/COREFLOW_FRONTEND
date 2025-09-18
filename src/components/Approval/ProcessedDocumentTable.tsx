@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import  Pagination  from './Pagination';
-import './Approval.css';
+import './Processed.css';
 
 const ProcessedDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<any[]>([]);
