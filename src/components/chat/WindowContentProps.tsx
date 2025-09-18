@@ -12,6 +12,7 @@ interface WindowContentProps {
     allUsers: chatProfile[];
     favoriteUsers: chatProfile[];
     allChatRooms: ChatRooms[];
+    directFiles : File[];
     handleOpenChatFromUser: (user: chatProfile) => void;
     handleOpenChatFromRoom: (room: ChatRooms) => void;
     handleMakeChatRoom: () => void;
@@ -23,8 +24,9 @@ interface WindowContentProps {
     handleOpenChatRoomUserList: (roomId:number, users:chatProfile[] ) => void; 
     handleOpenProfile:(user: chatProfile) =>void;
     handleSetMyProfile:(user: chatProfile) =>void;
-    handleOpenFileUpload: (chatRoom: ChatRooms) => void;
-    handleCloseWindow: (id: string) => void
+    handleOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
+    handleCloseWindow: (id: string) => void;
+    handleLeaveRoom : (roomId : number) => void;
 
 }
 
@@ -63,12 +65,13 @@ export const WindowContent = (props: WindowContentProps) => {
 
   if (window.id.startsWith('room-')&&window.chatRoomInfo) {
     return <ChatRoom
-    {...window.chatRoomInfo} 
-    myProfile={rest.myProfile} 
-    onNewMessage={rest.handleNewMessage}
-    onRoomUserList={rest.handleOpenChatRoomUserList}
-    onOpenProfile={rest.handleOpenProfile}
-    onOpenFileUpload={rest.handleOpenFileUpload}
+      {...window.chatRoomInfo} 
+      myProfile={rest.myProfile} 
+      onNewMessage={rest.handleNewMessage}
+      onRoomUserList={rest.handleOpenChatRoomUserList}
+      onOpenProfile={rest.handleOpenProfile}
+      onOpenFileUpload={rest.handleOpenFileUpload}
+      onLeaveRoom={rest.handleLeaveRoom}
     />;
   }
 
@@ -85,6 +88,7 @@ export const WindowContent = (props: WindowContentProps) => {
       chatRoom={window.chatRoomInfo}
       myProfile={rest.myProfile}
       onUploadComplete={() => rest.handleCloseWindow(window.id)}
+      directFiles={rest.directFiles}
     />;
   }
 

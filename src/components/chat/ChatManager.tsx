@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import FloatingWindow from './FloatingWindow';
-import ChatMenu from './ChatMenu';
 import { DndContext, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import type { ChatManagerProps, ChatMessage, chatProfile, ChatRooms, WindowState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
-import ChatRoom from './ChatRoom';
-import NewChat from './NewChat';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
-import { setChatRooms, updateChatRoom } from '../../features/chatSlice';
+import { removeChatRoom, setChatRooms, updateChatRoom } from '../../features/chatSlice';
 import { WindowContent } from './WindowContentProps';
 
 
@@ -30,14 +27,10 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   const [myProfile, setMyProfile] = useState<chatProfile>();
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
-
-  const [searchKeyword, setSearchKeyword] = useState({
-    keyword:''
-  })
-
+  
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
-
+  const [directFiles, setDirectFiles] = useState<File[]>([]);
 
 
   useEffect(() => {
@@ -57,6 +50,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     });
   }, [dispatch]);
 
+  
   if(!myProfile)
     return;
 
@@ -72,6 +66,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       handleFocusWindow(windowId);
       return;
     }
+    if(!myProfile)
+      return;
 
     try{
       const response = await api.get<ChatRooms>(`/chatting/private/${user.userNo}`)
@@ -97,7 +93,24 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     }
   };
 
-
+  const handleLeaveRoom = async (roomId: number) => {
+    if (!window.confirm("정말로 채팅방을 나가시겠습니까?")) {
+      return;
+    }
+    try {
+      // 1. 백엔드 API 호출
+      await api.delete(`/chatting/room/${roomId}/leave`);
+      // 2. Redux store에서 해당 채팅방 제거
+      dispatch(removeChatRoom(roomId));
+      // 3. 열려있는 채팅방 창 닫기
+      const windowId = `room-${roomId}`;
+      handleCloseWindow(windowId);
+      alert("채팅방에서 나갔습니다.");
+    } catch (error) {
+      console.error("채팅방 나가기 실패:", error);
+      alert("채팅방을 나가는 데 실패했습니다.");
+    }
+  };
 
   const handleOpenChatFromRoom = async (chatRoom: ChatRooms) => {
     const windowId = `room-${chatRoom.roomId}`;
@@ -289,13 +302,14 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     setNextZIndex(nextZIndex + 1);
   };
 
-  const handleOpenFileUpload = (chatRoom: ChatRooms) => {
+  const handleOpenFileUpload = (chatRoom: ChatRooms, directFiles:File[]) => {
     const windowId = `file-upload-${chatRoom.roomId}`;
     if (windows.some(win => win.id === windowId)) {
       handleFocusWindow(windowId);
       return;
     }
-
+    if(directFiles)
+      setDirectFiles(directFiles);
     const newWindow: WindowState = {
       id: windowId,
       title: `"${chatRoom.roomName}" 파일 전송`,
@@ -331,6 +345,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               allUsers={allUsers}
               favoriteUsers={favoriteUsers}
               allChatRooms={allChatRooms}
+              directFiles={directFiles}
               handleOpenChatFromUser={handleOpenChatFromUser}
               handleOpenChatFromRoom={handleOpenChatFromRoom}
               handleMakeChatRoom={handleMakeChatRoom}
@@ -344,6 +359,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               handleSetMyProfile={setMyProfile}
               handleOpenFileUpload={handleOpenFileUpload}
               handleCloseWindow={handleCloseWindow}
+              handleLeaveRoom={handleLeaveRoom}
             />
           </FloatingWindow>
         ))}
