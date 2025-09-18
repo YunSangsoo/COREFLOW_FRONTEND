@@ -12,6 +12,7 @@ interface WindowContentProps {
     allUsers: chatProfile[];
     favoriteUsers: chatProfile[];
     allChatRooms: ChatRooms[];
+    directFiles : File[];
     handleOpenChatFromUser: (user: chatProfile) => void;
     handleOpenChatFromRoom: (room: ChatRooms) => void;
     handleMakeChatRoom: () => void;
@@ -23,7 +24,7 @@ interface WindowContentProps {
     handleOpenChatRoomUserList: (roomId:number, users:chatProfile[] ) => void; 
     handleOpenProfile:(user: chatProfile) =>void;
     handleSetMyProfile:(user: chatProfile) =>void;
-    handleOpenFileUpload: (chatRoom: ChatRooms) => void;
+    handleOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
     handleCloseWindow: (id: string) => void;
     handleLeaveRoom : (roomId : number) => void;
 
@@ -87,6 +88,7 @@ export const WindowContent = (props: WindowContentProps) => {
       chatRoom={window.chatRoomInfo}
       myProfile={rest.myProfile}
       onUploadComplete={() => rest.handleCloseWindow(window.id)}
+      directFiles={rest.directFiles}
     />;
   }
 

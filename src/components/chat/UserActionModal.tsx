@@ -25,7 +25,7 @@ interface chatRoomModalProps {
   onClose :()=>void;
   onUsersUpdate :(user:chatProfile[]) => void;
   onRoomUserList :() => void;
-  onOpenFileUpload: (chatRoom: ChatRooms) => void;
+  onOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
   onLeaveRoom:(roomId : number) => void;
 }
 
@@ -246,7 +246,7 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
           }
           <li>
             <button
-              onClick={() =>{onOpenFileUpload(chatRooms);onClose();}}
+              onClick={() =>{onOpenFileUpload(chatRooms,[]);onClose();}}
               className="w-full text-left block px-4 py-2 hover:bg-gray-100"
             >
               파일 전송

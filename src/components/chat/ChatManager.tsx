@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import FloatingWindow from './FloatingWindow';
-import ChatMenu from './ChatMenu';
 import { DndContext, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import type { ChatManagerProps, ChatMessage, chatProfile, ChatRooms, WindowState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
-import ChatRoom from './ChatRoom';
-import NewChat from './NewChat';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { removeChatRoom, setChatRooms, updateChatRoom } from '../../features/chatSlice';
@@ -30,14 +27,10 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   const [myProfile, setMyProfile] = useState<chatProfile>();
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
-
-  const [searchKeyword, setSearchKeyword] = useState({
-    keyword:''
-  })
-
+  
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
-
+  const [directFiles, setDirectFiles] = useState<File[]>([]);
 
 
   useEffect(() => {
@@ -57,6 +50,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     });
   }, [dispatch]);
 
+  
   if(!myProfile)
     return;
 
@@ -72,6 +66,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       handleFocusWindow(windowId);
       return;
     }
+    if(!myProfile)
+      return;
 
     try{
       const response = await api.get<ChatRooms>(`/chatting/private/${user.userNo}`)
@@ -306,13 +302,14 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     setNextZIndex(nextZIndex + 1);
   };
 
-  const handleOpenFileUpload = (chatRoom: ChatRooms) => {
+  const handleOpenFileUpload = (chatRoom: ChatRooms, directFiles:File[]) => {
     const windowId = `file-upload-${chatRoom.roomId}`;
     if (windows.some(win => win.id === windowId)) {
       handleFocusWindow(windowId);
       return;
     }
-
+    if(directFiles)
+      setDirectFiles(directFiles);
     const newWindow: WindowState = {
       id: windowId,
       title: `"${chatRoom.roomName}" 파일 전송`,
@@ -348,6 +345,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
               allUsers={allUsers}
               favoriteUsers={favoriteUsers}
               allChatRooms={allChatRooms}
+              directFiles={directFiles}
               handleOpenChatFromUser={handleOpenChatFromUser}
               handleOpenChatFromRoom={handleOpenChatFromRoom}
               handleMakeChatRoom={handleMakeChatRoom}
