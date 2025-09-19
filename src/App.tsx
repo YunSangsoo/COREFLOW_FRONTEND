@@ -26,6 +26,8 @@ import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 import type { RootState } from './store/store';
 import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 import Organization from './pages/member_organization/Organization';
+import ProtectedRoute from './components/ProtectedRoute';
+import Unauthorized from './components/Unauthorized';
 
 
 function App() {
@@ -90,23 +92,35 @@ function App() {
                     <Route path="" element={<CompanyPolicyMainAdmin/>} />
                     <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
                 </Route>
-                <Route>
-                    <Route path='/calendar' element={<CalendarPage/>}/>
-                    <Route path='/rooms' element={<RoomsPage/>}/>
-                </Route>
-                <Route path='/members' element={<MemberMain/>}></Route>
-                <Route path='/members' element={<MemberMain/>}/>
-                <Route path='/vacation'>
-                    <Route path='info' element={<VacationInfo/>}/>
-                    <Route path='member' element={<VacationMember/>}/>
-                    <Route path='personal' element={<VacationPersonal/>}/>
-                </Route>
+                    <Route path='/members' element={
+                        <ProtectedRoute>
+                            <MemberMain/>
+                        </ProtectedRoute>
+                        }/>
+                    <Route path='/vacation'>
+                        <Route path='info' element={<VacationInfo/>}/>
+                        <Route path='member' element={
+                            <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
+                                <VacationMember/>
+                            </ProtectedRoute>
+                            }/>
+                        <Route path='personal' element={<VacationPersonal/>}/>
+                    </Route>
                 <Route path='/attendance'>
-                    <Route path="member" element={<AttendanceMember/>}/>
+                    <Route path="member" element={
+                        <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
+                            <AttendanceMember/>
+                        </ProtectedRoute>
+                    }/>
                     <Route path="personal" element={<AttendancePersonal/>}/>
                 </Route>
                 <Route path="/organization" element={<Organization/>}/>
+                
+
+
+                <Route path='/unAuthorized' element={<Unauthorized/>}/>
             </Routes>
+
 
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
             {isChatOpen && <ChatManager onClose={handleToggleChat} />}
