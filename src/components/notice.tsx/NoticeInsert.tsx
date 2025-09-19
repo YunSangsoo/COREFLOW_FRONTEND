@@ -19,8 +19,8 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
         parentDepId: null,
         childDepId: null,
         posId: null,
-        endDate: null,
-        endTime: null
+        endDate: '',
+        endTime: ''
     });
 
     const { data: parentDep } = useQuery<Department[]>({
@@ -43,7 +43,14 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
         const { name, value, type } = e.target;
         
         setNoticeForm(prevForm => {
-            if (name === 'parentDepId' || name === 'childDepId' || name === 'posId') {
+            if(name === 'parentDepId'){
+                return {
+                    ...prevForm,
+                    parentDepId:value ? Number(value) : null,
+                    childDepId:null
+                }
+            }
+            if (name === 'childDepId' || name === 'posId') {
                 return {
                     ...prevForm,
                     [name]: value ? Number(value) : null,
@@ -67,10 +74,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        let depId:number|null = null;
-        if(noticeForm.parentDepId){
-            depId = noticeForm.childDepId === null ? noticeForm.parentDepId : noticeForm.childDepId
-        }
+        const depId = noticeForm.childDepId ?? noticeForm.parentDepId
 
         const dataSubmit: NotiInsert = {
             title: noticeForm.title,
@@ -78,7 +82,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
             content: noticeForm.content,
             endDate: noticeForm.endDate || undefined,
             endTime: noticeForm.endTime || undefined,
-            depId: depId,
+            depId: depId ?? undefined,
             posId: noticeForm.posId || undefined
         };
 
@@ -219,9 +223,6 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                                                 onChange={handleChange}
                                                 className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                             />
-                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 12h14M5 16h14M5 20h14" /></svg>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -252,11 +253,12 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center">
-                            <span className="font-semibold text-gray-700">첨부 :</span>
-                            <button className="ml-2 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-gray-100 text-gray-500 hover:bg-gray-200">
-                                +
-                            </button>
+                        <div>
+                            <label className="font-semibold text-gray-700 block mb-2">첨부</label>
+                            <label className="inline-flex items-center justify-center h-10 w-auto min-w-[120px] px-4 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
+                                <input type="file" className="hidden" />
+                                <span className="text-gray-600 font-medium">파일 선택</span>
+                            </label>
                         </div>
                     </div>
 

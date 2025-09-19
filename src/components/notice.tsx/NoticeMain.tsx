@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { NoticeResponse, SearchParams } from "../../types/notice";
 import { notiList } from "../../api/noticeApi";
 import { useState } from "react";
-import NotiInsert from "./NoticeInsert";
+import NoticeDetail from "./NoticeDetail";
+import NoticeInsert from "./NoticeInsert";
 
 interface NoticeMainProps{
     onClose : () => void;
@@ -12,12 +13,25 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
     
     const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
     
-    const openNoticeModal = () => {
+    const [isNoticeDetailOpen, setIsNoticeDetailOpen] = useState(false);
+    const [selectedNoticeId, setSelectedNoticeId] = useState<number|null>(null);
+
+    const openNoticeInsert = () => {
         setIsNoticeInsertOpen(true);
     }
 
-    const closeNoticeModal = () => {
+    const closeNoticeInsert = () => {
         setIsNoticeInsertOpen(false);
+    }
+
+    const openNoticeDetail = (notiId:number) => {
+        setSelectedNoticeId(notiId);
+        setIsNoticeDetailOpen(true);
+    }
+
+    const closeNoticeDetail = () => {
+        setSelectedNoticeId(null);
+        setIsNoticeDetailOpen(false);
     }
 
     const [inputParams, setInputParams] = useState<SearchParams>({
@@ -75,7 +89,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                             className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <button onClick={handleSearch} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">검색</button>
                         <button onClick={handleReset} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">초기화</button>
-                        <button onClick={openNoticeModal} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
+                        <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded-md overflow-hidden overflow-y-auto max-h-[400px]">
@@ -90,7 +104,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {noticeList && noticeList.map((notice,index) => (
-                                <tr key={notice.notiId} className="hover:bg-gray-100 cursor-pointer">
+                                <tr key={notice.notiId} onDoubleClick={() => openNoticeDetail(notice.notiId)} className="hover:bg-gray-100 cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap">{index+1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -110,7 +124,8 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                     </table>
                 </div>
             </div>
-            {isNoticeInsertOpen && <NotiInsert onClose={closeNoticeModal}/>}
+            {isNoticeInsertOpen && <NoticeInsert onClose={closeNoticeInsert}/>}
+            {isNoticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail}/>)}
         </div>
     );
 };

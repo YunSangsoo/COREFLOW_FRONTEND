@@ -23,3 +23,15 @@ export interface NotiInsert{
     childDepId?:number|null;
     posId?:number|null;
 }
+
+export interface NotiDetail{
+    notiId:number;
+    essential:string;
+    title:string;
+    userName:String;
+    depName:String;
+    posName:String;
+    enrollDate:Date;
+    updateDate?:Date|null;
+    content:string;
+}
