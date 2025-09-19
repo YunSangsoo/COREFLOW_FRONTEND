@@ -47,6 +47,8 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
     const [isDepartmentMap, setIsDepartmentMap] = useState(false);
     const depMapRef = useRef<HTMLDivElement>(null);
 
+    const today = new Date().toISOString().split('T')[0];
+
     // 직위 조회
     const { data: positions } = useQuery<Position[]>({
         queryKey: ['positions'],
@@ -196,7 +198,7 @@ export default function MemberCreate({ isOpen, onClose }: MemberCreateModalProps
                     </div>
                     <div className={styles.infoRow}>
                         <span>입사일</span>
-                        <input type="date" name="hireDate" value={createUser.hireDate} onChange={handleChange} />
+                        <input type="date" name="hireDate" value={createUser.hireDate} onChange={handleChange} max={today}/>
                     </div>
                     <div className={styles.infoRow}>
                         <span>재직상태</span>
