@@ -2,6 +2,9 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import type { PutVacation, VacType } from "../../types/vacation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { putVacation, vacType } from "../../api/vacationApi";
+import dayjs from "dayjs";
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+dayjs.extend(isSameOrAfter);
 
 interface PutVacationProps{
     onClose: () => void
@@ -39,18 +42,77 @@ export default function PutVacation(props:PutVacationProps){
         }
     },[isSuccess])
     
-    const handleInputChange = (e:ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
-        const {name,value} = e.target;
+    const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
         setVacationData((prevData) => ({
             ...prevData,
-            [name]:name === "vacAmount" || name === "vacCode" ? Number(value) : value}))
-    }
+            [name]: value
+        }));
+    };
     
+    const handleDateBlur = (e:React.FocusEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        const dateObj = dayjs(value);
+        if(dateObj.isValid()){
+            setVacationData((prev) => ({
+                ...prev,[name]:dateObj.format('YYYY-MM-DD')
+            }))
+        }else{
+            alert('날짜 형식이 올바르지 않습니다.')
+            setVacationData((prev) => ({
+                ...prev,[name]:''
+            }))
+        }
+    }
+
+    const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setVacationData((prevData) => ({
+            ...prevData,
+            [name]: Number(value)
+        }));
+    };
+
+    const handleNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setVacationData((prevData) => ({
+            ...prevData,
+            [name]: Number(value)
+        }));
+    };
+
     const handleSubmit = (e:FormEvent) => {
         e.preventDefault();
+        
+        // 제출 전 유효성 검증
+        const vacStartDayjs = dayjs(vacationData.vacStart);
+        const vacEndDayjs = dayjs(vacationData.vacEnd);
+        
+        if (!vacStartDayjs.isValid() || !vacEndDayjs.isValid()) {
+            alert("휴가 시작일과 종료일을 올바른 날짜 형식으로 입력해주세요.");
+            return;
+        }
+
+        if (vacEndDayjs.isSameOrAfter(vacStartDayjs) === false) {
+            alert("휴가 종료일은 시작일보다 빠를 수 없습니다.");
+            return;
+        }
+
         mutate(vacationData);
         props.onClose();
     }
+    // const handleInputChange = (e:ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
+    //     const {name,value} = e.target;
+    //     setVacationData((prevData) => ({
+    //         ...prevData,
+    //         [name]:name === "vacAmount" || name === "vacCode" ? Number(value) : value}))
+    // }
+
+    // const handleSubmit = (e:FormEvent) => {
+    //     e.preventDefault();
+    //     mutate(vacationData);
+    //     props.onClose();
+    // }
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -60,7 +122,7 @@ export default function PutVacation(props:PutVacationProps){
                     <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">휴가 종류</label>
                         <select 
-                            name="vacCode" value={vacationData.vacCode} onChange={handleInputChange}
+                            name="vacCode" value={vacationData.vacCode} onChange={handleSelectChange}
                             className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             {data && data.length > 0 ? (
                                 data.map((vac) => (
@@ -73,21 +135,21 @@ export default function PutVacation(props:PutVacationProps){
                     <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">휴가 시작일</label>
                         <input
-                            type="date" name="vacStart" value={vacationData.vacStart} onChange={handleInputChange}
+                            type="date" name="vacStart" value={vacationData.vacStart} onChange={handleDateChange} onBlur={handleDateBlur}
                             className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     </div>
                     
                     <div className="mb-4">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">휴가 종료일</label>
                         <input
-                            type="date" name="vacEnd" value={vacationData.vacEnd} onChange={handleInputChange}
+                            type="date" name="vacEnd" value={vacationData.vacEnd} onChange={handleDateChange} onBlur={handleDateBlur}
                             className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     </div>
                     
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-gray-700 mb-1">사용 일수</label>
                         <input
-                            type="number" name="vacAmount" min="0.5" step="0.5"  value={vacationData.vacAmount} onChange={handleInputChange}
+                            type="number" name="vacAmount" min="0.5" step="0.5"  value={vacationData.vacAmount} onChange={handleNumberChange}
                             className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     </div>
 
