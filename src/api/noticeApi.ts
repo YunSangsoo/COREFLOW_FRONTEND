@@ -48,7 +48,7 @@ api.interceptors.response.use(
     }
 )
 
-export const notiList = async (params:SearchParams={}) => {
+export const notiList = async (params:SearchParams={},) => {
     const response = await api.get<NoticeResponse[]>('/notice/main',{params});
     return response.data;
 }
