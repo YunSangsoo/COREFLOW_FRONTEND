@@ -62,3 +62,8 @@ export const notiDetail = async (notiId:number) => {
     const response = await api.get<NotiDetail>(`/notice/detail/${notiId}`);
     return response.data;
 }
+
+export const notiUpdate = async (data:{notiId:number, params:NotiInsert}) => {
+    const response = await api.patch<NotiDetail>(`/notice/update/${data.notiId}`,data.params);
+    return response.data;
+}

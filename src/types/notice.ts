@@ -30,10 +30,15 @@ export interface NotiDetail{
     notiId:number;
     essential:string;
     title:string;
-    userName:String;
-    depName:String;
-    posName:String;
+    userName:string;
+    depName:string;
+    posName:string;
     enrollDate:Date;
     updateDate?:Date|null;
     content:string;
+    parentDepId?:number|null;
+    childDepId?:number|null;
+    posId?:number|null;
+    endDate?:string|null;
+    endTime?:string|null;
 }
