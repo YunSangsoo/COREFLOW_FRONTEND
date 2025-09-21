@@ -48,7 +48,7 @@ api.interceptors.response.use(
     }
 )
 
-export const notiList = async (params:SearchParams={}) => {
+export const notiList = async (params:SearchParams={},) => {
     const response = await api.get<NoticeResponse[]>('/notice/main',{params});
     return response.data;
 }
@@ -60,5 +60,10 @@ export const notiInsert = async (params:NotiInsert) => {
 
 export const notiDetail = async (notiId:number) => {
     const response = await api.get<NotiDetail>(`/notice/detail/${notiId}`);
+    return response.data;
+}
+
+export const notiUpdate = async (data:{notiId:number, params:NotiInsert}) => {
+    const response = await api.patch<NotiDetail>(`/notice/update/${data.notiId}`,data.params);
     return response.data;
 }

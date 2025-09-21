@@ -2,25 +2,26 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Department, DepartmentDetail, Position } from "../../types/member";
 import { depDetailList, depList, posList } from "../../api/memberApi";
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { notiInsert } from "../../api/noticeApi";
-import type { NotiInsert } from "../../types/notice";
+import { notiInsert, notiUpdate } from "../../api/noticeApi";
+import type { NotiDetail, NotiInsert } from "../../types/notice";
 
 interface NoticeInsertProps {
     onClose: () => void;
+    initData?:NotiDetail;
 }
 
-export default function NoticeInsert({ onClose }: NoticeInsertProps) {
+export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
     const queryClient = useQueryClient();
 
     const [noticeForm, setNoticeForm] = useState<NotiInsert>({
-        title: '',
-        essential: 'F',
-        content: '',
-        parentDepId: null,
-        childDepId: null,
-        posId: null,
-        endDate: '',
-        endTime: ''
+        title: initData?.title || '',
+        essential: initData?.essential === 'T' ? 'T' : 'F',
+        content: initData?.content || '',
+        parentDepId: initData?.parentDepId || null,
+        childDepId: initData?.childDepId || null,
+        posId: initData?.posId || null,
+        endDate: initData?.endDate || '',
+        endTime: initData?.endTime || ''
     });
 
     const { data: parentDep } = useQuery<Department[]>({
@@ -83,10 +84,16 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
             endDate: noticeForm.endDate || undefined,
             endTime: noticeForm.endTime || undefined,
             depId: depId ?? undefined,
+            parentDepId:noticeForm.parentDepId || undefined,
+            childDepId:noticeForm.childDepId || undefined,
             posId: noticeForm.posId || undefined
         };
 
-        insertMutation.mutate(dataSubmit);
+        if(initData){
+            updateMutation.mutate({notiId:initData.notiId, params:dataSubmit})
+        }else{
+            insertMutation.mutate(dataSubmit);
+        }
     };
 
     const insertMutation = useMutation({
@@ -99,6 +106,19 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
         onError: (error) => {
             console.error("공지 등록 실패 : ", error);
             alert('공지 등록에 실패했습니다.');
+        }
+    })
+    
+    const updateMutation = useMutation({
+        mutationFn:notiUpdate,
+        onSuccess:()=>{
+            queryClient.invalidateQueries({queryKey:['notices']});
+            onClose();
+            alert('공지가 수정되었습니다.');
+        },
+        onError:(error) =>{
+            console.error("공지 수정 실패 : ", error);
+            alert('공지 수정에 실패했습니다.');
         }
     })
 
@@ -263,7 +283,7 @@ export default function NoticeInsert({ onClose }: NoticeInsertProps) {
                     </div>
 
                     <div className="flex justify-end space-x-4 bg-gray-100 p-4">
-                        <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">등록</button>
+                        <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">{initData ? '수정':'등록'}</button>
                     </div>
                 </div>
             </div>

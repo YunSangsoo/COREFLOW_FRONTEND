@@ -3,13 +3,15 @@ export interface NoticeResponse{
     userName:string;
     title:string;
     enrollDate:Date;
-    essential:String;
-    status:String;
+    essential:string;
+    status:string;
 }
 
 export interface SearchParams{
     searchType?:'title'|'content'|'writer';
     keyword?:string;
+    depId?:number;
+    posId?:number;
 }
 
 export interface NotiInsert{
@@ -28,10 +30,15 @@ export interface NotiDetail{
     notiId:number;
     essential:string;
     title:string;
-    userName:String;
-    depName:String;
-    posName:String;
+    userName:string;
+    depName:string;
+    posName:string;
     enrollDate:Date;
     updateDate?:Date|null;
     content:string;
+    parentDepId?:number|null;
+    childDepId?:number|null;
+    posId?:number|null;
+    endDate?:string|null;
+    endTime?:string|null;
 }

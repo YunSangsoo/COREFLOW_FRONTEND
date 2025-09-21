@@ -4,13 +4,15 @@ import { notiList } from "../../api/noticeApi";
 import { useState } from "react";
 import NoticeDetail from "./NoticeDetail";
 import NoticeInsert from "./NoticeInsert";
+import { store } from "../../store/store";
 
 interface NoticeMainProps{
     onClose : () => void;
 }
 
 export default function NoticeMain({onClose} : NoticeMainProps) {
-    
+    const user = store.getState().auth.user;
+
     const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
     
     const [isNoticeDetailOpen, setIsNoticeDetailOpen] = useState(false);
@@ -36,12 +38,14 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
 
     const [inputParams, setInputParams] = useState<SearchParams>({
         searchType:"title",
-        keyword:""
+        keyword:"",
     })
 
     const [searchParams, setSearchParams] = useState<SearchParams>({
         searchType:"title",
-        keyword:""
+        keyword:"",
+        depId:user?.depId,
+        posId:user?.posId
     });
 
     const { data: noticeList } = useQuery<NoticeResponse[]>({

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { notiDetail } from "../../api/noticeApi";
 import type { NotiDetail } from "../../types/notice";
+import { useState } from "react";
+import NoticeInsert from "./NoticeInsert";
 
 interface NoticeDetailProps {
     notiId: number;
@@ -8,6 +10,15 @@ interface NoticeDetailProps {
 }
 
 export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
+
+    const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
+
+    const openNoticeInsert = () => {
+        setIsNoticeInsertOpen(true);
+    }
+    const closeNoticeInsert = () => {
+        setIsNoticeInsertOpen(false);
+    }  
 
     const { data } = useQuery<NotiDetail>({
         queryKey: ['noticeDetail', notiId],
@@ -73,6 +84,9 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                         ))} */}
                 </div>
                 {/* )} */}
+                
+                <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">수정</button>
+                {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
             </div>
         </div>
     );
