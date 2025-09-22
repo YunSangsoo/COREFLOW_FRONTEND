@@ -64,12 +64,12 @@ export const updateAiUsage = async (tokensUsed:number) => {
 };
 
 export const sendPrompt = async (messages:message[]) => {
-    const response = await axios.post("http://192.168.10.216:8000/chat", {messages});
+    const response = await axios.post("http://192.168.10.216:8005/chat", {messages});
     return response.data;
 };
 
 export const createTitle = async (prompt:string) => {
-    const response = await axios.post("http://192.168.10.216:8000/create_title", {message:prompt});
+    const response = await axios.post("http://192.168.10.216:8005/create_title", {message:prompt});
     return response.data;
 };
 
