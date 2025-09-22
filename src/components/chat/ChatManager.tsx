@@ -109,8 +109,10 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   };
   
   const handleNewMessage = (room: ChatRooms, message: ChatMessage) => {
-    const updatedRoom = { ...room, lastMessage: message };
-    dispatch(updateChatRoom(updatedRoom));
+    if(message.type==="TALK"||message.type==="FILE"){
+      const updatedRoom = { ...room, lastMessage: message };
+      dispatch(updateChatRoom(updatedRoom));
+    }
   };
 
   const handleOpenChatFromUser = async (user: chatProfile) => {

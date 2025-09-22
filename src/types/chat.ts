@@ -66,6 +66,7 @@ export interface ChatRooms {
   partner : chatProfile[];
   lastMessage? : ChatMessage;
   unreadCount: number;
+  alarm : string;
 }
 
 // 메시지 타입을 정의합니다.
