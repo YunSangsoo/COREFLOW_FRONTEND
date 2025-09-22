@@ -3,6 +3,7 @@ import type { ChatMenuProps, chatProfile, ModalState } from '../../types/chat';
 import UserActionModal, { UserStateModal } from './UserActionModal';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '../../hooks/useDebounce';
+import {AlarmIcon, NotAlarmIcon} from './SvgSettingIcon';
 
 
 const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClick, onChatRoomClick, onMakeChatRoomClick, onToggleFavorite,onSetState , onSearchUser, onOpenProfile }: ChatMenuProps) => {
@@ -263,11 +264,14 @@ const ChatMenu = ({ myProfile, allUsers, favoriteUsers, allChatRooms, onUserClic
                     </div>
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-gray-500 truncate">{room.lastMessage?.messageText}</p>
-                        {room.unreadCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
-                            {room.unreadCount}
-                          </span>
-                        )}
+                        <span className="flex-shrink-0 px-2 py-1 text-gray-400 text-sm rounded-full ml-auto">
+                          {room.alarm=='T'? (<AlarmIcon size={20}/>):(<NotAlarmIcon size={20}/>)}
+                        </span>
+                      {room.unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                          {room.unreadCount}
+                        </span>
+                      )}
                   </div>
                   </div>
                 </li>
