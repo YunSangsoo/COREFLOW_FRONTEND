@@ -53,3 +53,12 @@ tr:hover {
     background-color: #FF301D;
 }
 
+.scbar input{
+    border: solid 1px;
+    border-radius: 3px;
+}
+
+.scbar button{
+  border: solid 1px;
+  border-color: #ddd;
+}

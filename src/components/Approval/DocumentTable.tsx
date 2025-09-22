@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import './Approval.css'
 import { Link } from "react-router-dom";
+import Pagination from "./Pagination";
 
 interface Document {
     id: number;
@@ -14,8 +15,13 @@ interface Document {
 
 const DocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
-    const [filter, setFilter] = useState<string>("일반결재");
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<string>("일반결재");
+    const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState('');
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     const accessToken = useSelector((state: any) => state.auth.accessToken);
 
@@ -30,14 +36,15 @@ const DocumentTable: React.FC = () => {
                 const response = await axios.get('http://localhost:8081/api/approvals/my-documents',{
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
-                    }
+                    },
+                    params: {keyword:query}
                 });
                 const mappedDocs = response.data.map((item: any) => ({
                     id: item.approvalId,
                     type: item.approvalType, 
                     title: item.approvalTitle,
                     date: item.startDate ? new Date(item.startDate).toLocaleDateString() : "",
-                    status: item.approvalStatus === 1 ? "진행중" : item.approvalStatus === 2 ? "승인" : "반려" // 임시 상태 매핑
+                    status: item.approvalStatus === 1 ? "진행중" : item.approvalStatus === 2 ? "승인" : "반려" 
                 }));
                 setDocuments(mappedDocs);
             } catch(err) {
@@ -47,11 +54,27 @@ const DocumentTable: React.FC = () => {
         }    
     };
     fetchMyDocuments();
-    }, [accessToken]);
+    }, [accessToken, query]);
+
+    const handleSearch = () => {
+        setQuery(searchTerm.trim());
+        setCurrentPage(1);
+    }
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter'){
+            handleSearch();
+        }
+    }
 
     if (loading) return <div>로딩중...</div>;
 
-    const filteredDocs = documents.filter(doc => doc.type === filter);
+    const docsToRender = query ? documents : documents.filter(doc => doc.type === filter);
+
+    const indexOfLastDocument = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstDocument = indexOfLastDocument - ITEMS_PER_PAGE;
+    const currentDocuments = docsToRender.slice(indexOfFirstDocument, indexOfLastDocument);
+    const totalPages = Math.ceil(docsToRender.length / ITEMS_PER_PAGE);
 
     const getStatusClassName = (status: string): string => {
     switch (status) {
@@ -83,7 +106,7 @@ const DocumentTable: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredDocs.map(doc => (
+                    {currentDocuments.map(doc => (
                         <tr key={doc.id}>
                             <td>{doc.type}</td>
                             <td>
@@ -97,6 +120,21 @@ const DocumentTable: React.FC = () => {
                     ))}
                 </tbody>
             </table>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
+
+            <div className="scbar">
+                <input type="text"
+                placeholder="검색"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress} />
+                <button onClick={handleSearch}>검색</button>
+            </div>
         </div>
     );
 };

@@ -6,11 +6,12 @@ import './Detail.css';
 import { FiDownload, FiPaperclip } from 'react-icons/fi';
 
 interface AttachedFile{
-    id: number;
-    fileName: string;
+    fileId: number;
+    originalFileName: string;
 }
 
 interface ApprovalLine{
+    lineId: number;
     userName: string;
     lineStatus: string;
     lineOrder: number;
@@ -25,7 +26,7 @@ interface Approval {
     approvalDetail: string;
     userName: string;
     lines: ApprovalLine[];
-    attachedFiles?: AttachedFile[];
+    files?: AttachedFile[];
 }
 
 interface DocumentData{
@@ -116,85 +117,123 @@ const DocumentDetailPage: React.FC = () => {
     const approvers = doc.approval.lines.filter(line => line.lineOrder === 1);
     const ccs = doc.approval.lines.filter(line => line.lineOrder === 2);
 
+    const handleDownload = async (fileId: number, fileName:string) => {
+        if (!accessToken){
+            alert('로그인 정보없음');
+            return;
+        }
+
+        try{
+            const response = await axios.get(`http://localhost:8081/api/approvals/files/download/${fileId}`,{
+                headers: { 'Authorization': `Bearer ${accessToken}`},
+                responseType: 'blob',
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error){
+            console.error("다운로드 실패",error);
+            alert("다운로드 실패");
+        }
+    };
+
     return (
-        <div className="detail-page-container">
-            <div className="detailbox">
-                <div className="header-section">
-                    <h1 className="title">{doc.approval.approvalTitle}</h1>
-                    <div className="meta-info-grid">
-                        <p className="headpont"><strong>작성자:</strong> {doc.approval.userName}</p>
-                        <p className="headpont"><strong>문서 종류:</strong> {doc.approval.approvalType}</p>
-                        <p className="headpont"><strong>기안일:</strong> {new Date(doc.approval.startDate).toLocaleDateString()}</p>
-                        <p className="headpont"><strong>문서 상태:</strong> {mapStatus(doc.approval.approvalStatus)}</p>
-                        {doc.approval.endDate && (
-                            <p className="headpont"><strong>완료일:</strong> {new Date(doc.approval.endDate).toLocaleDateString()}</p>
-                        )}
-                    </div>
+    <div className="detail-page-container">
+        <div className="detailbox">
+            <div className="header-section">
+                <h1 className="title">{doc.approval.approvalTitle}</h1>
+                <div className="meta-info-grid">
+                    <p className="headpont"><strong>작성자:</strong> {doc.approval.userName}</p>
+                    <p className="headpont"><strong>문서 종류:</strong> {doc.approval.approvalType}</p>
+                    <p className="headpont"><strong>기안일:</strong> {new Date(doc.approval.startDate).toLocaleDateString()}</p>
+                    <p className="headpont"><strong>문서 상태:</strong> {mapStatus(doc.approval.approvalStatus)}</p>
+                    {doc.approval.endDate && (
+                        <p className="headpont"><strong>완료일:</strong> {new Date(doc.approval.endDate).toLocaleDateString()}</p>
+                    )}
                 </div>
+            </div>
 
-                <div className="detailbody" dangerouslySetInnerHTML={{ __html: doc.approval.approvalDetail }} />
+            <div className="detailbody" dangerouslySetInnerHTML={{ __html: doc.approval.approvalDetail }} />
 
-                 <div className="attachment-section">
-                    <h3>
-                        <FiPaperclip /> 첨부파일
-                        <span>({doc.approval.attachedFiles?.length || 0}개)</span>
-                    </h3>
-                    {doc.approval.attachedFiles && doc.approval.attachedFiles.length > 0 ? (
-                        <ul className="attachment-list">
-                            {doc.approval.attachedFiles.map(file => (
-                                <li key={file.id}>
-                                    <span>{file.fileName}</span>
-                                    <a
-                                        href={`http://localhost:8081/api/files/download/${file.id}`}
-                                        download={file.fileName}
+            <div className="attachment-section">
+                <h3>
+                    <FiPaperclip /> 첨부파일
+                    <span>({doc.approval.files?.length || 0}개)</span>
+                </h3>
+                {doc.approval.files && doc.approval.files.length > 0 ? (
+                    <ul className="attachment-list">
+                        {doc.approval.files.map(file => {
+                            // 👇 파일 키 값 확인용 로그
+                            console.log('**파일(File) 렌더링 Key:', file.fileId); 
+                            return (
+                                <li key={file.fileId}>
+                                    <span>{file.originalFileName}</span>
+                                    <button
+                                        onClick={() => handleDownload(file.fileId, file.originalFileName)}
                                         className="download-button"
                                     >
                                         <FiDownload /> 다운로드
-                                    </a>
+                                    </button>
                                 </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="no-attachments">첨부된 파일이 없습니다.</p>
-                    )}
-                </div>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <p className="no-attachments">첨부된 파일이 없습니다.</p>
+                )}
+            </div>
 
-                <div className="approval-lines-section">
-                    {approvers.length > 0 && (
-                        <div>
-                            <h3 className="line-title">결재자</h3>
-                            <div className="member-tags">
-                                {approvers.map((approver, index) => (
-                                    <span key={index} className={`member-tag status-${approver.lineStatus.toLowerCase()}`}>
+            <div className="approval-lines-section">
+                {approvers.length > 0 && (
+                    <div>
+                        <h3 className="line-title">결재자</h3>
+                        <div className="member-tags">
+                            {approvers.map((approver) => {
+                                // 👇 결재자 키 값 확인용 로그
+                                console.log('**결재자(Approver) 렌더링 Key:', approver.lineId);
+                                return (
+                                    <span key={approver.lineId} className={`member-tag status-${approver.lineStatus.toLowerCase()}`}>
                                         {approver.userName} ({mapLineStatus(approver.lineStatus)})
                                     </span>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
-                    )}
-                    {ccs.length > 0 && (
-                        <div style={{ marginTop: '16px' }}>
-                            <h3 className="line-title">참조자</h3>
-                            <div className="member-tags">
-                                {ccs.map((cc, index) => (
-                                    <span key={index} className="member-tag status-pending">
+                    </div>
+                )}
+                {ccs.length > 0 && (
+                    <div style={{ marginTop: '16px' }}>
+                        <h3 className="line-title">참조자</h3>
+                        <div className="member-tags">
+                            {ccs.map((cc) => {
+                                // 👇 참조자 키 값 확인용 로그
+                                console.log('**참조자(CC) 렌더링 Key:', cc.lineId);
+                                return (
+                                    <span key={cc.lineId} className="member-tag status-pending">
                                         {cc.userName}
                                     </span>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
-
-                {doc.currentUserIsApprover && doc.approval.approvalStatus === 1 && (
-                    <div className="approvalbtn">
-                        <button onClick={() => handleApprovalAction('APPROVE')} className="approve-button">승인</button>
-                        <button onClick={() => handleApprovalAction('REJECT')} className="reject-button">반려</button>
                     </div>
                 )}
             </div>
+
+            {doc.currentUserIsApprover && doc.approval.approvalStatus === 1 && (
+                <div className="approvalbtn">
+                    <button onClick={() => handleApprovalAction('APPROVE')} className="approve-button">승인</button>
+                    <button onClick={() => handleApprovalAction('REJECT')} className="reject-button">반려</button>
+                </div>
+            )}
         </div>
-    );
+    </div>
+);
 };
 
 

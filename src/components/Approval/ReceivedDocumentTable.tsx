@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import './Approval.css'
 import { Link } from "react-router-dom";
+import Pagination from "./Pagination";
 
 interface Document {
     id: number;
@@ -32,6 +33,12 @@ const ReceivedDocumentTable: React.FC = () => {
     const [filter, setFilter] = useState<string>("일반결재");
     const [loading, setLoading] = useState(true);
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState('');
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
+
     const accessToken = useSelector((state: any) => state.auth.accessToken);
 
     useEffect(() => {
@@ -41,18 +48,20 @@ const ReceivedDocumentTable: React.FC = () => {
         }
 
         const fetchReceivedDocuments = async () => {
+            setLoading(true);
             try{
                 const response = await axios.get('http://localhost:8081/api/approvals/received-documents',{
                     headers: {
                         'Authorization':`Bearer ${accessToken}`
-                    }
+                    },
+                    params: {keyword: query}
                 });
 
                 const mappedDocs = response.data.map((item: any) => ({
                     id: item.approvalId,
                     type: item.approvalType,
                     title: item.approvalTitle,
-                    drafter: item.drafterName || "정보 없음",
+                    drafter: item.userName || "정보 없음",
                     date: item.startDate ? new Date(item.startDate).toLocaleDateString() : "",
                     status: mapStatusCodeToString(item.approvalStatus)
                 }));
@@ -64,11 +73,27 @@ const ReceivedDocumentTable: React.FC = () => {
             }
         };
         fetchReceivedDocuments();
-    }, [accessToken]);
+    }, [accessToken, query]);
+    
+    const handleSearch = () => {
+        setQuery(searchTerm.trim());
+        setCurrentPage(1);
+    }
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if(e.key === 'Enter'){
+            handleSearch();
+        }
+    }
 
     if (loading) return <div>Loding...</div>;
 
-    const filteredDocs = documents.filter(doc => doc.type === filter);
+    const docsToRender = query ? documents : documents.filter(doc => doc.type === filter);
+
+    const indexOfLastDocument = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstDocument = indexOfLastDocument - ITEMS_PER_PAGE;
+    const currentDocumentes = docsToRender.slice(indexOfFirstDocument, indexOfLastDocument);
+    const totalPages = Math.ceil(docsToRender.length / ITEMS_PER_PAGE);
 
     const getStatusClassName = (status:string): string => {
         switch (status) {
@@ -87,8 +112,8 @@ const ReceivedDocumentTable: React.FC = () => {
         <div>
             <br />
             <div className="arrbtn1">
-                <button className="arrbtn" onClick={() => setFilter("일반결재")}>일반문서</button>
-                <button className="arrbtn" onClick={() => setFilter("휴가원")}>휴가원</button>
+                <button className="arrbtn" onClick={() => { setFilter("일반결재"); setCurrentPage(1); }}>일반문서</button>
+                <button className="arrbtn" onClick={() => {setFilter("휴가원"); setCurrentPage(1); }}>휴가원</button>
             </div>
             <table>
                 <thead className="topbar">
@@ -101,8 +126,8 @@ const ReceivedDocumentTable: React.FC = () => {
                     </tr>
                 </thead>
                     <tbody>
-                    {filteredDocs.length > 0 ? (
-                        filteredDocs.map(doc => (
+                    {currentDocumentes.length > 0 ? (
+                        currentDocumentes.map(doc => (
                             <tr key={doc.id}>
                                 <td>{doc.type}</td>
                                 <td>
@@ -127,6 +152,21 @@ const ReceivedDocumentTable: React.FC = () => {
                     )}
                     </tbody>
             </table>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
+
+            <div className="scbar">
+                <input type="text" 
+                placeholder="검색"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress}/>
+                <button onClick={handleSearch}>검색</button>
+            </div>
         </div>
     );
 };

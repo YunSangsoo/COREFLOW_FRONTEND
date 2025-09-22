@@ -7,8 +7,11 @@ import './Processed.css';
 
 const ProcessedDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<any[]>([]);
-    const accessToken = useSelector((state: any) => state.auth.accessToken);
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState('');
+
+    const accessToken = useSelector((state: any) => state.auth.accessToken);
     const documentsPerPage = 10;
 
     useEffect(() => {
@@ -16,7 +19,8 @@ const ProcessedDocumentTable: React.FC = () => {
             if (!accessToken) return;
             try {
                 const response = await axios.get('http://localhost:8081/api/approvals/processed-documents', {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                    headers: { 'Authorization': `Bearer ${accessToken}` },
+                    params:{keyword:query}
                 });
                 setDocuments(response.data);
             } catch (error) {
@@ -24,7 +28,7 @@ const ProcessedDocumentTable: React.FC = () => {
             }
         };
         fetchDocuments();
-    }, [accessToken]);
+    }, [accessToken, query]);
 
     const indexOfLastDocument = currentPage * documentsPerPage;
     const indexOfFirstDocument = indexOfLastDocument - documentsPerPage;
@@ -36,6 +40,17 @@ const ProcessedDocumentTable: React.FC = () => {
         if (status === 'REJECTED') return '반려';
         return status;
     };
+
+    const handleSearch = () => {
+        setQuery(searchTerm.trim());
+        setCurrentPage(1);
+    }
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter'){
+            handleSearch();
+        }
+    }
 
     return (
         
@@ -68,6 +83,14 @@ const ProcessedDocumentTable: React.FC = () => {
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
             />
+            <div className='scbar'>
+                <input type="text" 
+                    placeholder='검색'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={handleKeyPress}/>
+                    <button onClick={handleSearch}>검색</button>
+            </div>
         </div>
     );
 };

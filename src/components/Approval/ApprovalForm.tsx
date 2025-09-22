@@ -36,7 +36,7 @@ import {
 export type Member = { userNo: number, userName: string, email?: string, depId?: number };
 export type Department = { depId: number, depName: string };
 interface AuthState {
-    user: { id: number; name: string } | null;
+    user: { userNo: number; userName: string } | null;
     accessToken: string | null;
 }
 
@@ -50,8 +50,7 @@ function useDebounce<T>(value: T, delay = 250) {
     return v;
 }
 
-// PeoplePickerDialog 컴포넌트 (수정 없음)
-function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], presetQuery }: { open: boolean, onClose: () => void, onConfirm: (picked: Member[]) => void, initialSelected?: Member[], presetQuery?: string }) {
+function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], presetQuery,excludeUserNo }: { open: boolean, onClose: () => void, onConfirm: (picked: Member[]) => void, initialSelected?: Member[], presetQuery?: string, excludeUserNo?: number}) {
     const [deps, setDeps] = useState<Department[]>([]);
     const [activeDepId, setActiveDepId] = useState<number | "">("");
     const [q, setQ] = useState(presetQuery ?? "");
@@ -101,7 +100,26 @@ function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], pr
         searchMembers();
     }, [open, dq, activeDepId, accessToken]);
 
-    const list = useMemo(() => rows, [rows]);
+    const list = useMemo(() => {
+    if (excludeUserNo) {
+
+        const selfInList = rows.find(m => m.userNo == excludeUserNo); 
+        if (selfInList) {
+            if (selfInList.userNo !== excludeUserNo) {
+            } else {
+            }
+        } else {
+        }
+    }
+
+    if (!excludeUserNo) {
+        return rows;
+    }
+    return rows.filter(m => m.userNo !== excludeUserNo);
+}, [rows, excludeUserNo]);
+
+
+
     const toggle = (m: Member) => {
         setSelected((prev) => {
             const next = new Map(prev);
@@ -298,8 +316,8 @@ const ApprovalForm: React.FC = () => {
         const approvalData: any = {
             approvalTitle: title,
             approvalDetail: editor.getHTML(),
-            userNo: user.id,
-            userrName: user.name,
+            userNo: user.userNo,
+            userName: user.userName,
             approvalType: approvalType,
             approvalStatus: status === 'SUBMIT' ? 1 : 0,
             startDate: new Date().toISOString(),
@@ -378,8 +396,8 @@ const ApprovalForm: React.FC = () => {
             </div>
             <Toolbar editor={editor} />
             <EditorContent editor={editor} />
-            <PeoplePickerDialog open={isApproverModalOpen} onClose={() => setIsApproverModalOpen(false)} onConfirm={handleApproverConfirm} initialSelected={initialApprovers} />
-            <PeoplePickerDialog open={isCcModalOpen} onClose={() => setIsCcModalOpen(false)} onConfirm={handleCcConfirm} initialSelected={initialCCs} />
+            <PeoplePickerDialog open={isApproverModalOpen} onClose={() => setIsApproverModalOpen(false)} onConfirm={handleApproverConfirm} initialSelected={initialApprovers} excludeUserNo={user?.userNo}/>
+            <PeoplePickerDialog open={isCcModalOpen} onClose={() => setIsCcModalOpen(false)} onConfirm={handleCcConfirm} initialSelected={initialCCs} excludeUserNo={user?.userNo}/>
         </div>
     );
 };
