@@ -51,6 +51,7 @@
     "react-svg-pan-zoom": "^3.13.1",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
+    "remark-breaks": "^4.0.0",
     "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
