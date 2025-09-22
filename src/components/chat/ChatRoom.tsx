@@ -125,6 +125,7 @@ const ChatRoom = (props : ChatRoomProps) => {
             partner: props.partner,
             lastMessage: receivedMessage, // 새 메시지로 업데이트
             unreadCount: 0, // 채팅방을 보고 있으므로 0으로 설정
+            alarm: props.alarm
           };
           onNewMessage(roomDataForRedux, receivedMessage);
       });
@@ -267,7 +268,7 @@ const ChatRoom = (props : ChatRoomProps) => {
                         {msg.type === 'VIDEO_CALL_INVITE' ? 
                             (
                               <div className="flex items-center justify-center space-x-2 bg-blue-500 p-2 rounded-lg">
-                                <VideoIcon size={40} className="bg-blue-300 text-white rounded-sm" />
+                                <VideoIcon size={40} className=" text-white rounded-sm" />
                                 <span>{msg.userName}님이 영상통화를 걸었습니다.</span>
                               </div>
                             ):
