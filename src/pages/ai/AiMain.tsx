@@ -51,7 +51,8 @@ export default function AiMain() {
         if (sessionId == 0) {
             await createTitle(prompt)
                 .then(res => {
-                    title = res;
+                    title = res.message.content;
+                    // console.log(title);
                     // title = res.message.content;
                     // tokensUsed += res.eval_count + res.prompt_eval_count;
                 })
@@ -73,7 +74,7 @@ export default function AiMain() {
         await sendPrompt(messages)
             .then(res => {
                 modelResponse = res;
-                console.log(modelResponse);
+                // console.log(modelResponse);
                 // modelResponse = res.message.content;
                 messages.push({ "role": "assistant", "content": modelResponse });
                 setMessages([...messages]);
