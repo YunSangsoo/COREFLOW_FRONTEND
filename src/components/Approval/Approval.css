@@ -53,12 +53,38 @@ tr:hover {
     background-color: #FF301D;
 }
 
-.scbar input{
-    border: solid 1px;
-    border-radius: 3px;
+.scbar{
+  align-items: center;
+  display: flex;
+  width: 350px;
+  margin-left: 510px;
 }
 
-.scbar button{
-  border: solid 1px;
-  border-color: #ddd;
+.search-input, .search-button {
+  border: 1px solid #ccc; 
+  font-size: 16px;       
+  padding: 10px;         
+  outline: none;         
+  height: 40px;          
+  box-sizing: border-box;
+}
+
+.search-input {
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+}
+
+.search-button {
+  border-radius: 0 5px 5px 0; 
+  background-color: #f0f0f0;
+  cursor: pointer;
+  white-space: nowrap; 
+}
+
+.search-button:hover {
+  background-color: #e0e0e0;
+}
+
+.search-input:focus {
+  border-color: #007bff;
 }

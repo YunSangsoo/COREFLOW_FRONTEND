@@ -32,7 +32,6 @@ import {
  Typography,
 } from "@mui/material";
 
-// 타입 정의
 export type Member = { userNo: number, userName: string, email?: string, depId?: number };
 export type Department = { depId: number, depName: string };
 interface AuthState {
@@ -40,7 +39,6 @@ interface AuthState {
     accessToken: string | null;
 }
 
-// 커스텀 훅 (수정 없음)
 function useDebounce<T>(value: T, delay = 250) {
     const [v, setV] = useState(value);
     useEffect(() => {
@@ -184,7 +182,6 @@ function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], pr
     );
 }
 
-// Toolbar 컴포넌트 (수정 없음)
 const Toolbar: React.FC<{ editor: Editor | null }> = ({ editor }) => {
     if (!editor) return null;
 
@@ -218,9 +215,7 @@ const Toolbar: React.FC<{ editor: Editor | null }> = ({ editor }) => {
     );
 };
 
-// 메인 ApprovalForm 컴포넌트
 const ApprovalForm: React.FC = () => {
-    // ✅ 모든 훅(Hook)을 컴포넌트의 최상단으로 이동
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -245,7 +240,7 @@ const ApprovalForm: React.FC = () => {
         content: '',
     });
 
-    // ✅ 임시저장 문서 불러오기 로직
+    // 임시저장
     useEffect(() => {
         if (approvalId && accessToken && editor) {
             const fetchDocumentForEdit = async () => {
@@ -259,12 +254,7 @@ const ApprovalForm: React.FC = () => {
                     editor.commands.setContent(docData.approvalDetail || '');
                     setApprovalType(docData.approvalType);
 
-                    // TODO: 백엔드에서 결재선/참조자 정보를 보내준다면 아래 로직 활성화
-                    // const { approvers, ccs } = response.data;
-                    // setApprover(approvers.map((m: Member) => m.userName).join(','));
-                    // setApproverUserNo(approvers.map((m: Member) => m.userNo));
-                    // setInitialApprovers(approvers);
-                    // ... (참조자도 동일하게)
+                   
                 } catch (error) {
                     console.error("문서를 불러오는 데 실패했습니다.", error);
                     alert("문서 정보를 불러오지 못했습니다.");
@@ -342,7 +332,6 @@ const ApprovalForm: React.FC = () => {
     try {
       const config = { headers: { "Authorization": `Bearer ${accessToken}` } };
 
-      // 3. approvalId 존재 여부에 따라 PUT(수정) 또는 POST(생성) 요청을 보냅니다.
       if (approvalId) {
         await axios.put(`http://localhost:8081/api/approvals/${approvalId}`, formData, config);
       } else {
@@ -373,8 +362,12 @@ const ApprovalForm: React.FC = () => {
                 <div className="topinput">
                     <label>문서 종류</label>
                     <select value={approvalType} onChange={(e) => setApprovalType(e.target.value)}>
-                        <option value="일반결재">일반결재</option>
-                        <option value="휴가원">휴가원</option>
+                        <option value="보고서">보고서</option>
+                        <option value="회의록">회의록</option>
+                        <option value="휴가신청서">휴가신청서</option>
+                        <option value="구매품의서">구매품의서</option>
+                        <option value="지출결의서">지출결의서</option>
+                        <option value="지출결의서">경비청구서</option>
                     </select>
                 </div>
                 <div className="topinput">

@@ -8,6 +8,7 @@ import Pagination from "./Pagination";
 
 interface Document {
     id: number;
+    type : string;
     title: string;
     drafter: string; 
     date: string;
@@ -23,6 +24,8 @@ const mapStatusToString = (status: number): string => {
     }
 };
 
+const DOCUMENT_TYPES = ["전체", "보고서", "회의록", "휴가신청서", "구매품의서", "지출결의서", "경비청구서"];
+
 const CcDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,6 +35,8 @@ const CcDocumentTable: React.FC = () => {
     
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
+
+    const [filter, setFilter] = useState<string>('전체');
 
     const accessToken = useSelector((state: any) => state.auth.accessToken);
     useEffect(() => {
@@ -68,6 +73,11 @@ const CcDocumentTable: React.FC = () => {
         fetchCcDocuments();
     }, [accessToken, query]);
 
+    const handleFilterClick = (newFilter: string) => {
+        setFilter(newFilter);
+        setCurrentPage(1);
+    }
+
     const handleSearch = () => {
         setQuery(searchTerm.trim());
         setCurrentPage(1);
@@ -81,6 +91,12 @@ const CcDocumentTable: React.FC = () => {
 
     if (loading) return <div>로딩중...</div>;
 
+    const docsToRender = query
+        ? documents
+        : filter === "전체"
+          ? documents
+          : documents.filter(doc => doc.type === filter);
+
     const indexOfLastDocument = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstDocument = indexOfLastDocument - ITEMS_PER_PAGE;
     const currentDocuments = documents.slice(indexOfFirstDocument, indexOfLastDocument);
@@ -88,9 +104,20 @@ const CcDocumentTable: React.FC = () => {
 
     return (
         <div className="document-container"> 
+        <div className="arrbtn1">
+            {DOCUMENT_TYPES.map(type => (
+                <button
+                    key={type}
+                    className={`arrbtn ${filter === type ? 'active' : ''}`}
+                    onClick={() => handleFilterClick(type)}>
+                        {type}
+                </button>
+            ))}
+        </div>
             <table>
                 <thead>
                     <tr>
+                        <th>구분</th>
                         <th>제목</th>
                         <th>기안자</th>
                         <th>기안일</th>
@@ -101,6 +128,7 @@ const CcDocumentTable: React.FC = () => {
                     {currentDocuments.length > 0 ? (
                         currentDocuments.map(doc => (
                             <tr key={doc.id}>
+                                <td>{doc.type}</td>
                                 <td>
                                     <Link to={`/approvals/${doc.id}`}>{doc.title}</Link>
                                 </td>
@@ -123,12 +151,12 @@ const CcDocumentTable: React.FC = () => {
                 />
 
             <div className="scbar">
-                <input type="text" 
+                <input className="search-input" type="text"
                 placeholder="검색"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyPress}/>
-                <button onClick={handleSearch}>검색</button>
+                onKeyDown={handleKeyPress} />
+                <button className="search-button" onClick={handleSearch}>검색</button>
             </div>
         </div>
     );

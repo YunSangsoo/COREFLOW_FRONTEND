@@ -5,11 +5,15 @@ import { Link } from 'react-router-dom';
 import  Pagination  from './Pagination';
 import './Processed.css';
 
+const DOCUMENT_TYPES = ["전체", "보고서", "회의록", "휴가신청서", "구매품의서", "지출결의서", "경비청구서"];
+
 const ProcessedDocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<any[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState('');
+
+    const [filter, setFilter] = useState<String>('전체');
 
     const accessToken = useSelector((state: any) => state.auth.accessToken);
     const documentsPerPage = 10;
@@ -30,16 +34,27 @@ const ProcessedDocumentTable: React.FC = () => {
         fetchDocuments();
     }, [accessToken, query]);
 
+    const docsToRender = query
+        ? documents
+        : filter === "전체"
+          ? documents
+          : documents.filter(doc => doc.approvalType === filter);
+
     const indexOfLastDocument = currentPage * documentsPerPage;
     const indexOfFirstDocument = indexOfLastDocument - documentsPerPage;
-    const currentDocuments = documents.slice(indexOfFirstDocument, indexOfLastDocument);
-    const totalPages = Math.ceil(documents.length / documentsPerPage);
+    const currentDocuments = docsToRender.slice(indexOfFirstDocument, indexOfLastDocument);
+    const totalPages = Math.ceil(docsToRender.length / documentsPerPage);
 
     const getStatusText = (status: string) => {
         if (status === 'APPROVED') return '승인';
         if (status === 'REJECTED') return '반려';
         return status;
     };
+
+    const handleFilterClick = (newFilter: string) => {
+        setFilter(newFilter);
+        setCurrentPage(1);
+    }
 
     const handleSearch = () => {
         setQuery(searchTerm.trim());
@@ -52,10 +67,23 @@ const ProcessedDocumentTable: React.FC = () => {
         }
     }
 
+
+
     return (
         
         <div>
             <br />
+            <div className="arrbtn1">
+                {DOCUMENT_TYPES.map(type => (
+                    <button
+                        key={type}
+                        className={`arrbtn ${filter === type ? 'active' : ''}`}
+                        onClick={() => handleFilterClick(type)}
+                    >
+                        {type}
+                    </button>
+                ))}
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -83,13 +111,13 @@ const ProcessedDocumentTable: React.FC = () => {
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
             />
-            <div className='scbar'>
-                <input type="text" 
-                    placeholder='검색'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={handleKeyPress}/>
-                    <button onClick={handleSearch}>검색</button>
+            <div className="scbar">
+                <input className="search-input" type="text"
+                placeholder="검색"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress} />
+                <button className="search-button" onClick={handleSearch}>검색</button>
             </div>
         </div>
     );

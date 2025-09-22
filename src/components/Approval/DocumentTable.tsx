@@ -13,10 +13,12 @@ interface Document {
     status: string;
 }
 
+const DOCUMENT_TYPES = ["전체", "보고서", "회의록", "휴가신청서", "구매품의서", "지출결의서", "경비청구서"];
+
 const DocumentTable: React.FC = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<string>("일반결재");
+    const [filter, setFilter] = useState<string>("전체");
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState('');
 
@@ -61,6 +63,11 @@ const DocumentTable: React.FC = () => {
         setCurrentPage(1);
     }
 
+    const handleFilterClick = (newFilter: string) => {
+        setFilter(newFilter);
+        setCurrentPage(1);
+    }
+
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter'){
             handleSearch();
@@ -69,7 +76,11 @@ const DocumentTable: React.FC = () => {
 
     if (loading) return <div>로딩중...</div>;
 
-    const docsToRender = query ? documents : documents.filter(doc => doc.type === filter);
+     const docsToRender = query
+      ? documents
+      : filter === "전체"
+        ? documents
+        : documents.filter(doc => doc.type === filter);
 
     const indexOfLastDocument = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstDocument = indexOfLastDocument - ITEMS_PER_PAGE;
@@ -93,8 +104,10 @@ const DocumentTable: React.FC = () => {
         <div>
             <br />
             <div className="arrbtn1">
-                <button className="arrbtn" onClick={() => setFilter("일반결재")}>일반문서</button>
-                <button className="arrbtn" onClick={() => setFilter("휴가원")}>휴가원</button>
+                {DOCUMENT_TYPES.map(type => (
+                <button className={`arrbtn ${filter === type ? 'active' : ''}`}
+                onClick={() => handleFilterClick(type)}>{type}</button>
+                ))}
             </div>
             <table>
                 <thead className="topbar">
@@ -128,12 +141,12 @@ const DocumentTable: React.FC = () => {
             />
 
             <div className="scbar">
-                <input type="text"
+                <input className="search-input" type="text"
                 placeholder="검색"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyPress} />
-                <button onClick={handleSearch}>검색</button>
+                <button className="search-button" onClick={handleSearch}>검색</button>
             </div>
         </div>
     );
