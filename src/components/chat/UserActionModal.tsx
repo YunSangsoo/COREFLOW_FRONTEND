@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import type { chatProfile, ChatRooms } from '../../types/chat';
 import ChatPeoplePickerDialog from './ChatPeoplePickerDialog';
 import { api } from '../../api/coreflowApi';
-import { ChatRoomUploadFile } from './ChatRoomUploadFile';
 
 interface UserActionModalProps {
   user: chatProfile;
@@ -27,6 +26,7 @@ interface chatRoomModalProps {
   onRoomUserList :() => void;
   onOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
   onLeaveRoom:(roomId : number) => void;
+  onStartVideoCall: (partner: chatProfile) => void;
 }
 
 
@@ -154,7 +154,7 @@ export const UserStateModal = ({ user, position, onClose, onSetState }: UserStat
 
 const EMPTY_USER_LIST: chatProfile[] = [];
 
-export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload, onLeaveRoom}: chatRoomModalProps) => {
+export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload, onLeaveRoom,onStartVideoCall}: chatRoomModalProps) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -216,7 +216,6 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
   const handleClosePicker = useCallback(() => {
     setPickerOpen(false);
   }, []);
-
   const modalContent = (
     <>
       <div
@@ -233,6 +232,22 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
               대화 상대
             </button>
           </li>
+          {chatRooms.roomType === 'PRIVATE' && (
+          <li>
+            <button
+              onClick={() => {
+                // 파트너 정보가 있고, 1명일 때만 실행
+                if (chatRooms.partner && chatRooms.partner.length === 1) {
+                  onStartVideoCall(chatRooms.partner[0]);
+                  onClose(); // 메뉴 닫기
+                }
+              }}
+              className="w-full text-left block px-4 py-2 hover:bg-gray-100"
+            >
+              화상채팅하기
+            </button>
+          </li>
+        )}
           {chatRooms.roomType==='PUBLIC' ? 
             (<li>
               <button

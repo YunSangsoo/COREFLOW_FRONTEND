@@ -6,6 +6,10 @@ interface SettingsIconProps extends React.SVGProps<SVGSVGElement> {
   size?: number | string; // 아이콘 크기를 조절할 prop
 }
 
+interface VideoIconProps extends React.SVGProps<SVGSVGElement> {
+  size?: number | string;
+}
+
 const SettingsIcon = ({ size = 24, className, ...rest }: SettingsIconProps) => {
   return (
     <svg
@@ -34,6 +38,28 @@ const SettingsIcon = ({ size = 24, className, ...rest }: SettingsIconProps) => {
           C405.3,350.7,386.6,334.5,362.7,334.5z M0,405.3v35.8h298.7v-35.8H0z M426.7,405.3v35.8H512v-35.8H426.7z"
         />
       </g>
+    </svg>
+  );
+};
+
+export const VideoIcon = ({ size = 24, className, ...rest }: VideoIconProps) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor" // 부모의 text 색상을 따라감
+      width={size}
+      height={size}
+      className={className}
+      {...rest}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9A2.25 2.25 0 0 0 13.5 5.25h-9A2.25 2.25 0 0 0 2.25 7.5v9A2.25 2.25 0 0 0 4.5 18.75Z"
+      />
     </svg>
   );
 };

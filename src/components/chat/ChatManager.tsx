@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import FloatingWindow from './FloatingWindow';
 import { DndContext, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
-import type { ChatManagerProps, ChatMessage, chatProfile, ChatRooms, WindowState } from '../../types/chat';
+import type { ChatManagerProps, ChatMessage, chatProfile, ChatRooms, SignalMessage, WindowState } from '../../types/chat';
 import { api } from '../../api/coreflowApi';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import { removeChatRoom, setChatRooms, updateChatRoom } from '../../features/chatSlice';
 import { WindowContent } from './WindowContentProps';
+import stompClient from '../../api/webSocketApi';
+import type { StompSubscription } from '@stomp/stompjs';
 
 
 const ChatManager = ({ onClose }: ChatManagerProps) => {
@@ -28,9 +30,18 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   const [allUsers, setAllUsers] = useState<chatProfile[]>([]);
   const [favoriteUsers, setFavoriteUsers] = useState<chatProfile[]>([]);
   
+  const [directFiles, setDirectFiles] = useState<File[]>([]);
+  const [incomingCalls, setIncomingCalls] = useState<SignalMessage[]>([]);
+  const signalHandlersRef = useRef<Map<number, (signal: SignalMessage) => void>>(new Map());
+  const registerSignalHandler = useCallback((partnerNo: number, handler: (signal: SignalMessage) => void) => {
+    signalHandlersRef.current.set(partnerNo, handler);
+  }, []);
+  const unregisterSignalHandler = useCallback((partnerNo: number) => {
+    signalHandlersRef.current.delete(partnerNo);
+  }, []);
+
   const dispatch = useDispatch();
   const allChatRooms = useSelector((state: RootState) => state.chat.chatRooms);
-  const [directFiles, setDirectFiles] = useState<File[]>([]);
 
 
   useEffect(() => {
@@ -50,10 +61,53 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     });
   }, [dispatch]);
 
-  
-  if(!myProfile)
-    return;
+  const handleAcceptCall = (callToAccept: SignalMessage) => {
+    if (!myProfile) return;
+    const partner = allUsers.find(user => user.userNo === callToAccept.from);
+    if (!partner) { /* ... */ return; }
 
+    const windowId = `video-${partner.userNo}`;
+    const newWindow: WindowState = {
+      id: windowId,
+      title: `${partner.userName}님과 통화`,
+      zIndex: nextZIndex,
+      position: { top: initialTop, left: initialLeft },
+      width: 600, height: 450,
+      profileUser: partner,
+      initialData: callToAccept.data, // ✅ 파라미터로 받은 통화의 offer 정보를 사용
+    };
+    setWindows(prev => [...prev, newWindow]);
+    setNextZIndex(prev => prev + 1);
+
+    // ✅ 2. 처리한 통화 요청을 수신 목록 배열에서 제거합니다.
+    setIncomingCalls(prev => prev.filter(call => call.from !== callToAccept.from));
+  };
+
+  const handleStartVideoCall = (partner: chatProfile) => {
+    if (!myProfile)
+      return;
+    const windowId = `video-${partner.userNo}`;
+    if (windows.some(win => win.id === windowId))
+      return;
+
+    const newWindow: WindowState = {
+      id: windowId,
+      title: `${partner.userName}님과 통화`,
+      zIndex: nextZIndex,
+      position: { top: initialTop, left: initialLeft },
+      width: 600, height: 450,
+      profileUser: partner, // 기존 profileUser 속성에 '상대방' 정보 저장
+      // initialData는 없으므로 '거는 사람'으로 동작
+    };
+    setWindows(prev => [...prev, newWindow]);
+    setNextZIndex(prev => prev + 1);
+  };
+
+  const handleDeclineCall = (callToDecline: SignalMessage) => {
+    alert(`[${callToDecline.from}]님의 전화를 거절합니다.`);
+    setIncomingCalls(prev => prev.filter(call => call.from !== callToDecline.from));
+  };
+  
   const handleNewMessage = (room: ChatRooms, message: ChatMessage) => {
     const updatedRoom = { ...room, lastMessage: message };
     dispatch(updateChatRoom(updatedRoom));
@@ -119,18 +173,25 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       handleFocusWindow(windowId);
       return;
     }
-    const newWindow: WindowState = {
-      id: windowId,
-      title: chatRoom.roomName, // 채팅방 이름을 제목으로 사용
-      zIndex: nextZIndex,
-      partner : chatRoom.partner,
-      position: { top: initialTop, left: initialLeft },
-      chatRoomInfo: chatRoom,
-      width : 320,
-      height : 600
-    };
-    setWindows([...windows, newWindow]);
-    setNextZIndex(nextZIndex + 1);
+    try {
+      // ✅ 창을 열기 전에, 해당 채팅방의 최신/상세 정보를 API로 다시 가져옵니다.
+      const response = await api.get<ChatRooms>(`/chatting/room/${chatRoom.roomId}`);
+      const detailedChatRoom = response.data;
+      const newWindow: WindowState = {
+        id: windowId,
+        title: detailedChatRoom.roomName,
+        zIndex: nextZIndex,
+        position: { top: initialTop, left: initialLeft },
+        chatRoomInfo: detailedChatRoom, // ✅ API로 가져온 최신 전체 정보를 사용
+        width: 320,
+        height: 600
+      };
+      setWindows([...windows, newWindow]);
+      setNextZIndex(nextZIndex + 1);
+
+    } catch (error) {
+      alert("채팅방 정보를 불러오는 데 실패했습니다.");
+    }
   };
 
   const handleOpenChatRoomUserList = (roomId:number, users:chatProfile[]) => {
@@ -324,47 +385,111 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
     setNextZIndex(nextZIndex + 1);
   };
 
+  useEffect(() => {
+    if (stompClient.connected && myProfile) {
+      const subscription = stompClient.subscribe(`/user/queue/webrtc`, (message) => {
+        const signal: SignalMessage = JSON.parse(message.body);
+
+        switch (signal.type) {
+          case 'offer':
+            // 전화 제안이 오면 수신 목록에 추가
+            setIncomingCalls(prev => [...prev, signal]);
+            break;
+          case 'answer':
+          case 'ice':
+            const handler = signalHandlersRef.current.get(signal.from);
+            if (handler) handler(signal);
+            break;
+          case 'user-offline':
+            // offer 외 다른 모든 시그널은 해당 통화 창의 핸들러를 찾아 전달
+            const partnerNo = signal.from; // 신호를 보낸 사람 = 내가 전화 건 상대방
+            // 1. 사용자에게 상대방이 오프라인임을 알립니다.
+            alert("상대방이 접속 중이 아니거나 통화할 수 없는 상태입니다.");
+            // 2. 방금 내가 열었던 화상채팅 창을 즉시 닫습니다.
+            handleCloseWindow(`video-${partnerNo}`);
+            // 3. (부가 기능) 서버에 부재중 전화 메시지를 남겨달라고 요청합니다.
+            api.post('/chatting/room/missed-call', { partnerNo: partnerNo });
+            break;
+          case 'hang-up':
+            alert("상대방이 접속을 종료했습니다.");
+            handleCloseWindow(`video-${signal.from}`);
+            break;
+        }
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [myProfile,handleCloseWindow]);
+  
+  if(!myProfile)
+    return;
+
   return (
-    <div className="fixed inset-0 z-40 pointer-events-none">
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        {windows.map(window => (
-          <FloatingWindow
-            key={window.id}
-            id={window.id}
-            title={window.title}
-            onClose={handleCloseWindow}
-            onFocus={handleFocusWindow}
-            zIndex={window.zIndex}
-            position={window.position}
-            w={window.width}
-            h={window.height}
-          >
-            <WindowContent
-              window={window}
-              myProfile={myProfile}
-              allUsers={allUsers}
-              favoriteUsers={favoriteUsers}
-              allChatRooms={allChatRooms}
-              directFiles={directFiles}
-              handleOpenChatFromUser={handleOpenChatFromUser}
-              handleOpenChatFromRoom={handleOpenChatFromRoom}
-              handleMakeChatRoom={handleMakeChatRoom}
-              handleAddFavorite={handleAddFavorite}
-              setState={setState}
-              handleSearchUsers={handleSearchUsers}
-              handleCreationComplete={handleCreationComplete}
-              handleNewMessage={handleNewMessage}
-              handleOpenChatRoomUserList={handleOpenChatRoomUserList}
-              handleOpenProfile={handleOpenProfile}
-              handleSetMyProfile={setMyProfile}
-              handleOpenFileUpload={handleOpenFileUpload}
-              handleCloseWindow={handleCloseWindow}
-              handleLeaveRoom={handleLeaveRoom}
-            />
-          </FloatingWindow>
+    <>
+      <div className="fixed inset-0 z-40 pointer-events-none">
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          {windows.map(window => (
+            <FloatingWindow
+              key={window.id}
+              id={window.id}
+              title={window.title}
+              onClose={handleCloseWindow}
+              onFocus={handleFocusWindow}
+              zIndex={window.zIndex}
+              position={window.position}
+              w={window.width}
+              h={window.height}
+            >
+              <WindowContent
+                window={window}
+                myProfile={myProfile}
+                allUsers={allUsers}
+                favoriteUsers={favoriteUsers}
+                allChatRooms={allChatRooms}
+                directFiles={directFiles}
+                handleOpenChatFromUser={handleOpenChatFromUser}
+                handleOpenChatFromRoom={handleOpenChatFromRoom}
+                handleMakeChatRoom={handleMakeChatRoom}
+                handleAddFavorite={handleAddFavorite}
+                setState={setState}
+                handleSearchUsers={handleSearchUsers}
+                handleCreationComplete={handleCreationComplete}
+                handleNewMessage={handleNewMessage}
+                handleOpenChatRoomUserList={handleOpenChatRoomUserList}
+                handleOpenProfile={handleOpenProfile}
+                handleSetMyProfile={setMyProfile}
+                handleOpenFileUpload={handleOpenFileUpload}
+                handleCloseWindow={handleCloseWindow}
+                handleLeaveRoom={handleLeaveRoom}
+                handleStartVideoCall={handleStartVideoCall}
+                registerSignalHandler={registerSignalHandler}
+                unregisterSignalHandler={unregisterSignalHandler}
+              />
+            </FloatingWindow>
+          ))}
+        </DndContext>
+      </div>
+        {incomingCalls.map(call => (
+          <div key={call.from} className="bg-white p-4 rounded-lg shadow-xl">
+            <p className="font-semibold">{call.from}님으로부터 영상통화 요청이 왔습니다.</p>
+            <div className="flex justify-end mt-4 space-x-2">
+              <button 
+                onClick={() => handleDeclineCall(call)} 
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                거절
+              </button>
+              <button 
+                onClick={() => handleAcceptCall(call)} 
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                수락
+              </button>
+            </div>
+          </div>
         ))}
-      </DndContext>
-    </div>
+    </>
   );
 };
 
