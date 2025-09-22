@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { notiDetail } from "../../api/noticeApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notiDelete, notiDetail } from "../../api/noticeApi";
 import type { NotiDetail } from "../../types/notice";
 import { useState } from "react";
 import NoticeInsert from "./NoticeInsert";
+import { store } from "../../store/store";
 
 interface NoticeDetailProps {
     notiId: number;
@@ -10,6 +11,8 @@ interface NoticeDetailProps {
 }
 
 export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
+    const queryClient = useQueryClient();
+    const loginUser = store.getState().auth.user;
 
     const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
 
@@ -25,6 +28,24 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
         queryFn: () => notiDetail(notiId),
         enabled: notiId != null
     })
+
+    const deleteMutation = useMutation({
+        mutationFn: (notiId: number) => notiDelete(notiId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notices'] });
+            alert('공지 삭제 완료');
+            onClose();
+        },
+        onError: () => {
+            alert('공지 삭제 실패');
+        }
+    })
+
+    const handleDeleteClick = () => {
+        if(window.confirm('공지를 삭제하시겠습니까?')){
+            deleteMutation.mutate(notiId);
+        }
+    }
 
     if (!data) {
         return null
@@ -85,8 +106,13 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                 </div>
                 {/* )} */}
                 
-                <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">수정</button>
-                {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
+                {loginUser?.userNo === data.writer && (
+                    <div className="flex justify-end space-x-4 p-4">
+                        <button type="button" onClick={handleDeleteClick} className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">삭제</button>
+                        <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">수정</button>
+                        {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
+                    </div>
+                )}
             </div>
         </div>
     );

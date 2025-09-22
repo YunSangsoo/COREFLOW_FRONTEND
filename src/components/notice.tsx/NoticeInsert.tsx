@@ -12,6 +12,7 @@ interface NoticeInsertProps {
 
 export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
     const queryClient = useQueryClient();
+    console.log(initData);
 
     const [noticeForm, setNoticeForm] = useState<NotiInsert>({
         title: initData?.title || '',
@@ -20,9 +21,15 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         parentDepId: initData?.parentDepId || null,
         childDepId: initData?.childDepId || null,
         posId: initData?.posId || null,
-        endDate: initData?.endDate || '',
+        endDate: initData?.endDate ? new Date(initData.endDate).toISOString().split('T')[0] : '',
         endTime: initData?.endTime || ''
     });
+    console.log(noticeForm.depId);
+    console.log(noticeForm.parentDepId);
+    console.log(noticeForm.childDepId);
+    console.log(noticeForm.posId);
+    console.log(noticeForm.endDate);
+    console.log(noticeForm.endTime);
 
     const { data: parentDep } = useQuery<Department[]>({
         queryKey: ['departments'],
@@ -57,21 +64,46 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                     [name]: value ? Number(value) : null,
                 };
             }
-            // 필수/일반 공지 라디오 버튼 처리
             if (type === 'radio' && name === 'essential') {
                 return {
                     ...prevForm,
                     essential: value as 'F' | 'T',
                 };
             }
-            // 그 외 일반 입력 필드 처리
             return {
                 ...prevForm,
                 [name]: value,
             };
         });
     };
-
+    
+    const insertMutation = useMutation({
+        mutationFn: notiInsert,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notices'] });
+            onClose();
+            alert('공지가 등록되었습니다.');
+        },
+        onError: (error) => {
+            console.error("공지 등록 실패 : ", error);
+            alert('공지 등록에 실패했습니다.');
+        }
+    })
+    
+    const updateMutation = useMutation({
+        mutationFn:notiUpdate,
+        onSuccess:()=>{
+            queryClient.invalidateQueries({queryKey:['notices']});
+            queryClient.invalidateQueries({queryKey:['noticeDetail']});
+            onClose();
+            alert('공지가 수정되었습니다.');
+        },
+        onError:(error) =>{
+            console.error("공지 수정 실패 : ", error);
+            alert('공지 수정에 실패했습니다.');
+        }
+    })
+    
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
@@ -95,32 +127,6 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
             insertMutation.mutate(dataSubmit);
         }
     };
-
-    const insertMutation = useMutation({
-        mutationFn: notiInsert,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['notices'] });
-            onClose();
-            alert('공지가 등록되었습니다.');
-        },
-        onError: (error) => {
-            console.error("공지 등록 실패 : ", error);
-            alert('공지 등록에 실패했습니다.');
-        }
-    })
-    
-    const updateMutation = useMutation({
-        mutationFn:notiUpdate,
-        onSuccess:()=>{
-            queryClient.invalidateQueries({queryKey:['notices']});
-            onClose();
-            alert('공지가 수정되었습니다.');
-        },
-        onError:(error) =>{
-            console.error("공지 수정 실패 : ", error);
-            alert('공지 수정에 실패했습니다.');
-        }
-    })
 
     return (
         <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-opacity-50">
@@ -240,6 +246,7 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                                                 type="date"
                                                 name="endDate"
                                                 value={noticeForm.endDate||''}
+                                                
                                                 onChange={handleChange}
                                                 className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                             />
@@ -268,7 +275,6 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                                     value={noticeForm.content}
                                     onChange={handleChange}
                                     className="mt-1 h-48 w-full resize-none rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
-                                    placeholder=""
                                 />
                             </div>
                         </div>
@@ -285,6 +291,7 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                     <div className="flex justify-end space-x-4 bg-gray-100 p-4">
                         <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">{initData ? '수정':'등록'}</button>
                     </div>
+                    
                 </div>
             </div>
         </form>

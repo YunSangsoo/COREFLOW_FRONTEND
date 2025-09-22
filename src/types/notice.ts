@@ -10,8 +10,6 @@ export interface NoticeResponse{
 export interface SearchParams{
     searchType?:'title'|'content'|'writer';
     keyword?:string;
-    depId?:number;
-    posId?:number;
 }
 
 export interface NotiInsert{
@@ -31,6 +29,7 @@ export interface NotiDetail{
     essential:string;
     title:string;
     userName:string;
+    writer:number;
     depName:string;
     posName:string;
     enrollDate:Date;
@@ -42,3 +41,8 @@ export interface NotiDetail{
     endDate?:string|null;
     endTime?:string|null;
 }
+
+export interface NotiDelete{
+    notiId:number;
+}
+
