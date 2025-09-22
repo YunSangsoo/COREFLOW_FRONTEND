@@ -69,8 +69,7 @@ const ProcessedDocumentTable: React.FC = () => {
 
 
 
-    return (
-        
+    return ( 
         <div>
             <br />
             <div className="arrbtn1">
@@ -87,7 +86,7 @@ const ProcessedDocumentTable: React.FC = () => {
             <table>
                 <thead>
                     <tr>
-                        <th>문서 종류</th>
+                        <th>구분</th>
                         <th>제목</th>
                         <th>기안일</th>
                         <th>내 결재 상태</th>

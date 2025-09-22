@@ -103,7 +103,8 @@ const CcDocumentTable: React.FC = () => {
     const totalPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
 
     return (
-        <div className="document-container"> 
+        <div> 
+            <br />
         <div className="arrbtn1">
             {DOCUMENT_TYPES.map(type => (
                 <button
@@ -113,6 +114,7 @@ const CcDocumentTable: React.FC = () => {
                         {type}
                 </button>
             ))}
+           
         </div>
             <table>
                 <thead>

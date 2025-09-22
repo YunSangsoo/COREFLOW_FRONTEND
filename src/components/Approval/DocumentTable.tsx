@@ -105,7 +105,7 @@ const DocumentTable: React.FC = () => {
             <br />
             <div className="arrbtn1">
                 {DOCUMENT_TYPES.map(type => (
-                <button className={`arrbtn ${filter === type ? 'active' : ''}`}
+                <button key={type} className={`arrbtn ${filter === type ? 'active' : ''}`}
                 onClick={() => handleFilterClick(type)}>{type}</button>
                 ))}
             </div>

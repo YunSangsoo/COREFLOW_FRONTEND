@@ -230,7 +230,7 @@ const ApprovalForm: React.FC = () => {
     const [isCcModalOpen, setIsCcModalOpen] = useState(false);
     const [initialApprovers, setInitialApprovers] = useState<Member[]>([]);
     const [initialCCs, setInitialCCs] = useState<Member[]>([]);
-    const [approvalType, setApprovalType] = useState('일반결재');
+    const [approvalType, setApprovalType] = useState('보고서');
 
     const user = useSelector((state: { auth: AuthState }) => state.auth.user);
     const accessToken = useSelector((state: { auth: AuthState }) => state.auth.accessToken);
@@ -367,7 +367,7 @@ const ApprovalForm: React.FC = () => {
                         <option value="휴가신청서">휴가신청서</option>
                         <option value="구매품의서">구매품의서</option>
                         <option value="지출결의서">지출결의서</option>
-                        <option value="지출결의서">경비청구서</option>
+                        <option value="경비청구서">경비청구서</option>
                     </select>
                 </div>
                 <div className="topinput">

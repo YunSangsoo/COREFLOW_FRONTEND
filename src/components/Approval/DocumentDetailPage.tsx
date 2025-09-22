@@ -105,7 +105,8 @@ const DocumentDetailPage: React.FC = () => {
             case 'WAITING': return '대기';
             case 'APPROVED': return '승인';
             case 'REJECTED': return '반려';
-            case 'PENDING': return '참조';
+            case 'PENDING': return '결재 예정';
+            case 'CC': return '참조';
             default: return status;
         }
     }
@@ -114,8 +115,8 @@ const DocumentDetailPage: React.FC = () => {
         if (error) return <div className="error-container">{error}</div>;
         if (!doc) return <div>문서 정보를 찾을 수 없음</div>;
     
-    const approvers = doc.approval.lines.filter(line => line.lineOrder === 1);
-    const ccs = doc.approval.lines.filter(line => line.lineOrder === 2);
+    const approvers = doc.approval.lines.filter(line => line.lineOrder < 99);
+    const ccs = doc.approval.lines.filter(line => line.lineOrder === 99);
 
     const handleDownload = async (fileId: number, fileName:string) => {
         if (!accessToken){
