@@ -48,17 +48,45 @@ api.interceptors.response.use(
     }
 )
 
-export const notiList = async (params:SearchParams={}) => {
+export const notiList = async (params:SearchParams={},) => {
     const response = await api.get<NoticeResponse[]>('/notice/main',{params});
     return response.data;
 }
 
 export const notiInsert = async (params:NotiInsert) => {
-    const response = await api.post<number>('/notice/insert',params);
+    const response = await api.post<number>('/notice/insert',params,{
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
     return response.data;
 }
 
 export const notiDetail = async (notiId:number) => {
     const response = await api.get<NotiDetail>(`/notice/detail/${notiId}`);
+    return response.data;
+}
+
+export const notiUpdate = async (data:{notiId:number, params:NotiInsert}) => {
+    const response = await api.patch<void>(`/notice/update/${data.notiId}`,data.params,{
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    return response.data;
+}
+
+export const notiDelete = async (notiId:number) => {
+    const response = await api.delete<void>(`/notice/detail/${notiId}`);
+    return response.data;
+}
+
+export const notiInsertForm = async (params:FormData) => {
+    const response = await api.post<number>('/notice/insert',params,{
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    return response.data;
+}
+
+export const notiUpdateForm = async (data:{notiId:number, params:FormData}) => {
+    const response = await api.patch<number>(`/notice/update/${data.notiId}`,data.params,{
+        headers: { 'Content-Type': 'multipart/form-data'},
+      });
     return response.data;
 }

@@ -5,16 +5,16 @@ import { useState } from "react";
 import NoticeDetail from "./NoticeDetail";
 import NoticeInsert from "./NoticeInsert";
 
-interface NoticeMainProps{
-    onClose : () => void;
+interface NoticeMainProps {
+    onClose: () => void;
 }
 
-export default function NoticeMain({onClose} : NoticeMainProps) {
-    
+export default function NoticeMain({ onClose }: NoticeMainProps) {
+
     const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
-    
+
     const [isNoticeDetailOpen, setIsNoticeDetailOpen] = useState(false);
-    const [selectedNoticeId, setSelectedNoticeId] = useState<number|null>(null);
+    const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
 
     const openNoticeInsert = () => {
         setIsNoticeInsertOpen(true);
@@ -24,7 +24,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
         setIsNoticeInsertOpen(false);
     }
 
-    const openNoticeDetail = (notiId:number) => {
+    const openNoticeDetail = (notiId: number) => {
         setSelectedNoticeId(notiId);
         setIsNoticeDetailOpen(true);
     }
@@ -35,24 +35,24 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
     }
 
     const [inputParams, setInputParams] = useState<SearchParams>({
-        searchType:"title",
-        keyword:""
+        searchType: "title",
+        keyword: "",
     })
 
     const [searchParams, setSearchParams] = useState<SearchParams>({
-        searchType:"title",
-        keyword:""
+        searchType: "title",
+        keyword: "",
     });
 
     const { data: noticeList } = useQuery<NoticeResponse[]>({
-        queryKey: ['notices',searchParams],
+        queryKey: ['notices', searchParams],
         queryFn: () => notiList(searchParams)
     })
 
-    const handleInputChange = (e:React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
-        const {name, value} = e.target;
+    const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+        const { name, value } = e.target;
         setInputParams(prev => ({
-            ...prev,[name]:value
+            ...prev, [name]: value
         }))
     }
     const handleSearch = () => {
@@ -60,7 +60,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
     }
 
     const handleReset = () => {
-        const resetParams = {searchType:"title", keyword:""} as SearchParams;
+        const resetParams = { searchType: "title", keyword: "" } as SearchParams;
         setInputParams(resetParams);
         setSearchParams(resetParams);
     }
@@ -78,7 +78,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                 <div className="space-y-4 mb-6">
                     <div className="flex items-center space-x-2">
                         <select
-                            name="searchType" value={inputParams.searchType} onChange={handleInputChange} 
+                            name="searchType" value={inputParams.searchType} onChange={handleInputChange}
                             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold">
                             <option value="title">제목</option>
                             <option value="content">내용</option>
@@ -103,9 +103,9 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {noticeList && noticeList.map((notice,index) => (
+                            {noticeList && noticeList.map((notice, index) => (
                                 <tr key={notice.notiId} onDoubleClick={() => openNoticeDetail(notice.notiId)} className="hover:bg-gray-100 cursor-pointer">
-                                    <td className="px-6 py-4 whitespace-nowrap">{index+1}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {notice.essential === 'T' && (
@@ -113,7 +113,7 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                                                 필독
                                             </span>)
                                         }
-                                    {notice.title}
+                                        {notice.title}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(notice.enrollDate).toLocaleDateString()}
@@ -124,8 +124,8 @@ export default function NoticeMain({onClose} : NoticeMainProps) {
                     </table>
                 </div>
             </div>
-            {isNoticeInsertOpen && <NoticeInsert onClose={closeNoticeInsert}/>}
-            {isNoticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail}/>)}
+            {isNoticeInsertOpen && <NoticeInsert onClose={closeNoticeInsert} />}
+            {isNoticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail} />)}
         </div>
     );
 };

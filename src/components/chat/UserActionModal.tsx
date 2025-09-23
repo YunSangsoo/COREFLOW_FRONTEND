@@ -4,6 +4,9 @@ import type { chatProfile, ChatRooms } from '../../types/chat';
 import ChatPeoplePickerDialog from './ChatPeoplePickerDialog';
 import { api } from '../../api/coreflowApi';
 import { ChatRoomUploadFile } from './ChatRoomUploadFile';
+import { updateChatRoom } from '../../features/chatSlice';
+import { useDispatch } from 'react-redux';
+import stompClient from '../../api/webSocketApi';
 
 interface UserActionModalProps {
   user: chatProfile;
@@ -27,6 +30,7 @@ interface chatRoomModalProps {
   onRoomUserList :() => void;
   onOpenFileUpload: (chatRoom: ChatRooms, directFiles:File[]) => void;
   onLeaveRoom:(roomId : number) => void;
+  onStartVideoCall: (partner: chatProfile) => void;
 }
 
 
@@ -154,10 +158,11 @@ export const UserStateModal = ({ user, position, onClose, onSetState }: UserStat
 
 const EMPTY_USER_LIST: chatProfile[] = [];
 
-export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload, onLeaveRoom}: chatRoomModalProps) => {
+export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpdate, onRoomUserList,onOpenFileUpload, onLeaveRoom,onStartVideoCall}: chatRoomModalProps) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-
+  
+  const dispatch = useDispatch();
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isPickerOpen) {
@@ -195,16 +200,29 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
       if (response.status === 200) {
         // Map을 사용해 기존 사용자와 새로 추가된 사용자를 합치고 중복을 제거
         const combinedUsers = new Map();
-        //selectedUsers.forEach(user => combinedUsers.set(user.userNo, user));
         users.forEach(user => combinedUsers.set(user.userNo, user));
         pickedUsers.forEach(user => combinedUsers.set(user.userNo, user));
         
         const newSelectedUsers = Array.from(combinedUsers.values());
-        //setSelectedUsers(newSelectedUsers); // 채팅방 멤버 state 업데이트
         onUsersUpdate(newSelectedUsers);
 
         setPickerOpen(false); // 초대 모달 닫기
         onClose(); // 메인 모달 닫기
+
+        pickedUsers.forEach(user =>{
+            stompClient.publish({
+            destination: `/app/chat/enter/${chatRooms.roomId}`,
+            body: JSON.stringify({
+              userNo : user.userNo,
+              userName : user.userName,
+              roomId:chatRooms.roomId,
+              sentAt: new Date(),
+              messageText: '',
+              type: 'ENTER',
+            }),
+          });
+        })
+      
       }
     } catch (error) {
       // 4. 요청 실패 시 에러 처리
@@ -216,6 +234,22 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
   const handleClosePicker = useCallback(() => {
     setPickerOpen(false);
   }, []);
+
+  const handleChangeAlarm = async(value:string) =>{
+    try{
+      const response = await api.patch<ChatRooms>('chatting/room/alarm',{
+        roomId:chatRooms.roomId,
+        alarm:value,
+      });
+      const backMessage = chatRooms.lastMessage;
+      const updatedRoom = response.data;
+      if(backMessage)
+        updatedRoom.lastMessage=backMessage;
+      dispatch(updateChatRoom(updatedRoom));
+    }catch(error) {
+      alert('알람 변경에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
 
   const modalContent = (
     <>
@@ -233,6 +267,22 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
               대화 상대
             </button>
           </li>
+          {chatRooms.roomType === 'PRIVATE' && (
+          <li>
+            <button
+              onClick={() => {
+                // 파트너 정보가 있고, 1명일 때만 실행
+                if (chatRooms.partner && chatRooms.partner.length === 1) {
+                  onStartVideoCall(chatRooms.partner[0]);
+                  onClose(); // 메뉴 닫기
+                }
+              }}
+              className="w-full text-left block px-4 py-2 hover:bg-gray-100"
+            >
+              화상채팅하기
+            </button>
+          </li>
+        )}
           {chatRooms.roomType==='PUBLIC' ? 
             (<li>
               <button
@@ -252,6 +302,26 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
               파일 전송
             </button>
           </li>
+          {chatRooms.alarm=='T' ?
+            (<li>
+              <button
+                onClick={() =>{handleChangeAlarm('F');onClose();}}
+                className="w-full text-left block px-4 py-2 hover:bg-gray-100"
+              >
+                알람 끄기
+              </button>
+            </li>) : (
+              
+            <li>
+              <button
+                onClick={() =>{handleChangeAlarm('T');onClose();}}
+                className="w-full text-left block px-4 py-2 hover:bg-gray-100"
+              >
+                알람 키기
+              </button>
+            </li>
+            )
+          }
           {chatRooms.roomType==='PUBLIC' ? 
           (<li>
             <button
