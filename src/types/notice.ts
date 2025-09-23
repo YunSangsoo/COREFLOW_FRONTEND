@@ -1,3 +1,5 @@
+import type { customFile } from "./type";
+
 export interface NoticeResponse{
     notiId:number;
     userName:string;
@@ -22,6 +24,7 @@ export interface NotiInsert{
     parentDepId?:number|null;
     childDepId?:number|null;
     posId?:number|null;
+    file?:customFile[];
 }
 
 export interface NotiDetail{
@@ -40,6 +43,7 @@ export interface NotiDetail{
     posId?:number|null;
     endDate?:string|null;
     endTime?:string|null;
+    file?:customFile[];
 }
 
 export interface NotiDelete{

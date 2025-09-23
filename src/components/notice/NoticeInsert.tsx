@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Department, DepartmentDetail, Position } from "../../types/member";
 import { depDetailList, depList, posList } from "../../api/memberApi";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { notiInsert, notiUpdate } from "../../api/noticeApi";
 import type { NotiDetail, NotiInsert } from "../../types/notice";
+import dayjs from "dayjs";
 
 interface NoticeInsertProps {
     onClose: () => void;
@@ -21,15 +22,13 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         parentDepId: initData?.parentDepId || null,
         childDepId: initData?.childDepId || null,
         posId: initData?.posId || null,
-        endDate: initData?.endDate ? new Date(initData.endDate).toISOString().split('T')[0] : '',
-        endTime: initData?.endTime || ''
+        endDate: initData?.endDate ? dayjs(initData.endDate).format('YYYY-MM-DD') : '',
+        endTime: initData?.endTime || '',
+        file: initData?.file || []
     });
-    console.log(noticeForm.depId);
-    console.log(noticeForm.parentDepId);
-    console.log(noticeForm.childDepId);
-    console.log(noticeForm.posId);
-    console.log(noticeForm.endDate);
-    console.log(noticeForm.endTime);
+
+    // 엄..
+    const [uploadFile, setUploadFile] = useState<File[]>([]);
 
     const { data: parentDep } = useQuery<Department[]>({
         queryKey: ['departments'],
@@ -118,7 +117,7 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
             depId: depId ?? undefined,
             parentDepId:noticeForm.parentDepId || undefined,
             childDepId:noticeForm.childDepId || undefined,
-            posId: noticeForm.posId || undefined
+            posId: noticeForm.posId || undefined,
         };
 
         if(initData){
@@ -282,16 +281,16 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                         <div>
                             <label className="font-semibold text-gray-700 block mb-2">첨부</label>
                             <label className="inline-flex items-center justify-center h-10 w-auto min-w-[120px] px-4 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                                <input type="file" className="hidden" />
+                                <input type="file" className="hidden" multiple />
                                 <span className="text-gray-600 font-medium">파일 선택</span>
                             </label>
+                            
                         </div>
                     </div>
 
                     <div className="flex justify-end space-x-4 bg-gray-100 p-4">
                         <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">{initData ? '수정':'등록'}</button>
                     </div>
-                    
                 </div>
             </div>
         </form>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/coreflowApi";
 import type { RootState } from "../store/store"
 import { logout } from "../features/authSlice";
-import NoticeMain from "../components/notice.tsx/NoticeMain";
+import NoticeMain from "../components/notice/NoticeMain";
 import { useState } from "react";
 
 export default function MainPage() {
