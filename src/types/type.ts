@@ -2,15 +2,15 @@ export interface User {
     userNo: number;
     email: string;
     userName: string;
-    depId?: number;
-    posId?: number;
-    profile?: string;
+    depId: number;
+    posId: number;
     roles: string[];
-    hireDate?: Date;
+    hireDate: Date;
     phone?: string;
     address?: string;
     addressDetail?: string;
-    status?: string;
+    status: string;
+    profile: customFile;
 }
 
 export interface LoginResponse {

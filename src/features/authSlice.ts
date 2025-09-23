@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { initialState, type LoginResponse } from "../types/type";
+import { initialState, type LoginResponse, type User } from "../types/type";
 
 const authSlice = createSlice({
     name: 'auth',
@@ -17,6 +17,10 @@ const authSlice = createSlice({
             state.user = null;
             state.isAuthenticated = false;
         },
+        updateUser: (state, action: PayloadAction<Partial<User>>) => {
+            if (!state.user) return;
+            state.user = { ...state.user, ...action.payload };
+        }
     }
 });
 

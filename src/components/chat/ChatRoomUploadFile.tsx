@@ -18,8 +18,6 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete,direct
   const [isUploading, setIsUploading] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  if(directFiles)
-    console.log(directFiles);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     // 기존 미리보기 URL들을 모두 해제

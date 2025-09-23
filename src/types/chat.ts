@@ -49,6 +49,7 @@ export interface WindowState {
   profileUser?: chatProfile;
   width : number;
   height : number;
+  initialData?: any; // ✅ 통화 제안(offer) 등 일회성 초기 데이터를 전달하기 위한 속성
 }
 
 export interface ChatManagerProps {
@@ -65,12 +66,13 @@ export interface ChatRooms {
   partner : chatProfile[];
   lastMessage? : ChatMessage;
   unreadCount: number;
+  alarm : string;
 }
 
 // 메시지 타입을 정의합니다.
 export interface ChatMessage {
   messageId:number;
-  type: 'ENTER' | 'EXIT' | 'TALK' | 'FILE';
+  type: 'ENTER' | 'EXIT' | 'TALK' | 'FILE' | 'VIDEO_CALL_INVITE';
   userNo: number;
   messageText: string;
   userName: string;
@@ -78,3 +80,13 @@ export interface ChatMessage {
   file?: customFile;
   // ... 기타 필드
 }
+
+//webRTC용 interface
+export interface SignalMessage {
+  type: SignalType;
+  from: number;
+  to: number;
+  data: any ;
+}
+
+export type SignalType = 'offer' | 'answer' | 'ice' | 'user-offline' | 'hang-up';
