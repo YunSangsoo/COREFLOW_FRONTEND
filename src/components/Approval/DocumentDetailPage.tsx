@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import './Detail.css';
 import { FiDownload, FiPaperclip } from 'react-icons/fi';
+import type { customFile } from "../../types/type";
 
 interface AttachedFile{
     fileId: number;
@@ -26,7 +27,8 @@ interface Approval {
     approvalDetail: string;
     userName: string;
     lines: ApprovalLine[];
-    files?: AttachedFile[];
+    //files?: AttachedFile[];
+    files?: customFile[];
 }
 
 interface DocumentData{
@@ -170,16 +172,23 @@ const DocumentDetailPage: React.FC = () => {
                 {doc.approval.files && doc.approval.files.length > 0 ? (
                     <ul className="attachment-list">
                         {doc.approval.files.map(file => {
-                            console.log('파일(File) 렌더링 Key:', file.fileId); 
+                            console.log('파일(File) 렌더링 Key:', file.imgId); 
                             return (
-                                <li key={file.fileId}>
-                                    <span>{file.originalFileName}</span>
-                                    <button
-                                        onClick={() => handleDownload(file.fileId, file.originalFileName)}
+                                <li key={file.imgId}>
+                                    <span>{file.originName}</span>
+                                    {/* <button
+                                        onClick={() => handleDownload(file.imgId, file.originName)}
                                         className="download-button"
                                     >
                                         <FiDownload /> 다운로드
-                                    </button>
+                                    </button> */}
+                                    <a
+                                        href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}
+                                        download={file.originName || "download"}
+                                        className="download-button"
+                                    >
+                                        <FiDownload /> 다운로드
+                                    </a>
                                 </li>
                             );
                         })}
