@@ -50,7 +50,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
     if (!data) {
         return null
     }
-
+    console.log(data);
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">
@@ -97,12 +97,15 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                 {/* {data?.attachments && data?.attachments.length > 0 && ( */}
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
                     <span className="font-bold text-gray-700">첨부 : </span>
-                    {/* {data.attachments.map((file, index) => (
-                            <span key={index} className="text-gray-800">
-                                {file.fileName}
-                                {index < data.attachments.length - 1 && ", "}
-                            </span>
-                        ))} */}
+                    {data.files?.map((file, index) => (
+                            <a 
+                            download={file.originName || "download"}
+                            href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}
+                            key={index} className="text-gray-800">
+                                {file.originName}
+                                {index < (data.files?.length ?? 0) - 1 && ", "}
+                            </a>
+                        ))}
                 </div>
                 {/* )} */}
                 

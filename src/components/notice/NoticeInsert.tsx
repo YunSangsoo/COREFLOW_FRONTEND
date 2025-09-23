@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Department, DepartmentDetail, Position } from "../../types/member";
 import { depDetailList, depList, posList } from "../../api/memberApi";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { notiInsert, notiUpdate } from "../../api/noticeApi";
+import { notiInsert, notiInsertForm, notiUpdate, notiUpdateForm } from "../../api/noticeApi";
 import type { NotiDetail, NotiInsert } from "../../types/notice";
 import dayjs from "dayjs";
 
@@ -24,11 +24,8 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         posId: initData?.posId || null,
         endDate: initData?.endDate ? dayjs(initData.endDate).format('YYYY-MM-DD') : '',
         endTime: initData?.endTime || '',
-        file: initData?.file || []
+        initFile: initData?.files || []
     });
-
-    // 엄..
-    const [uploadFile, setUploadFile] = useState<File[]>([]);
 
     const { data: parentDep } = useQuery<Department[]>({
         queryKey: ['departments'],
@@ -77,7 +74,8 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
     };
     
     const insertMutation = useMutation({
-        mutationFn: notiInsert,
+        //mutationFn: notiInsert,
+        mutationFn: notiInsertForm,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notices'] });
             onClose();
@@ -90,7 +88,8 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
     })
     
     const updateMutation = useMutation({
-        mutationFn:notiUpdate,
+        //mutationFn:notiUpdate,
+        mutationFn:notiUpdateForm,
         onSuccess:()=>{
             queryClient.invalidateQueries({queryKey:['notices']});
             queryClient.invalidateQueries({queryKey:['noticeDetail']});
@@ -108,24 +107,53 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
 
         const depId = noticeForm.childDepId ?? noticeForm.parentDepId
 
-        const dataSubmit: NotiInsert = {
-            title: noticeForm.title,
-            essential: noticeForm.essential,
-            content: noticeForm.content,
-            endDate: noticeForm.endDate || undefined,
-            endTime: noticeForm.endTime || undefined,
-            depId: depId ?? undefined,
-            parentDepId:noticeForm.parentDepId || undefined,
-            childDepId:noticeForm.childDepId || undefined,
-            posId: noticeForm.posId || undefined,
-        };
+        const formData = new FormData();
+        formData.append('title', noticeForm.title);
+        formData.append('essential', noticeForm.essential);
+        formData.append('content', noticeForm.content);
+        formData.append('endDate', noticeForm.endDate ?? '');
+        formData.append('endTime', noticeForm.endTime ?? '');
+        if(depId)
+            formData.append('depId', depId.toString());
+        if(noticeForm.parentDepId)
+            formData.append('parentDepId', noticeForm.parentDepId.toString());
+        if(noticeForm.childDepId)
+            formData.append('childDepId', noticeForm.childDepId.toString());
+        if(noticeForm.posId)
+            formData.append('posId', noticeForm.posId.toString());
+        noticeForm.sendFile?.forEach(file => {
+            formData.append('files', file);
+        });
+        
+        // const dataSubmit: NotiInsert = {
+        //     title: noticeForm.title,
+        //     essential: noticeForm.essential,
+        //     content: noticeForm.content,
+        //     endDate: noticeForm.endDate || undefined,
+        //     endTime: noticeForm.endTime || undefined,
+        //     depId: depId ?? undefined,
+        //     parentDepId:noticeForm.parentDepId || undefined,
+        //     childDepId:noticeForm.childDepId || undefined,
+        //     posId: noticeForm.posId || undefined
+        // };
+
+        console.log(noticeForm);
 
         if(initData){
-            updateMutation.mutate({notiId:initData.notiId, params:dataSubmit})
+            updateMutation.mutate({notiId:initData.notiId, params:formData})
         }else{
-            insertMutation.mutate(dataSubmit);
+            insertMutation.mutate(formData);
         }
     };
+
+    const handleFileChange =(event: React.ChangeEvent<HTMLInputElement>) => {
+        const fileList: FileList | null = event.currentTarget.files;
+        if(fileList){
+            const fileArray = Array.from(fileList);
+            noticeForm.sendFile=fileArray;
+        }
+    }
+
 
     return (
         <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-opacity-50">
@@ -281,8 +309,10 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                         <div>
                             <label className="font-semibold text-gray-700 block mb-2">첨부</label>
                             <label className="inline-flex items-center justify-center h-10 w-auto min-w-[120px] px-4 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                                <input type="file" className="hidden" multiple />
-                                <span className="text-gray-600 font-medium">파일 선택</span>
+                                <input 
+                                onChange={(e)=>handleFileChange(e)}
+                                type="file" multiple />
+                                {/* <span className="text-gray-600 font-medium">파일 선택</span> */}
                             </label>
                             
                         </div>

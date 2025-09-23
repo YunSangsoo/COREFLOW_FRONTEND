@@ -24,7 +24,8 @@ export interface NotiInsert{
     parentDepId?:number|null;
     childDepId?:number|null;
     posId?:number|null;
-    file?:customFile[];
+    initFile?:customFile[];
+    sendFile?:File[];
 }
 
 export interface NotiDetail{
@@ -43,7 +44,7 @@ export interface NotiDetail{
     posId?:number|null;
     endDate?:string|null;
     endTime?:string|null;
-    file?:customFile[];
+    files?:customFile[];
 }
 
 export interface NotiDelete{
