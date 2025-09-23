@@ -3,7 +3,7 @@ import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
 import type { LoginUser, MemberChoice, MemberVacation, PutVacation, VacationInfo, VacStatus, VacType } from "../types/vacation";
 
-const api = axios.create({
+export const api = axios.create({
     baseURL : "http://localhost:8081/api",
     withCredentials : true
 });

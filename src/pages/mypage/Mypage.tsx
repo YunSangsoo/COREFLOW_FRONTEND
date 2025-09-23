@@ -1,5 +1,13 @@
 import { MemberControll } from "../../components/MemberControll";
 import { useMypageForm } from "../../types/MypageForm";
+import { useState } from "react";
+import { api } from "../../api/vacationApi";
+import { useQuery } from "@tanstack/react-query";
+
+type annualLeave = {
+    vacAmount: number,
+    vacRemaining: number
+};
 
 export default function Mypage() {
     const {
@@ -25,6 +33,52 @@ export default function Mypage() {
         handleUpdateAddress,
         handleUpdatePassword
     } = useMypageForm();
+
+    const currentYear = new Date().getFullYear();
+
+    const {
+        data: vacations = [],
+        isLoading,
+        isError
+    } = useQuery({
+        queryKey: ['personalVacation', currentYear],
+        queryFn: () => api.get("/vacation/personal", {
+            params: { year: currentYear }
+        }).then(res => res.data),
+    });
+
+    const {
+        data: annualLeaveData = { vacAmount: 0, vacRemaining: 0 },
+        isLoading: isAnnualLeaveLoading,
+        isError: isAnnualLeaveError
+    } = useQuery<annualLeave, Error>({
+        queryKey: ['availableVacations', currentYear],
+        queryFn: () => api.get("/vacation/personal-available", {
+            params: { year: currentYear }
+        }).then(res => res.data),
+    });
+
+    const formatDate = (dateString: string | Date) => {
+        // 날짜 문자열(예: '2025-09-23T12:00:00.000+00:00')을 Date 객체로 변환
+        const date = new Date(dateString);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    };
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 15;
+    const sortedVacations = [...vacations].sort(
+        (a, b) => new Date(b.vacStart).getTime() - new Date(a.vacStart).getTime()
+    );
+    const showVacations = sortedVacations.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+    const totalPages = Math.max(1, Math.ceil(vacations.length / rowsPerPage));
 
     return (
         <>
@@ -205,9 +259,75 @@ export default function Mypage() {
                 )}
             </div>
             <div className="flex-1 mx-auto bg-white shadow rounded p-4
-                            absolute start-160 top-0">
-                <div className="flex-2">
-                    일정
+                            absolute start-160 gap-4 top-0 flex flex-col">
+                <div className="flex flex-col">
+                    <h1 className="text-xl font-bold mb-4">휴가</h1>
+                    {/* Use conditional rendering for annual leave data */}
+                    {isAnnualLeaveLoading ? (
+                        <p>연차 정보를 불러오는 중입니다...</p>
+                    ) : isAnnualLeaveError ? (
+                        <p className="text-red-500">연차 정보를 가져오는 데 실패했습니다.</p>
+                    ) : (
+                        <>
+                            <h2 className="text-xl font-bold mb-4">
+                                {currentYear}년 지급 연차 수: {annualLeaveData.vacAmount}
+                            </h2>
+                            <h2 className="text-xl font-bold mb-4">
+                                잔여 연차 수: {annualLeaveData.vacRemaining}
+                            </h2>
+                        </>
+                    )}
+                </div>
+                <div className="flex flex-col">
+                    <h1 className="text-xl font-bold mb-4">휴가 사용 및 신청 내역</h1>
+                    <table className="min-w-full text-left border-collapse">
+                        <thead className="bg-blue-200">
+                            <tr>
+                                <th className="px-4 py-2">기간</th>
+                                <th className="px-4 py-2">사용 일 수</th>
+                                <th className="px-4 py-2">휴가 형태</th>
+                                <th className="px-4 py-2">승인 여부</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isLoading ? (
+                                <tr><td colSpan={4} className="text-center py-4">휴가 정보를 불러오는 중입니다...</td></tr>
+                            ) : isError ? (
+                                <tr><td colSpan={4} className="text-center py-4 text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>
+                            ) : showVacations.length > 0 ? (
+                                showVacations.map((v) => (
+                                    <tr key={v.vacId} className="border-b hover:bg-gray-100">
+                                        <td className="px-4 py-2">{formatDate(v.vacStart)} ~ {formatDate(v.vacEnd)}</td>
+                                        <td className="px-4 py-2">{v.vacAmount}</td>
+                                        <td className="px-4 py-2">{v.vacName}</td>
+                                        <td className="px-4 py-2">{v.status === 1 ? '대기' : v.status === 2 ? '승인' : '반려'}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr><td colSpan={4} className="text-center py-4">해당 연도에 신청된 연차가 없습니다.</td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                    {/* 페이지네이션 */}
+                    <div className="flex justify-center gap-2 mt-4">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 rounded hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            이전
+                        </button>
+                        <span className="px-2 py-1">
+                            {currentPage} / {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 rounded hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            다음
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
