@@ -110,8 +110,8 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     item.subItems ? (
                         <div 
                             key={item.name} 
-                            className={openCard===item.name ? "bg-white p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
-                                'bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
+                            className={openCard===item.name ? "bg-gray-100 p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
+                                'bg-gray-100 p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
                             }
                         >
                         <div 
@@ -128,8 +128,9 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     {openCard === item.name && (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                         {item.subItems.map(subItem => (
-                        <Link to={subItem.path || '#'} key={subItem.name} className="block p-8 text-xl bg-gray-50 rounded hover:bg-gray-200 transition-colors">
+                        <Link to={subItem.path || '#'} key={subItem.name} className="block p-8 text-xl bg-gray-200 rounded hover:bg-gray-300 transition-colors">
                             {subItem.name}
+                            <p className="text-gray-500 mt-2 text-sm">바로가기</p>
                         </Link>
                         ))}
                     </div>
@@ -140,7 +141,7 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     <div
                         key={item.name}
                         onClick={() => handleCardClick(item)}
-                        className="bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                        className="bg-gray-100 p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                         >
                         <h2 className="text-2xl font-semibold text-gray-700">{item.name}</h2>
                         <p className="text-gray-500 mt-2 text-sm">바로가기</p>

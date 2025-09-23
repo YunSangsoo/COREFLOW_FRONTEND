@@ -108,6 +108,8 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         </div>
                     </li>
                 </ul>
+                
+            <Header/>
             </nav>
         </div>
     );

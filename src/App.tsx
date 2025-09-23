@@ -30,6 +30,7 @@ import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 import Organization from './pages/member_organization/Organization';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
+import Header from './components/Header';
 
 
 function App() {
@@ -79,7 +80,11 @@ function App() {
     return (
         <>
         <div className="container">
-                {!isMainPage && !isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
+                {!isMainPage && !isAuthPage && 
+                <> 
+                    <Sidebar onChatClick={handleToggleChat} />
+                </>
+                }
                     <Routes>
                         <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
                         <Route path="/auth">

@@ -32,16 +32,22 @@ const Header = () => {
 
   return (
     <header 
-      className={`w-full p-4 flex justify-end items-center shadow-sm text-md bg-gray-800`}
+      className={`p-4 flex items-center shadow-sm text-md 
+        ${isMainPage ? 'justify-end bg-gray-800':''}
+        `}
     >
       {auth.accessToken && auth.user ? (
         // 로그인 상태일 때 표시될 UI
-        <div className="flex items-center space-x-4">
+        <div className={`flex items-center space-x-4
+          ${!isMainPage ? 'flex-col flex-grow' : ''}`
+        }>
           <span className={`hover:underline${
                 isMainPage ? 'text-grey-200' : 'text-gray-600'
             }`}>
             <span className="font-semibold">{auth.user.userName}</span>
-            <span className="ml-1">({auth.user.email})</span>
+            {isMainPage? 
+            <span className="ml-1">({auth.user.email})</span> : <></>
+            }
           </span>
           <Link 
             to="/mypage" 
