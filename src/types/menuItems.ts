@@ -15,8 +15,17 @@ export const menuItems: MenuItem[] = [
       { name: '근태관리', path: '/attendance/personal' },
       { name: '조직도', path: '/organization' },
     ],
+  },{
+    name: '전자결재',
+    action: 'toggleSubMenu', // 이 항목은 하위 메뉴를 열고 닫는 역할
+    subItems: [
+      { name: '작성문서목록', path: '/approvals/my-documents' },
+      { name: '문서작성', path: '/approvals/new' },
+      { name: '받은 문서함', path: '/approvals/received' },
+      { name: '결재 완료함', path: '/approvals/processed' },
+      { name: '참조 문서함', path: '/approvals/cc-documents' },
+    ],
   },
-  { name: '전자결제', path: '/approval' }, // 실제 경로로 수정 필요
   { name: '캘린더', path: '/calendar' },
   { name: '회의실', path: '/rooms' },
   { name: '회사 규정', path: '/cpolicies' },
