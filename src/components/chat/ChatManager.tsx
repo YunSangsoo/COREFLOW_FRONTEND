@@ -109,7 +109,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
   };
   
   const handleNewMessage = (room: ChatRooms, message: ChatMessage) => {
-    if(message.type==="TALK"||message.type==="FILE"){
+    if(message.type){
       const updatedRoom = { ...room, lastMessage: message };
       dispatch(updateChatRoom(updatedRoom));
     }
@@ -162,6 +162,21 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       const windowId = `room-${roomId}`;
       handleCloseWindow(windowId);
       alert("채팅방에서 나갔습니다.");
+
+      if(myProfile){
+        stompClient.publish({
+            destination: `/app/chat/exit/${roomId}`,
+            body: JSON.stringify({
+              userNo : myProfile.userNo,
+              userName : myProfile.userName,
+              roomId:roomId,
+              sentAt: new Date(),
+              messageText: '',
+              type: 'EXIT',
+            }),
+        });
+      }
+
     } catch (error) {
       console.error("채팅방 나가기 실패:", error);
       alert("채팅방을 나가는 데 실패했습니다.");
