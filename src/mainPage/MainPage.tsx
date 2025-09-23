@@ -7,6 +7,7 @@ import NoticeMain from "../components/notice/NoticeMain";
 import { useState } from "react";
 import { menuItems } from "../types/menuItems";
 import Header from "../components/Header";
+import { selectTotalUnreadCount } from "../features/chatSlice";
 
 interface MainPageProps {
     onChatClick: () => void;
@@ -33,9 +34,8 @@ export default function MainPage({ onChatClick }: MainPageProps) {
     };
 
     const [openCard, setOpenCard] = useState<string | null>('');
-
-
     const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
+    const totalUnreadCount = useSelector(selectTotalUnreadCount);
 
     const handleLogout = () => {
         api.post("/auth/logout")
@@ -59,49 +59,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                 <p className="p-4 font-bold text-5xl">CoreFlow</p>
                 <Header />
             </div>
-            {/* {
-            auth.isAuthenticated ? (
-                <>
-                <div className="nav-item">
-                    <span style={{fontWeight:"bold"}}>
-                        {auth.user?.userName} {auth.user?.email}
-                    </span>
-                </div>
-                <div id="logout-button" className="nav-item">
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            padding: "8px 16px",
-                            backgroundColor: "#DC3545",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer"
-                        }}
-                    >
-                    로그아웃
-                    </button>
-                    <button>
-                        <Link to="/mypage" className="nav-mypage">마이페이지</Link>
-                    </button>
-                </div>
-                </>
-                ) : (
-                <div id="login-button">
-                    <button>
-                        <Link to="/auth/login" className="nav-login">로그인</Link>
-                    </button>
-                    <button>
-                        <Link to="/auth/find-pwd" className="nav-find-pwd">비밀번호 찾기</Link>
-                    </button>
-                </div>
-                )
-            }
-            </div>
-            <div
-                onClick={openNoticeModal} 
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold"> 공지 썸네일이 될 공간
-            </div> */}
             
             <div className="p-8 mt-36">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -110,8 +67,8 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     item.subItems ? (
                         <div 
                             key={item.name} 
-                            className={openCard===item.name ? "bg-white p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
-                                'bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
+                            className={openCard===item.name ? "bg-gray-100 p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
+                                'bg-gray-100 p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
                             }
                         >
                         <div 
@@ -128,8 +85,9 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     {openCard === item.name && (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                         {item.subItems.map(subItem => (
-                        <Link to={subItem.path || '#'} key={subItem.name} className="block p-8 text-xl bg-gray-50 rounded hover:bg-gray-200 transition-colors">
+                        <Link to={subItem.path || '#'} key={subItem.name} className="block p-8 text-xl bg-gray-200 rounded hover:bg-gray-300 transition-colors">
                             {subItem.name}
+                            <p className="text-gray-500 mt-2 text-sm">바로가기</p>
                         </Link>
                         ))}
                     </div>
@@ -140,9 +98,14 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                     <div
                         key={item.name}
                         onClick={() => handleCardClick(item)}
-                        className="bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                        className={`bg-gray-100 p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer
+                            ${item.action === 'chat' && totalUnreadCount > 0 ? 'border-2 border-red-400 ring-4 ring-red-100' : ''}
+                            `}
                         >
                         <h2 className="text-2xl font-semibold text-gray-700">{item.name}</h2>
+                        {item.action === 'chat' && totalUnreadCount > 0 && (
+                            <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                        )}
                         <p className="text-gray-500 mt-2 text-sm">바로가기</p>
                     </div>
                     )
