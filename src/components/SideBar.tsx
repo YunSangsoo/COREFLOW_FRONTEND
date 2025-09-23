@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { selectTotalUnreadCount } from '../features/chatSlice';
+import Header from './Header';
 
 
 // onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
@@ -13,7 +14,7 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
     const [isApprovalOpen, setIsApprovalOpen] = useState(false);
     const totalUnreadCount = useSelector(selectTotalUnreadCount);
     return (
-        <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
+        <div className="fixed top-0 left-0 flex flex-col w-56 bg-gray-800 text-white h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
                 CoreFlow
             </div>

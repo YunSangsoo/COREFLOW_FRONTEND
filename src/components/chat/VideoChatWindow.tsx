@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { chatProfile, SignalMessage, SignalType } from "../../types/chat";
 import { sendSignal } from '../../api/webSocketApi';
+import { XIcon } from "./SvgSettingIcon";
 
 interface VideoChatWindowProps {
   myProfile: chatProfile;
@@ -76,7 +77,9 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
             });
         }
       })
-      .catch(error => console.error("미디어 장치 접근 실패:", error));
+      .catch(error => 
+        alert("미디어 장치를 확인할 수 없습니다. 카메라를 확인 한 후 다시 통화를 시도해주세요.")
+      );
 
     // 3. 컴포넌트가 사라질 때 ChatManager에서 핸들러를 '등록 해제'합니다.
     return () => {
@@ -111,9 +114,9 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
         onClick={handleHangUpClick}
         className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-red-500 rounded-full p-4 hover:bg-red-600"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-6 h-6">
+        <XIcon size={36}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 3.75 4.5 15.001m0 0L3.75 12M4.5 15.001l2.25 2.25M3.75 3.75 15 15.001" />
-        </svg>
+        </XIcon>
       </button>
     </div>
   );
