@@ -2,10 +2,15 @@ export interface User {
     userNo: number;
     email: string;
     userName: string;
-    profile: string;
-    phone: string;
+    depId: number;
+    posId: number;
     roles: string[];
-    address: string;
+    hireDate: Date;
+    phone?: string;
+    address?: string;
+    addressDetail?: string;
+    status: string;
+    profile: customFile;
 }
 
 export interface LoginResponse {
@@ -28,4 +33,14 @@ export const initialState:AuthState = {
     refreshToken: null,
     user: null,
     isAuthenticated: false
+}
+
+export interface customFile {
+    imgId:number;
+    imageCode:string;
+    originName:string;
+    changeName:string;
+    imgOrder?:number;
+    refId:number;
+    mimeType: string;
 }

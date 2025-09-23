@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { selectTotalUnreadCount } from '../features/chatSlice';
+import Header from './Header';
 
 
 // onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
@@ -9,8 +12,9 @@ interface SidebarProps {
 
 const Sidebar = ({ onChatClick }: SidebarProps) => {
     const [isApprovalOpen, setIsApprovalOpen] = useState(false);
+    const totalUnreadCount = useSelector(selectTotalUnreadCount);
     return (
-        <div className="fixed left-0 flex flex-col w-56 bg-gray-800 text-white min-h-screen">
+        <div className="fixed top-0 left-0 flex flex-col w-56 bg-gray-800 text-white h-screen">
             <div className="p-4 bg-gray-900 text-center font-bold text-lg">
                 CoreFlow
             </div>
@@ -33,10 +37,13 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     <Link to="/members" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>사원관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/vacation/info" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>연차관리</Link>
+                                    <Link to="/vacation/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>휴가관리</Link>
                                 </li>
                                 <li>
-                                    <Link to="/attendance" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>출결관리</Link>
+                                    <Link to="/attendance/personal" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>근태관리</Link>
+                                </li>
+                                <li>
+                                    <Link to="/organization" className="block py-2 px-3 rounded hover:bg-gray-600" style={{ color: "white" }}>조직도</Link>
                                 </li>
                             </ul>
                         )}
@@ -83,17 +90,20 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                         )}
                     </li>
                     <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>캘린더</Link>
+                        <Link to="/calendar" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>캘린더</Link>
+                    </li>
+                    <li className="px-4">
+                        <Link to="/rooms" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>회의실</Link>
                     </li>
                     <li className="px-4">
                         <Link to="/cpolicies" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>회사 규정</Link>
                     </li>
                     <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>공지</Link>
-                    </li>
-                    <li className="px-4">
                         <div onClick={onChatClick} className="block py-2 px-3 rounded hover:bg-gray-700 cursor-pointer" style={{ color: "white" }}>
                             채팅
+                            {totalUnreadCount > 0 && (
+                                <span className="w-2 h-2 float-right bg-red-500 rounded-full"></span>
+                            )}
                         </div>
                     </li>
                 </ul>

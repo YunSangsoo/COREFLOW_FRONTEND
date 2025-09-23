@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type HTMLInputTypeAttribute, type InputHTMLAttributes, type ReactNode } from "react";
+import { type ChangeEvent, type ReactNode } from "react";
 
 //
 // 1. 검색 폼
@@ -89,79 +89,85 @@ export default function MemberSearchForm({
   );
 }
 
-export interface MemberControllProps {
-  title: string;
+interface MemberControllProps {
+  label: string;
+  type?: "text" | "password" | "file";
   value?: string;
-  readOnly?: boolean;
-  type?: HTMLInputTypeAttribute;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  renderAction?: ReactNode;
-  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, 
-    "value" | "onChange" | "type" | "readOnly">;
-  className?: string;
-  labelClassName?: string;
-  inputClassName?: string;
-  actionClassName?: string;
+  isEditing?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSave?: () => void;
+  onCancel?: () => void;
+  fileInputRef?: React.RefObject<HTMLInputElement | null>;
+  children?: React.ReactNode;
 }
 
-export function MemberControll({
-  title,
-  value,
-  readOnly = false,
+export const MemberControll: React.FC<MemberControllProps> = ({
+  label,
   type = "text",
+  value,
+  isEditing,
   onChange,
-  renderAction,
-  inputProps,
-  className = "",
-  labelClassName = "",
-  inputClassName = "",
-  actionClassName = "",
-}: MemberControllProps) {
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if(type === "file" && e.target.files?.[0]){
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-    onChange?.(e);
-  };
-
+  onSave,
+  onCancel,
+  fileInputRef,
+  children,
+}) => {
   return (
-    <div className={`flex items-center justify-between mb-3 ${className}`}>
-      <label className={`w-24 font-medium ${labelClassName}`}>{title}</label>
-      <div className="flex-1 flex items-center gap-2">
-        <input
-          type={type}
-          {...(type !== "file" ? {value} : {})}
-          onChange={handleChange}
-          readOnly={readOnly}
-          className={`w-full rounded border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 ${readOnly ? "bg-gray-100" : ""} ${inputClassName}`}
-          {...inputProps}
-        />
-
-        {/* 파일 미리보기 기능 */}
-        {type === "file" && preview && (
-          <img
-            src={preview}
-            alt="미리보기"
-            className="w-24 h-24 object-cover border"
-          >
-          </img>
+    <div className="mb-4">
+      <label className="block font-semibold mb-1">{label}</label>
+      <div className="flex items-center gap-2">
+        {type === "file" && isEditing ? (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onChange}
+            />
+            {children}
+          </>
+        ) : isEditing ? (
+          <input
+            type={type}
+            value={value || ""}
+            onChange={onChange}
+            className="border rounded px-2 py-1 flex-1"
+          />
+        ) : (
+          <span className="flex-1">{value || "-"}</span>
         )}
+
+        {/* 편집 모드에서 저장/취소 버튼 */}
+        {isEditing && type !== "file" && (
+          <div className="flex gap-2">
+            {onSave && (
+              <button
+                onClick={onSave}
+                className="px-2 py-1 bg-green-500 text-white rounded"
+              >
+                저장
+              </button>
+            )}
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                className="px-2 py-1 bg-gray-400 text-white rounded"
+              >
+                취소
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* 조회 모드에서 커스텀 버튼/액션 */}
+        {children && !isEditing && <>{children}</>}
+        {/* 수정 모드 전용 children */}
+        {children && isEditing && <>{children}</>}
       </div>
-      {renderAction && (
-        <div className={`shrink-0 ${actionClassName}`}>
-          {renderAction}
-        </div>
-      )}
     </div>
   );
-}
+};
 
 //
 // 2. 액션 버튼 묶음

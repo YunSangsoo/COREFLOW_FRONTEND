@@ -1,14 +1,22 @@
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
 
 export default function AttSideBar() {
+    
+    const userRoles = useSelector((state:RootState) => state.auth.user?.roles);
+    const hasAccess = userRoles?.includes("ROLE_ADMIN") || userRoles?.includes("ROLE_HR");
 
     return (
         <div className="flex flex-col w-48">
-            <Link to="/attendance">
-                <button className="px-4 py-2 text-left border border-gray-300 mb-1">전체 근태 관리</button>
+            {hasAccess && (
+                <Link to="/attendance/member" >
+                    <button className="w-full py-3 text-center border border-gray-300 mb-1">사원 근태 정보</button>
+                </Link>
+            )}
+            <Link to="/attendance/personal">
+                <button className="w-full py-3 text-center border border-gray-300 mb-1">내 근태 정보</button>
             </Link>
-            <button className="px-4 py-2 text-left border border-gray-300 mb-1">사원 근태 관리</button>
-            <button className="px-4 py-2 text-left border border-gray-300">내 근태 관리</button>
         </div>
     )
 }

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { store } from "../store/store";
 import { loginSuccess, logout } from "../features/authSlice";
-import type { Attendance } from "../types/attendance";
+import type { Attendance, PostCheckInTime, PutCheckOutTime, VacType, VacTypeUpdate} from "../types/attendance";
 
 const api = axios.create({
     baseURL : "http://localhost:8081/api",
@@ -48,9 +48,39 @@ api.interceptors.response.use(
     }
 )
 
-// 사원 출퇴근 기록 조회(일별)
-export const attInfo = async (attDate:string,userNo:number|null) => {
+// 사원 근퇴 기록 조회(일별)
+export const memAttendance = async (attDate:string,userNo:number|null) => {
     const userNoParam = userNo != null ? `&userNo=${userNo}` : ''
-    const response = await api.get<Attendance[]>(`/attendance?attDate=${attDate}${userNoParam}`);
+    const response = await api.get<Attendance[]>(`/attendance/member?attDate=${attDate}${userNoParam}`);
     return response.data;  
+}
+
+// 로그인 사용자 근퇴 기록 조회(월별)
+export const loginUserAttendance = async (year:number,month:number) => {
+    const response = await api.get<Attendance[]>(`/attendance/personal`,{params:{year,month}});
+    return response.data;
+}
+
+// 출근시간 넣기
+export const checkIn = async (checkInRequest : PostCheckInTime) => {
+    const response = await api.post('/attendance/checkIn',checkInRequest);
+    return response.data;
+}
+
+// 퇴근시간 넣기
+export const checkOut = async (checkOutRequest : PutCheckOutTime) => {
+    const response = await api.patch('/attendance/checkOut',checkOutRequest);
+    return response.data;
+}
+
+// 비고 종류 조회
+export const vacType = async () => {
+    const response = await api.get<VacType[]>('/attendance/vacType');
+    return response.data;
+}
+
+// 비고 바꾸기
+export const vacTypeUpdate = async (typeUpdate : VacTypeUpdate) => {
+    const response = await api.patch<VacTypeUpdate>('/attendance/vacType',typeUpdate);
+    return response.data;
 }
