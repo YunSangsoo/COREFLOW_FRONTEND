@@ -10,9 +10,6 @@ import FindPwd from './pages/login/Find-pwd'
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
 import { getPolicies } from './api/companyPolicyApi';
-
-
-import CalendarPage from './pages/calendar/CalendarPage';
 import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
@@ -20,7 +17,12 @@ import MemberMain from './pages/member_main/MemberMain';
 import VacationInfo from './pages/member_vacation/VacationInfo';
 import VacationMember from './pages/member_vacation/VacationMember';
 import VacationPersonal from './pages/member_vacation/VacationPersonal';
-import RoomsPage from './pages/rooms/RoomsPage';
+import DocumentTable from './components/Approval/DocumentTable';
+import ApprovalForm from './components/Approval/ApprovalForm';
+import DocumentDetailPage from './components/Approval/DocumentDetailPage';
+import ReceivedDocumentTable from './components/Approval/ReceivedDocumentTable';
+import ProcessedDocumentTable from './components/Approval/ProcessedDocumentTable';
+import CcDocumentTable from './components/Approval/CcDocumentTable';
 import AttendanceMember from './pages/member_attendance/AttendanceMember';
 import AttendancePersonal from './pages/member_attendance/AttendancePersonal';
 import type { RootState } from './store/store';
@@ -74,7 +76,6 @@ function App() {
         }
     };
 
-
     return (
         <>
         <div className="container">
@@ -115,6 +116,14 @@ function App() {
                                 </ProtectedRoute>
                             }/>
                             <Route path="personal" element={<AttendancePersonal/>}/>
+                        </Route>
+                        <Route path='/approvals'>
+                            <Route path="my-documents" element={<DocumentTable />} />
+                            <Route path="received" element={<ReceivedDocumentTable />} />
+                            <Route path="processed" element={<ProcessedDocumentTable />} />
+                            <Route path="new" element={<ApprovalForm />} />
+                            <Route path=":id" element={<DocumentDetailPage />} />
+                            <Route path='cc-documents' element={<CcDocumentTable/>}/>
                         </Route>
                         <Route path="/organization" element={<Organization/>}/>
                         
