@@ -10,7 +10,7 @@
     font-family: 'Pretendard', sans-serif; 
 }
 
-/* 전역 스타일(전체 tsx에 적용되니까 조심!) */
+/*전체 tsx에 적용되니까 조심*/
 table {
     
     border-collapse: collapse; 

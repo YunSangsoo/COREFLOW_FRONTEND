@@ -1,6 +1,5 @@
 import React from 'react';
-import './Pagination.css'; // 페이지네이션 전용 CSS 파일을 import합니다.
-import './Pagination.css';
+import './Pagination.css'; 
 
 interface PaginationProps {
     currentPage: number;
@@ -15,20 +14,18 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
     }
 
     if (totalPages <= 1) {
-        return null; // 페이지가 1개 이하면 페이지네이션을 표시하지 않음
+        return null; 
     }
 
     return (
         <nav>
             <ul className="pagination">
-                {/* 이전 페이지 버튼 */}
                 <li className={currentPage === 1 ? 'disabled' : ''}>
                     <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
                         &laquo;
                     </button>
                 </li>
 
-                {/* 페이지 번호 버튼 */}
                 {pageNumbers.map(number => (
                     <li key={number} className={currentPage === number ? 'active' : ''}>
                         <button onClick={() => onPageChange(number)}>
@@ -37,7 +34,6 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
                     </li>
                 ))}
 
-                {/* 다음 페이지 버튼 */}
                 <li className={currentPage === totalPages ? 'disabled' : ''}>
                     <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>
                         &raquo;

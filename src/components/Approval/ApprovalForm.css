@@ -87,7 +87,7 @@ tr:hover {
   
   width: 90px;      
   height: 38px;     
-  flex-shrink: 0;   /* 너비가 줄어들지 않도록 고정합니다. */
+  flex-shrink: 0;  
 
   background-color: #4A5568; 
   border: 1px solid #718096;      
@@ -99,16 +99,14 @@ tr:hover {
   font-weight: bold;           
   font-size: 14px;            
   
-  /* 텍스트를 박스의 정중앙에 위치시키는 가장 좋은 방법입니다. */
   display: flex;
-  justify-content: center; /* 가로 중앙 정렬 */
-  align-items: center;   /* 세로 중앙 정렬 */
+  justify-content: center;
+  align-items: center;  
 
-  /* === 4. 여백 === */
-  margin-right: 10px; /* 레이블과 입력 필드 사이의 여백 */
+
+  margin-right: 10px; 
 }
 
-/* 추가: input, select 태그들의 스타일도 통일감을 줍니다. */
 .topinput input, .topinput select {
     height: 38px;
     border: 1px solid #ccc;
@@ -119,11 +117,11 @@ tr:hover {
 }
 
 .main33, .main34 {
-    width: 300px; /* 입력 필드 너비 조절 */
+    width: 300px; 
 }
 
 .main34 {
-    text-align: left; /* 버튼 값 왼쪽 정렬 */
+    text-align: left; 
     background-color: white;
 }
 

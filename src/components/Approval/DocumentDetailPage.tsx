@@ -66,7 +66,6 @@ const DocumentDetailPage: React.FC = () => {
         fetchDocumentDetail();
     }, [id, accessToken]);
 
-    // 결재 처리 함수
     const handleApprovalAction = async (action: 'APPROVE' | 'REJECT') => {
         if (!accessToken) {
             alert('로그인 정보가 없습니다.');
@@ -171,8 +170,7 @@ const DocumentDetailPage: React.FC = () => {
                 {doc.approval.files && doc.approval.files.length > 0 ? (
                     <ul className="attachment-list">
                         {doc.approval.files.map(file => {
-                            // 👇 파일 키 값 확인용 로그
-                            console.log('**파일(File) 렌더링 Key:', file.fileId); 
+                            console.log('파일(File) 렌더링 Key:', file.fileId); 
                             return (
                                 <li key={file.fileId}>
                                     <span>{file.originalFileName}</span>
@@ -197,8 +195,7 @@ const DocumentDetailPage: React.FC = () => {
                         <h3 className="line-title">결재자</h3>
                         <div className="member-tags">
                             {approvers.map((approver) => {
-                                // 👇 결재자 키 값 확인용 로그
-                                console.log('**결재자(Approver) 렌더링 Key:', approver.lineId);
+                                console.log('결재자(Approver) 렌더링 Key:', approver.lineId);
                                 return (
                                     <span key={approver.lineId} className={`member-tag status-${approver.lineStatus.toLowerCase()}`}>
                                         {approver.userName} ({mapLineStatus(approver.lineStatus)})
@@ -213,8 +210,7 @@ const DocumentDetailPage: React.FC = () => {
                         <h3 className="line-title">참조자</h3>
                         <div className="member-tags">
                             {ccs.map((cc) => {
-                                // 👇 참조자 키 값 확인용 로그
-                                console.log('**참조자(CC) 렌더링 Key:', cc.lineId);
+                                console.log('참조자(CC) 렌더링 Key:', cc.lineId);
                                 return (
                                     <span key={cc.lineId} className="member-tag status-pending">
                                         {cc.userName}
