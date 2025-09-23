@@ -34,6 +34,7 @@ function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
+    const isMainPage = location.pathname === '/';
 
 
     useEffect(() => {
@@ -75,56 +76,56 @@ function App() {
 
 
     return (
+        <>
         <div className="container">
-            {!isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
-            <Routes>
-                <Route path="/" element={<MainPage />} />
-                <Route path="/auth">
-                    <Route path="login" element={<Login />} />
-                    <Route path="find-pwd" element={<FindPwd/>}/>
-                </Route>
-                <Route path="/mypage" element={<Mypage/>}/>
-                <Route path="/cpolicies">
-                    <Route path="" element={<CompanyPolicyMain/>} />
-                    <Route path=":policyNo" element={<CompanyPolicyMain/>} />
-                </Route>
-                <Route path="/admin/cpolicies">
-                    <Route path="" element={<CompanyPolicyMainAdmin/>} />
-                    <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
-                </Route>
-                    <Route path='/members' element={
-                        <ProtectedRoute>
-                            <MemberMain/>
-                        </ProtectedRoute>
-                        }/>
-                    <Route path='/vacation'>
-                        <Route path='info' element={<VacationInfo/>}/>
-                        <Route path='member' element={
-                            <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
-                                <VacationMember/>
-                            </ProtectedRoute>
+                {!isMainPage && !isAuthPage && <Sidebar onChatClick={handleToggleChat} />}
+                    <Routes>
+                        <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
+                        <Route path="/auth">
+                            <Route path="login" element={<Login />} />
+                            <Route path="find-pwd" element={<FindPwd/>}/>
+                        </Route>
+                        <Route path="/mypage" element={<Mypage/>}/>
+                        <Route path="/cpolicies">
+                            <Route path="" element={<CompanyPolicyMain/>} />
+                            <Route path=":policyNo" element={<CompanyPolicyMain/>} />
+                        </Route>
+                        <Route path="/admin/cpolicies">
+                            <Route path="" element={<CompanyPolicyMainAdmin/>} />
+                            <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                        </Route>
+                            <Route path='/members' element={
+                                <ProtectedRoute>
+                                    <MemberMain/>
+                                </ProtectedRoute>
+                                }/>
+                            <Route path='/vacation'>
+                                <Route path='info' element={<VacationInfo/>}/>
+                                <Route path='member' element={
+                                    <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
+                                        <VacationMember/>
+                                    </ProtectedRoute>
+                                    }/>
+                                <Route path='personal' element={<VacationPersonal/>}/>
+                            </Route>
+                        <Route path='/attendance'>
+                            <Route path="member" element={
+                                <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
+                                    <AttendanceMember/>
+                                </ProtectedRoute>
                             }/>
-                        <Route path='personal' element={<VacationPersonal/>}/>
-                    </Route>
-                <Route path='/attendance'>
-                    <Route path="member" element={
-                        <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
-                            <AttendanceMember/>
-                        </ProtectedRoute>
-                    }/>
-                    <Route path="personal" element={<AttendancePersonal/>}/>
-                </Route>
-                <Route path="/organization" element={<Organization/>}/>
-                
+                            <Route path="personal" element={<AttendancePersonal/>}/>
+                        </Route>
+                        <Route path="/organization" element={<Organization/>}/>
+                        
 
 
-                <Route path='/unAuthorized' element={<Unauthorized/>}/>
-            </Routes>
-
-
+                        <Route path='/unAuthorized' element={<Unauthorized/>}/>
+                    </Routes>
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
             {isChatOpen && <ChatManager onClose={handleToggleChat} />}
         </div>
+        </>
     )
 }
 
