@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createEventType, fetchEventTypes } from "../../../api/calendarApi";
 import type { EventTypeOption } from "../../../api/calendarApi";
 import {

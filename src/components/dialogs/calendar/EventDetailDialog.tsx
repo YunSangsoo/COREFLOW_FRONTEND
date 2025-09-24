@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, Button, Chip, Stack, FormControlLabel, Switch, Alert, Link
@@ -86,7 +86,7 @@ export default function EventDetailDialog({
   const [end, setEnd] = useState<Dayjs | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // 참석자/공유자 목록(여러 키명 대응)
+  // // 참석자/공유자 목록(여러 키명 대응)
   const attendees = useMemo(
     () =>
       normalizeMembers(detail, [

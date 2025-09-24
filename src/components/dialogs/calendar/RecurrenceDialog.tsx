@@ -1,5 +1,5 @@
 // src/components/dialogs/calendar/RecurrenceDialog.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Button, FormControl, InputLabel, Select, MenuItem,
@@ -78,9 +78,9 @@ export default function RecurrenceDialog({
     }
   }, [open]); // eslint-disable-line
 
-  const endLabel = endMode === "NEVER" ? "끝없음"
-    : endMode === "COUNT" ? `${count}회`
-    : untilDate ? `${untilDate.format("YYYY-MM-DD")}까지` : "종료일 지정";
+  // const endLabel = endMode === "NEVER" ? "끝없음"
+  //   : endMode === "COUNT" ? `${count}회`
+  //   : untilDate ? `${untilDate.format("YYYY-MM-DD")}까지` : "종료일 지정";
 
   const rulePreview: RecurrenceRule = useMemo(() => ({
     enabled,

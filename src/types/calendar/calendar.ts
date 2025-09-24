@@ -1,3 +1,5 @@
+import type { Dayjs } from "dayjs";
+
 // src/types/calendar/calendar.ts
 export type CalendarDefaultRole = "NONE" | "BUSY_ONLY" | "READER" | "CONTRIBUTOR" | "EDITOR";
 
@@ -45,4 +47,38 @@ export type RecurrenceRule = {
   byWeekdays?: number[];             // WEEKLY일 때 사용, 0=일요일 ... 6=토요일 (dayjs 기준)
   end: RecurrenceEnd;                // 종료 조건
   maxInstances?: number;             // 안전 상한(기본 200)
+};
+
+// 일정상세조회
+export type LabelOption = { id: number; name: string; };
+
+export type EventDetailForm = {
+  eventId : number;
+  calId : number;
+  title : string;
+  allDay : boolean;
+  start : Dayjs;
+  end : Dayjs;
+  labelId? : number;
+  typeId?: number;
+  locationText?: string;
+  note?: string;
+};
+
+export type ShareRole = "NONE" | "BUSY_ONLY" | "READER" | "CONTRIBUTOR" | "EDITOR";
+
+export type ShareUser = { userNo: number; role: ShareRole };
+export type ShareDept = { depId: number; role: ShareRole };
+export type SharePos  = { posId: number; role: ShareRole };
+
+export type ShareListRes = {
+  users: ShareUser[];
+  departments: ShareDept[];
+  positions: SharePos[];
+  defaultRole: ShareRole | "OWNER"; };
+
+export type ShareUpsertReq = {
+  users?: ShareUser[];
+  departments?: ShareDept[];
+  positions?: SharePos[];
 };
