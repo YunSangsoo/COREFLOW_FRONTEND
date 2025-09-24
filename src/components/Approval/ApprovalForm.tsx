@@ -219,7 +219,7 @@ const ApprovalForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const [approvalId, setApprovalId] = useState<number | null>(id ? parseInt(id, 10) : null);
+    const [approvalId] = useState<number | null>(id ? parseInt(id, 10) : null);
     const [title, setTitle] = useState('');
     const [approver, setApprover] = useState('');
     const [cc, setCc] = useState('');
