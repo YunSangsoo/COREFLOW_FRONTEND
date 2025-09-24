@@ -9,7 +9,7 @@ import PutVacation from "../../components/member_vacation/putVacation";
 
 export default function VacationPersonal() {
 
-    const [selectYear, setSelectYear] = useState(dayjs().year()); 
+    const [selectYear, setSelectYear] = useState(dayjs().year());
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const handleOpenModal = () => {
@@ -54,12 +54,12 @@ export default function VacationPersonal() {
                                 <span className="font-semibold min-w-[70px]">입사일 :</span>
                                 <span className="flex-1">{dayjs(loginUserProfile?.hireDate).format('YYYY-MM-DD')}</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={handleOpenModal}
                                 className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                                 휴가 등록
                             </button>
-                            {isModalOpen && <PutVacation onClose={handleCloseModal}  />}
+                            {isModalOpen && <PutVacation onClose={handleCloseModal} />}
                         </div>
                     </div>
                     <div className="border border-gray-300 rounded-md overflow-hidden">

@@ -84,9 +84,12 @@ function App() {
         <div className="container">
                 {!isMainPage && !isAuthPage && 
                 <> 
+                <div className='w-56 shrink-0'>
                     <Sidebar onChatClick={handleToggleChat} />
+                </div>
                 </>
                 }
+                <div className='flex-auto min-w-fit overflow-auto ml-56 pr-20'>
                     <Routes>
                         <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
@@ -144,6 +147,7 @@ function App() {
                     </Routes>
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
             {isChatOpen && <ChatManager onClose={handleToggleChat} />}
+            </div>
         </div>
         </>
     )
