@@ -135,7 +135,7 @@ export const MemberControll: React.FC<MemberControllProps> = ({
             className="border rounded px-2 py-1 flex-1"
           />
         ) : (
-          <span className="flex-1">{value || "-"}</span>
+          <span className="flex-1">{value || ""}</span>
         )}
 
         {/* 편집 모드에서 저장/취소 버튼 */}
@@ -161,9 +161,11 @@ export const MemberControll: React.FC<MemberControllProps> = ({
         )}
 
         {/* 조회 모드에서 커스텀 버튼/액션 */}
-        {children && !isEditing && <>{children}</>}
-        {/* 수정 모드 전용 children */}
-        {children && isEditing && <>{children}</>}
+        <div className="flex-1">
+          {children && !isEditing && <>{children}</>}
+          {/* 수정 모드 전용 children */}
+          {children && isEditing && <>{children}</>}
+        </div>
       </div>
     </div>
   );

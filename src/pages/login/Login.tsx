@@ -88,11 +88,6 @@ export default function Login() {
                     </button>
                     {error && <p className={styles.error}>{error}</p>}
                 </form>
-                <div className={styles.dividerWrap}>
-                    <div className={styles.divider} />
-                    <span className={styles.dividerText}>또는</span>
-                    <div className={styles.divider} />
-                </div>
             </section>
         </div>
     )
