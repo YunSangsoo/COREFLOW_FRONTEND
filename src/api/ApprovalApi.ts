@@ -24,7 +24,7 @@ export const getDocuments = async (): Promise<ApprovalDto[]> => {
     }
     try {
         const response: AxiosResponse<ApprovalDto[]> = await axios.get(
-            "http://localhost:8081/api/approvals/",
+            `${import.meta.env.VITE_API_BASE_URL}/approvals/`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`

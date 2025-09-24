@@ -47,7 +47,7 @@ const CcDocumentTable: React.FC = () => {
 
         const fetchCcDocuments = async () => {
             try {
-                const response = await axios.get('http://localhost:8081/api/approvals/cc-documents', {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/cc-documents`, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     },

@@ -9,7 +9,6 @@ import { api } from './api/coreflowApi';
 import FindPwd from './pages/login/Find-pwd'
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
-import { getPolicies } from './api/companyPolicyApi';
 import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
@@ -30,7 +29,6 @@ import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 import Organization from './pages/member_organization/Organization';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
-import Header from './components/Header';
 
 
 function App() {

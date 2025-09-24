@@ -70,7 +70,7 @@ function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], pr
         if (!open || !accessToken || hasFetchedDeps) return;
         const fetchDepartments = async () => {
             try {
-                const response = await axios.get('http://localhost:8081/api/departments', {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/departments`, {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
                 setDeps(response.data);
@@ -86,7 +86,7 @@ function PeoplePickerDialog({ open, onClose, onConfirm, initialSelected = [], pr
         if (!open || !accessToken) return;
         const searchMembers = async () => {
             try {
-                const response = await axios.get('http://localhost:8081/api/members', {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/members`, {
                     params: { query: dq || undefined, depId: activeDepId === "" ? undefined : Number(activeDepId), limit: 50 },
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
@@ -245,7 +245,7 @@ const ApprovalForm: React.FC = () => {
         if (approvalId && accessToken && editor) {
             const fetchDocumentForEdit = async () => {
                 try {
-                    const response = await axios.get(`http://localhost:8081/api/approvals/${approvalId}`, {
+                    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/${approvalId}`, {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     });
                     
@@ -333,9 +333,9 @@ const ApprovalForm: React.FC = () => {
       const config = { headers: { "Authorization": `Bearer ${accessToken}` } };
 
       if (approvalId) {
-        await axios.put(`http://localhost:8081/api/approvals/${approvalId}`, formData, config);
+        await axios.put(`${import.meta.env.VITE_API_BASE_URL}/approvals/${approvalId}`, formData, config);
       } else {
-        await axios.post("http://localhost:8081/api/approvals", formData, config);
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/approvals`, formData, config);
       }
 
       alert(status === "SUBMIT" ? "상신 완료!" : "임시저장 완료!");

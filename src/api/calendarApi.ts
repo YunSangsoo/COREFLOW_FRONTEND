@@ -89,6 +89,9 @@ export type EventDetail = {
   };
   canEdit: boolean;
   canDelete: boolean;
+
+  attendees?: Member[];
+  sharers?: Member[];
 };
 
 function unwrap<T = any>(res: any): T {
