@@ -1,5 +1,5 @@
 // src/components/inputs/calendar/LabelSelectWithManager.tsx
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FormControl, Select, MenuItem, OutlinedInput, InputAdornment, IconButton, InputLabel, Box
 } from "@mui/material";
