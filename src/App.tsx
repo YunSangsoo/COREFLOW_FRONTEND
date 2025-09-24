@@ -31,6 +31,8 @@ import Organization from './pages/member_organization/Organization';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
 import Header from './components/Header';
+import CalendarPage from './pages/calendar/CalendarPage';
+import RoomsPage from './pages/rooms/RoomsPage';
 
 
 function App() {
@@ -99,6 +101,10 @@ function App() {
                         <Route path="/admin/cpolicies">
                             <Route path="" element={<CompanyPolicyMainAdmin/>} />
                             <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                        </Route>
+                        <Route>
+                            <Route path='/calendar' element={<CalendarPage/>}/>
+                            <Route path='/rooms' element={<RoomsPage/>}/>
                         </Route>
                             <Route path='/members' element={
                                 <ProtectedRoute>

@@ -1,5 +1,5 @@
 // c:/FinalProject_Front/src/components/rooms/RoomList.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box, Button, Chip, MenuItem, Stack,
   Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography
