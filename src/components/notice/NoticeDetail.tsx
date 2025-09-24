@@ -50,7 +50,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
     if (!data) {
         return null
     }
-    console.log(data);
+    
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">

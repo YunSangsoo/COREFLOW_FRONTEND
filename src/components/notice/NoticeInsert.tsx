@@ -124,18 +124,6 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         noticeForm.sendFile?.forEach(file => {
             formData.append('files', file);
         });
-        
-        // const dataSubmit: NotiInsert = {
-        //     title: noticeForm.title,
-        //     essential: noticeForm.essential,
-        //     content: noticeForm.content,
-        //     endDate: noticeForm.endDate || undefined,
-        //     endTime: noticeForm.endTime || undefined,
-        //     depId: depId ?? undefined,
-        //     parentDepId:noticeForm.parentDepId || undefined,
-        //     childDepId:noticeForm.childDepId || undefined,
-        //     posId: noticeForm.posId || undefined
-        // };
 
         console.log(noticeForm);
 
