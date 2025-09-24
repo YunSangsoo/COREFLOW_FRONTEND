@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react"
+﻿import { useEffect, useRef, useState } from "react"
 import style from "./AiMain.module.css"
 import { checkUsedBefore, createTitle, deleteChatSession, getAiChatHistory, getSessions, insertAiChatHistory, insertAiChatSession, insertAiUsage, sendPrompt, updateAiChatSession, updateAiUsage } from "../../api/aiApi";
 import { type message, type AiChatHistory, type AiChatSession } from "../../types/aiTypes";
 import Markdown from 'react-markdown'
+import remarkBreaks from 'remark-breaks'
 
 export default function AiMain() {
     const [sessionId, setSessionId] = useState(0);
     const promptRef = useRef<HTMLInputElement>(null);
     const [sessionsList, setSessionsList] = useState<AiChatSession[]>([]);
     const [historyList, setHistoryList] = useState<AiChatHistory[]>([]);
-    const modelInstruction = {"role": "system", "content": "너는 우리 회사 CoreFlow의 어시스턴트 챗봇이고 네 이름은 CoreFlow AI야. 반드시 한국말로 답변해줘."}
-    const [messages, setMessages] = useState<message[]>([modelInstruction]);
+    const [messages, setMessages] = useState<message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     let currentSession = 0;
 
@@ -51,7 +51,8 @@ export default function AiMain() {
         if (sessionId == 0) {
             await createTitle(prompt)
                 .then(res => {
-                    title = res;
+                    title = res.message.content;
+                    // console.log(title);
                     // title = res.message.content;
                     // tokensUsed += res.eval_count + res.prompt_eval_count;
                 })
@@ -73,6 +74,7 @@ export default function AiMain() {
         await sendPrompt(messages)
             .then(res => {
                 modelResponse = res;
+                // console.log(modelResponse);
                 // modelResponse = res.message.content;
                 messages.push({ "role": "assistant", "content": modelResponse });
                 setMessages([...messages]);
@@ -110,7 +112,7 @@ export default function AiMain() {
     };
 
     const sessionClick = async (liSessionId:number) => {
-        setMessages([modelInstruction]);
+        setMessages([]);
 
         setSessionId(liSessionId);
 
@@ -143,7 +145,7 @@ export default function AiMain() {
     };
 
     const clickNewChat = () => {
-        setMessages([modelInstruction]);
+        setMessages([]);
         setSessionId(0);
         currentSession = 0;
     };
@@ -160,7 +162,7 @@ export default function AiMain() {
                             sessionsList && sessionsList.map(session => (
                             session.sessionId == sessionId ? <li key={session.sessionId} className={`mb-2 ${style["session-li"]}`}>
                                 <div className={`bg-amber-500 ${style["session-p"]}`} onClick={() => sessionClick(session.sessionId)}>
-                                    <Markdown>
+                                    <Markdown remarkPlugins={[remarkBreaks]}>
                                         {session.title}
                                     </Markdown>
                                 </div>
@@ -168,7 +170,7 @@ export default function AiMain() {
                             </li>
                             : <li key={session.sessionId} className={`mb-2 ${style["session-li"]}`}>
                                 <div className={style["session-p"]} onClick={() => sessionClick(session.sessionId)}>
-                                    <Markdown>
+                                    <Markdown remarkPlugins={[remarkBreaks]}>
                                         {session.title}
                                     </Markdown>
                                 </div>
@@ -188,7 +190,11 @@ export default function AiMain() {
                                     )
                                 } else if (message.role == "assistant") {
                                     return (
-                                        <div key={index} className={`${style["message"]} ${style["answer"]}`}><Markdown>{message.content}</Markdown></div>
+                                        <div key={index} className={`${style["message"]} ${style["answer"]}`}>
+                                            <Markdown remarkPlugins={[remarkBreaks]}>
+                                                {message.content}
+                                            </Markdown>
+                                        </div>
                                     )
                                 }
                             })
@@ -207,3 +213,7 @@ export default function AiMain() {
         </>
     )
 }
+
+
+
+

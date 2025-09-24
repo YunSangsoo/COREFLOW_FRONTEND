@@ -97,7 +97,7 @@ export default function Organization() {
 
     return(
         <div id="treeWrapper" style={{ width: '100vw', height: '100vh' }}>
-            <Tree data={treeData} translate={{ x: 300, y: 100 }} orientation="vertical" onNodeClick={onNodeClick}/>
+            <Tree data={treeData} translate={{ x: 600, y: 150 }} orientation="vertical" onNodeClick={onNodeClick}/>
         </div>
     )
 }

@@ -2,6 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { store } from '../store/store'; // Redux 스토어
 import { updateChatRoom } from '../features/chatSlice';
+import type { chatProfile, SignalType } from '../types/chat';
 
 // 1. STOMP 클라이언트 인스턴스를 앱 전체에서 공유하도록 하나만 생성
 const stompClient = new Client({
@@ -58,6 +59,28 @@ export const disconnectWebSocket = () => {
   if (stompClient.connected) {
     stompClient.deactivate();
   }
+};
+
+
+export const sendSignal = (
+  type: SignalType, 
+  data: any, 
+  fromUser: chatProfile, 
+  toUser: chatProfile
+) => {
+  if (!stompClient.connected) {
+    console.error("STOMP client is not connected.");
+    return;
+  }
+  stompClient.publish({
+    destination: '/app/webrtc/signal',
+    body: JSON.stringify({
+      type,
+      from: fromUser.userNo,
+      to: toUser.userNo,
+      data,
+    }),
+  });
 };
 
 export default stompClient;

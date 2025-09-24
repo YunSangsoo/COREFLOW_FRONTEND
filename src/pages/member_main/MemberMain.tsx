@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Department, DepartmentDetail, MemberResponse, Position, SearchParams } from "../../types/member";
 import { depDetailList, depList, memberList, posList } from "../../api/memberApi";
 import MemberDetail from "../../components/member_main/MemberDetail";
-import type { User } from "../../types/type";
+import MemberCreate from "../../components/member_main/MemberCreate";
 
 export default function MemberMain() {
 
@@ -27,28 +27,8 @@ export default function MemberMain() {
     const [isModal, setIsModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<number | null>(null);
 
-    // 사원 계정 생성용 훅
-    const [createUser, setCreateUser] = useState<User>({
-        userNo: 0,
-        email: '',             // string
-        userName: '',          // string
-        depId: undefined,
-        posId: undefined,
-        profile: undefined,
-        roles: [],             // string[]
-        hireDate: undefined,
-        phone: undefined,
-        address: undefined,
-        status: undefined
-    });
-    const [emailInput, setEmailInput] = useState('');
-    const [userNameInput, setUserNameInput] = useState('');
-    const [depIdInput, setDepIdInput] = useState<number | undefined>(undefined);
-    const [posIdInput, setPosIdInput] = useState<number | undefined>(undefined);
-    const [phoneInput, setPhoneInput] = useState('');
-    const [addressInput, setAddressInput] = useState('');
-    const [addressDetailInput, setAddressDetailInput] = useState('');
-
+    // 사원 생성 모달용 훅
+    const [isCreateModal, setIsCreateModal] = useState(false);
 
     // 사원 목록 조회용 훅
     const { data: members, isLoading, isError, error } = useQuery<MemberResponse[]>({
@@ -77,6 +57,7 @@ export default function MemberMain() {
         enabled: searchValues.parentDepId !== null
     })
 
+    
     // 직위 목록 조회용 훅
     const { data: position } = useQuery<Position[]>({
         queryKey: ['positions'],
@@ -149,24 +130,6 @@ export default function MemberMain() {
         })
     }
 
-    // 사원 추가 버튼
-    const handleCreate = () => {
-        setCreateUser({
-            userNo: 0,
-            email: emailInput,
-            userName: userNameInput,
-            depId: depIdInput,
-            posId: posIdInput,
-            profile: '/resources/static/images/p/default.png',
-            roles: [],
-            hireDate: new Date(),
-            phone: phoneInput,
-            address: addressInput,
-            addressDetail: addressDetailInput,
-            status: 'T'
-        })
-    }
-
     // 사원 상세 조회
     const handleDetailOpen = (userNo: number) => {
         setSelectedUser(userNo);
@@ -177,6 +140,9 @@ export default function MemberMain() {
         setSelectedUser(null);
         setIsModal(false);
     }
+
+    const handleCreateOpen = () => setIsCreateModal(true);
+    const handleCreateClose = () => setIsCreateModal(false);
 
     if (isLoading) return <div>Loading...</div>
     if (isError) return <div>{error.message}</div>
@@ -275,7 +241,7 @@ export default function MemberMain() {
                     검색
                 </button>
                 <button
-                    onClick={handleCreate}
+                    onClick={handleCreateOpen}
                     className="py-2 px-4 bg-green-500 text-white rounded-md font-semibold hover:bg-green-600 transition-colors"
                 >
                     사원등록
@@ -321,8 +287,13 @@ export default function MemberMain() {
                 </table>
             </div>
 
+            {/* 상세조회 모달 */}
             {isModal && selectedUser !== null && (
                 <MemberDetail userNo={selectedUser} onClose={handleDetailClose} />
+            )}
+            {/* 생성 모달 */}
+            {isCreateModal && (
+                <MemberCreate isOpen={isCreateModal} onClose={handleCreateClose} />
             )}
         </div>
     );
