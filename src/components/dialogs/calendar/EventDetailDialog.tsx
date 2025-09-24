@@ -49,23 +49,23 @@ function patchSvgResponsive(svg: string) {
 }
 
 /** 다양한 키 이름을 지원하며, 사용자 배열을 통일된 형태로 변환 */
-// type SimpleMember = { id: number; name: string; email?: string };
-// function normalizeMembers(source: any, keys: string[]): SimpleMember[] {
-//   if (!source) return [];
-//   const found = keys.map(k => (source as any)[k]).find(v => Array.isArray(v));
-//   const arr: any[] = Array.isArray(found) ? found : [];
-//   return arr.map((m: any, i: number) => {
-//     const id =
-//       Number(m.userNo ?? m.USER_NO ?? m.id ?? m.ID ?? i);
-//     const name =
-//       String(
-//         m.userName ?? m.USER_NAME ?? m.name ?? m.NAME ??
-//         m.displayName ?? m.DISPLAY_NAME ?? "이름없음"
-//       );
-//     const email = m.email ?? m.EMAIL ?? undefined;
-//     return { id, name, email };
-//   });
-// }
+type SimpleMember = { id: number; name: string; email?: string };
+function normalizeMembers(source: any, keys: string[]): SimpleMember[] {
+  if (!source) return [];
+  const found = keys.map(k => (source as any)[k]).find(v => Array.isArray(v));
+  const arr: any[] = Array.isArray(found) ? found : [];
+  return arr.map((m: any, i: number) => {
+    const id =
+      Number(m.userNo ?? m.USER_NO ?? m.id ?? m.ID ?? i);
+    const name =
+      String(
+        m.userName ?? m.USER_NAME ?? m.name ?? m.NAME ??
+        m.displayName ?? m.DISPLAY_NAME ?? "이름없음"
+      );
+    const email = m.email ?? m.EMAIL ?? undefined;
+    return { id, name, email };
+  });
+}
 
 export default function EventDetailDialog({
   open, eventId, onClose,
@@ -87,22 +87,22 @@ export default function EventDetailDialog({
   const [error, setError] = useState<string | null>(null);
 
   // // 참석자/공유자 목록(여러 키명 대응)
-  // const attendees = useMemo(
-  //   () =>
-  //     normalizeMembers(detail, [
-  //       "attendees", "attendeeList", "attendeeUsers", "participants",
-  //       "ATTENDEES", "ATTENDEE_LIST", "PARTICIPANTS"
-  //     ]),
-  //   [detail]
-  // );
-  // const sharers = useMemo(
-  //   () =>
-  //     normalizeMembers(detail, [
-  //       "sharers", "shareUsers", "shareMembers",
-  //       "SHARERS", "SHARE_USERS", "SHARE_MEMBERS"
-  //     ]),
-  //   [detail]
-  // );
+  const attendees = useMemo(
+    () =>
+      normalizeMembers(detail, [
+        "attendees", "attendeeList", "attendeeUsers", "participants",
+        "ATTENDEES", "ATTENDEE_LIST", "PARTICIPANTS"
+      ]),
+    [detail]
+  );
+  const sharers = useMemo(
+    () =>
+      normalizeMembers(detail, [
+        "sharers", "shareUsers", "shareMembers",
+        "SHARERS", "SHARE_USERS", "SHARE_MEMBERS"
+      ]),
+    [detail]
+  );
 
   // 도면 상태
   const room = detail?.room;
