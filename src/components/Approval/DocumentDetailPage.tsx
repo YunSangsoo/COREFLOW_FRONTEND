@@ -48,7 +48,7 @@ const DocumentDetailPage: React.FC = () => {
 
         const fetchDocumentDetail = async () => {
             try {
-                const response = await axios.get<DocumentData>(`http://localhost:8081/api/approvals/${id}`, {
+                const response = await axios.get<DocumentData>(`${import.meta.env.VITE_API_BASE_URL}/approvals/${id}`, {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
             console.log("서버로부터 받은 데이터:", response.data); 
@@ -73,7 +73,7 @@ const DocumentDetailPage: React.FC = () => {
         }
         try {
             await axios.post(
-                `http://localhost:8081/api/approvals/${id}/process`,
+                `${import.meta.env.VITE_API_BASE_URL}/approvals/${id}/process`,
                 { action },
                 { headers: { 'Authorization': `Bearer ${accessToken}` } }
             );

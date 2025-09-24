@@ -22,7 +22,7 @@ const ProcessedDocumentTable: React.FC = () => {
         const fetchDocuments = async () => {
             if (!accessToken) return;
             try {
-                const response = await axios.get('http://localhost:8081/api/approvals/processed-documents', {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/processed-documents`, {
                     headers: { 'Authorization': `Bearer ${accessToken}` },
                     params:{keyword:query}
                 });

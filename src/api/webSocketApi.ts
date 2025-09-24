@@ -6,14 +6,14 @@ import type { chatProfile, SignalType } from '../types/chat';
 
 // 1. STOMP 클라이언트 인스턴스를 앱 전체에서 공유하도록 하나만 생성
 const stompClient = new Client({
-  webSocketFactory: () => new SockJS('http://localhost:8081/api/ws'),
+  webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_BASE_URL}/ws`),
   // 연결 시도 간격을 5초로 설정
   reconnectDelay: 5000,
   // 통신이 없을 때 연결을 확인하는 heart-beat 설정
   heartbeatIncoming: 4000,
   heartbeatOutgoing: 4000,
   // 디버깅 메시지
-  debug: (str) => {
+  debug: () => {
   },
 });
 
@@ -47,7 +47,7 @@ export const connectWebSocket = () => {
     onDisconnect: () => {
       isConnected = false;
     },
-    onStompError: (frame) => {
+    onStompError: () => {
     },
   });
 

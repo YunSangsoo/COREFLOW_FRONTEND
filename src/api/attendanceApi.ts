@@ -4,7 +4,7 @@ import { loginSuccess, logout } from "../features/authSlice";
 import type { Attendance, PostCheckInTime, PutCheckOutTime, VacType, VacTypeUpdate} from "../types/attendance";
 
 const api = axios.create({
-    baseURL : "http://localhost:8081/api",
+    baseURL : import.meta.env.VITE_API_BASE_URL,
     withCredentials : true
 });
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(
         // api 서버로부터 응답받은 상태코드가 401인 경우 refresh토큰을 활용한 accessToken 재발급
         if(err.response?.status === 401){
             try{
-                const response = await axios.post(`http://localhost:8081/api/auth/refresh`, {}, {
+                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {}, {
                     withCredentials:true
                 });
                 // 응답성공시 accessToken을 다시 메모리에 저장
