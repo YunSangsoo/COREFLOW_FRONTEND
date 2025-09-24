@@ -30,3 +30,26 @@ export type RoomCreateReq = {
 
 export type RoomUpdateReq 
 = Partial<Omit<Room, "roomId" | "createDate" | "updateDate" | "createUserNo" | "updateUserNo">>;
+
+export interface RoomReservationRes {
+  eventId: number;
+  title: string;
+  calId: number;
+  calendarName: string;
+  startAt: string; // 'YYYY-MM-DD HH:mm:ss'
+  endAt: string;
+  organizerUserNo: number;
+  organizerName: string;
+}
+
+export interface RoomDetailRes {
+  roomId: number;
+  roomName: string;
+  location: string | null;
+  capacity: number | null;
+  equipments: string | null;
+  description: string | null;
+  reservations: RoomReservationRes[];
+}
+
+export const SPACE_FMT = "YYYY-MM-DD HH:mm:ss";
