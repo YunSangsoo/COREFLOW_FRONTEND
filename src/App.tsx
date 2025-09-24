@@ -29,6 +29,8 @@ import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 import Organization from './pages/member_organization/Organization';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
+import CalendarPage from './pages/calendar/CalendarPage';
+import RoomsPage from './pages/rooms/RoomsPage';
 
 
 function App() {
@@ -80,9 +82,12 @@ function App() {
         <div className="container">
                 {!isMainPage && !isAuthPage && 
                 <> 
+                <div className='w-56 shrink-0'>
                     <Sidebar onChatClick={handleToggleChat} />
+                </div>
                 </>
                 }
+                <div className='flex-auto min-w-fit overflow-auto ml-56 pr-20'>
                     <Routes>
                         <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
@@ -97,6 +102,10 @@ function App() {
                         <Route path="/admin/cpolicies">
                             <Route path="" element={<CompanyPolicyMainAdmin/>} />
                             <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                        </Route>
+                        <Route>
+                            <Route path='/calendar' element={<CalendarPage/>}/>
+                            <Route path='/rooms' element={<RoomsPage/>}/>
                         </Route>
                             <Route path='/members' element={
                                 <ProtectedRoute>
@@ -136,6 +145,7 @@ function App() {
                     </Routes>
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
             {isChatOpen && <ChatManager onClose={handleToggleChat} />}
+            </div>
         </div>
         </>
     )

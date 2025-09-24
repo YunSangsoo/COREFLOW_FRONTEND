@@ -1,5 +1,5 @@
 import { api } from "./coreflowApi";
-import type { Room, RoomCreateReq, RoomUpdateReq, RoomStatus } from "../types/rooms/room";
+import type { Room, RoomCreateReq, RoomUpdateReq, RoomStatus, RoomDetailRes } from "../types/rooms/room";
 
 
 export async function fetchRooms(params?: {
@@ -33,4 +33,20 @@ await api.put<void>(`/rooms/${roomId}`, body);
 
 export async function deleteRoom(roomId: number): Promise<void> {
 await api.delete<void>(`/rooms/${roomId}`);
+}
+
+export async function fetchRoomDetail(
+  roomId: number,
+  params: { from: string; to: string } // 'YYYY-MM-DD HH:mm:ss'
+): Promise<RoomDetailRes> {
+  const res = await api.get<RoomDetailRes>(`/rooms/${roomId}/detail`, { params });
+  return res.data;
+}
+
+export async function getRoomDetail(
+  roomId: number,
+  params: { from: string; to: string }
+): Promise<RoomDetailRes> {
+  const res = await api.get<RoomDetailRes>(`/rooms/${roomId}/detail`, { params });
+  return res.data;
 }

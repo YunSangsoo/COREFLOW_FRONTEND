@@ -10,7 +10,7 @@ type Member = { userNo: number; userName: string; email?: string; depId?: number
 
 export default function PeoplePickerDialog({
   open, mode, departments, members, selected, blockedUserNos = [],
-  loadingDepts, loadingMembers,
+  loadingMembers,
   onClose, onConfirm, onToggle, onQueryChange, onDeptChange,
 }: {
   open: boolean;

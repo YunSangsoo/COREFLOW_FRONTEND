@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import './Detail.css';
 import { FiDownload, FiPaperclip } from 'react-icons/fi';
 import type { customFile } from "../../types/type";
 
-interface AttachedFile{
-    fileId: number;
-    originalFileName: string;
-}
 
 interface ApprovalLine{
     lineId: number;
@@ -43,7 +39,6 @@ const DocumentDetailPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const accessToken = useSelector((state: any) => state.auth.accessToken);
-    const navigate = useNavigate(); 
 
     useEffect(() => {
         if (!accessToken || !id) {
@@ -119,32 +114,6 @@ const DocumentDetailPage: React.FC = () => {
     const approvers = doc.approval.lines.filter(line => line.lineOrder < 99);
     const ccs = doc.approval.lines.filter(line => line.lineOrder === 99);
 
-    const handleDownload = async (fileId: number, fileName:string) => {
-        if (!accessToken){
-            alert('로그인 정보없음');
-            return;
-        }
-
-        try{
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/files/download/${fileId}`,{
-                headers: { 'Authorization': `Bearer ${accessToken}`},
-                responseType: 'blob',
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-
-            link.click();
-            link.parentNode?.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error){
-            console.error("다운로드 실패",error);
-            alert("다운로드 실패");
-        }
-    };
 
     return (
     <div className="detail-page-container">

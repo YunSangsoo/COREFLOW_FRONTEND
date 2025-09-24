@@ -91,11 +91,6 @@ const CcDocumentTable: React.FC = () => {
 
     if (loading) return <div>로딩중...</div>;
 
-    const docsToRender = query
-        ? documents
-        : filter === "전체"
-          ? documents
-          : documents.filter(doc => doc.type === filter);
 
     const indexOfLastDocument = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstDocument = indexOfLastDocument - ITEMS_PER_PAGE;

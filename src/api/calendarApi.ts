@@ -1,4 +1,5 @@
 // src/api/calendarApi.ts
+import type { ShareListRes, ShareUpsertReq } from "../types/calendar/calendar";
 import { api } from "./coreflowApi";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -39,6 +40,36 @@ export type CalendarDefaultRole =
   | "CONTRIBUTOR"
   | "EDITOR";
 
+export type ShareUser = { userNo: number; role: CalendarDefaultRole; userName?: string };
+export type ShareDept = { depId: number; role: CalendarDefaultRole; depName?: string }; // depId 규칙
+export type SharePos  = { posId: number; role: CalendarDefaultRole; posName?: string };
+
+export type CalendarShares = {
+  users?: ShareUser[];
+  departments?: ShareDept[];
+  positions?: SharePos[];
+  defaultRole?: CalendarDefaultRole; // 응답에 있을 수 있으나 저장 시엔 항상 NONE 정책
+};
+
+export type CalendarDetail = {
+  calId: number;
+  calName: string;
+  color: string;
+  ownerUserNo: number;
+  // ... 필요시 확장
+};
+
+// ── 상세/공유 조회
+export async function getCalendar(calId: number): Promise<CalendarDetail> {
+  const r = await api.get(`/calendar/${calId}`);
+  return r.data;
+}
+
+export async function getCalendarShares(calId: number): Promise<CalendarShares> {
+  const r = await api.get(`/calendar/${calId}/shares`);
+  return r.data ?? {};
+}
+  
 export type Member = {
   userNo : number;
   userName : string;
@@ -46,6 +77,15 @@ export type Member = {
   depId? : number;
   posId? : number;
 }
+
+export type MemberLite = {
+  userNo: number;
+  name: string;         
+  depId?: number;
+  posId?: number;
+  depName?: string;
+  posName?: string;
+};
 
 export type Department = {
   depId: number; depName: string; parentId?: number | null;
@@ -62,6 +102,10 @@ export type EventTypeOption = {
   typeCode: string;
   typeName: string;
 };
+
+export type MemberItem = { userNo: number; name: string; depName?: string; posName?: string };
+export type DeptNode   = { depId: number; name: string;};
+export type PositionRow= { posId: number; posName: string };
 
 // 상세 타입
 export type EventDetail = {
@@ -89,7 +133,6 @@ export type EventDetail = {
   };
   canEdit: boolean;
   canDelete: boolean;
-
   attendees?: Member[];
   sharers?: Member[];
 };
@@ -107,17 +150,17 @@ function num(n: any, d = 0): number {
 }
 
 
-// ── 내가 조회 가능한 캘린더 목록
-export async function fetchVisibleCalendars(userNo: number): Promise<CalendarSummary[]> {
-  const r = await api.get("/calendar/visible", {
-    headers: { "X-User-No": String(userNo) }, 
-    params:  { userNo },                      
-  });
+export async function fetchVisibleCalendars(userNo?: number): Promise<CalendarSummary[]> {
+  const url = typeof userNo === "number"
+    ? `/calendar/visible?userNo=${userNo}`   // 서버가 무시해도 무방, 과거 호출부와 호환
+    : `/calendar/visible`;
+
+  const r = await api.get(url);
   const raw = unwrap<any[]>(r) ?? [];
   return raw.map((c) => ({
     calId: num(c.calId ?? c.CAL_ID),
-    name: String(c.name ?? c.calName ?? ""),
-    color: c.color ?? c.COLOR,
+    name: String(c.name ?? c.calName ?? c.CAL_NAME ?? ""),
+    color: String(c.color ?? c.COLOR ?? "#4096ff"),
   }));
 }
 
@@ -141,17 +184,206 @@ export async function createCalendar(body: {
   };
 }
 
+export type AudienceDefaultRole = CalendarDefaultRole;
+
+
+const pickArray = (r: any): any[] => {
+  const dig = (v: any, depth = 0): any[] => {
+    if (Array.isArray(v)) return v;
+    if (!v || typeof v !== "object" || depth > 3) return [];
+
+    // 1차: 흔한 키들에서 바로 배열 찾기
+    const keys = [
+      "data", "items", "list", "rows", "records",
+      "content", "result", "nodes", "children",
+      "departments", "positions"
+    ];
+    for (const k of keys) {
+      const a = (v as any)[k];
+      if (Array.isArray(a)) return a;
+    }
+
+    // 2차: 값들 중 배열이 있으면 그걸 사용
+    for (const val of Object.values(v)) {
+      if (Array.isArray(val)) return val as any[];
+    }
+
+    // 3차: 객체 값들을 한 단계 더 파고듦
+    for (const val of Object.values(v)) {
+      if (val && typeof val === "object") {
+        const inner = dig(val, depth + 1);
+        if (inner.length) return inner;
+      }
+    }
+    return [];
+  };
+
+  return dig(r?.data ?? r);
+};
+const toNum = (...vals: any[]): number | null => {
+  for (const v of vals) {
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+};
+const toStr = (...vals: any[]): string => {
+  for (const v of vals) {
+    if (v !== undefined && v !== null) {
+      const s = String(v).trim();
+      if (s) return s;
+    }
+  }
+  return "";
+};
+
+export async function searchMembersForSharePicker(
+  query = "",
+  limit = 30,
+  depId?: number
+): Promise<MemberLite[]> {
+  // 엔드포인트는 현재 쓰는 걸 유지
+  const r = await api.get("/CalendarMembers", { params: { query, limit, depId } });
+  const raw = (unwrap<any[]>(r) ?? []) as any[];
+
+  return raw
+    .map((m) => {
+      const userNo = num(m.userNo ?? m.USER_NO ?? m.id ?? m.USER_ID);
+      if (!Number.isFinite(userNo)) return null;
+
+      return {
+        userNo,
+        // 서버가 userName/NAME/name 중 무엇을 주든 표준 name으로 치환
+        name: String(m.name ?? m.userName ?? m.USER_NAME ?? m.NAME ?? ""),
+        email: m.email ?? m.EMAIL ?? undefined,
+        depId: num(m.depId ?? m.DEP_ID) ?? undefined,
+        posId: num(m.posId ?? m.POS_ID) ?? undefined,
+        depName: m.depName ?? m.DEP_NAME ?? undefined,
+        posName: m.posName ?? m.POS_NAME ?? undefined,
+      } as MemberLite;
+    })
+    .filter((x): x is MemberLite => !!x && x.name.length > 0);
+}
+
+// ✅ 부서 트리
+export async function fetchDeptChildren(parentId?: number | null): Promise<DeptNode[]> {
+  // 루트면 params 자체를 생략(= 쿼리 문자열에 parentId가 붙지 않도록)
+  const params = parentId == null ? undefined : { parentId };
+
+  // 1순위: 실제 운영에서 가장 일반적인 엔드포인트
+  try {
+    const r = await api.get("/CalendarDepartments", { params });
+    const raw = pickArray(r);
+    if (raw.length) {
+      return raw
+        .map((d: any) => ({
+          // 다양한 키 수용(deptId/depId/DEPT_ID/DEP_ID/id)
+          depId: toNum(d.deptId ?? d.depId ?? d.DEPT_ID ?? d.DEP_ID ?? d.id),
+          // 이름 키 수용(name/depName/DEPT_NAME)
+          name:  toStr(d.name ?? d.depName ?? d.DEP_NAME),
+        }))
+        .filter((x: any) => x.depId !== null) as DeptNode[];
+    }
+  } catch {
+    // 무시하고 폴백 진행
+  }
+
+  // 2순위 폴백: 트리형 엔드포인트 - 서버별 구현에 따라 children이 통째로 오기도 함
+  try {
+    // 보통 루트 호출은 인자/쿼리 없이도 응답이 오기 때문에 우선 그대로 호출
+    const r = await api.get("/calendar/org/departments/tree", { params });
+    const raw = pickArray(r);
+    if (raw.length) {
+      return raw
+        .map((d: any) => ({
+          depId: toNum(d.deptId ?? d.depId ?? d.DEPT_ID ?? d.DEP_ID ?? d.id),
+          name:  toStr(d.name ?? d.depName ?? d.DEP_NAME),
+        }))
+        .filter((x: any) => x.depId !== null) as DeptNode[];
+    }
+  } catch {
+    /* 최종 빈 배열 반환 */
+  }
+
+  return [];
+}
+
+// ✅ 직급 목록
+export async function fetchPositions(): Promise<{ posId: number; posName: string }[]> {
+  try {
+    // console.log("[api] GET /calendar/org/positions (call)");
+    const r = await api.get("/calendar/org/positions");
+    // console.log("[api] /org/positions status:", r.status, "raw:", r.data);
+
+    const raw: any =
+      Array.isArray(r?.data)       ? r.data :
+      Array.isArray(r?.data?.data) ? r.data.data :
+      Array.isArray(r?.data?.list) ? r.data.list :
+      Array.isArray(r?.data?.rows) ? r.data.rows :
+      Array.isArray(r?.data?.items)? r.data.items :
+      [];
+
+    const out = raw
+      .map((p: any) => ({
+        // ❗️백엔드가 POSID(언더스코어 없음)로 보내는 케이스 보완
+        posId: Number(p.posId ?? p.POS_ID ?? p.POSID ?? p.id),
+        posName: String(
+          p.posName ?? p.POS_NAME ?? p.POSNAME ??  // ← 여기에 POSNAME 추가
+          p.name ?? p.positionName ?? p.POSITION_NAME ?? ""
+        ),
+      }))
+      .filter((x: any) => Number.isFinite(x.posId) && !!x.posName);
+
+    // console.log("[api] /org/positions normalized:", out);
+    return out;
+  } catch (err: any) {
+    // console.log("[api] /org/positions ERROR:", err?.response?.status, err?.response?.data ?? String(err));
+    throw err;
+  }
+}
 // ── 캘린더 수정
 export async function updateCalendar(
   calId: number,
-  body: { name?: string; color?: string; defaultRole?: CalendarDefaultRole }
+  req: { name: string; color: string }
 ): Promise<void> {
-  await api.put(`/calendar/${calId}`, body);
+  await api.put(`/calendar/${calId}`, {
+    name: req.name,
+    color: req.color,
+    defaultRole: "NONE" as CalendarDefaultRole,
+  });
 }
 
 // ── 캘린더 삭제
 export async function deleteCalendar(calId: number): Promise<void> {
   await api.delete(`/calendar/${calId}`);
+}
+
+// 캘린더 공유 조회
+export async function fetchCalendarShares(calId: number) {
+  const { data } = await api.get<ShareListRes>(`/calendar/${calId}/shares`);
+  return data;
+}
+
+// 캘린더 공유 저장 (merge | replace)
+export async function saveCalendarShares(args: {
+  calId: number;
+  payload: ShareUpsertReq;                   // users 기반
+  mode?: "merge" | "replace";
+  userNo?: number;                           // X-User-No 폴백용
+}) {
+  const { calId, payload, mode = "merge", userNo } = args;
+
+  // 🤝 서버가 members를 받도록 변환(서버가 users를 받아도 문제 없음)
+  const body: any = {
+    members: payload.users ?? [],            // ← 핵심 변환
+    departments: payload.departments ?? [],
+    positions: payload.positions ?? [],
+  };
+
+  return api.put(`/calendar/${calId}/shares`, body, {
+    params: { mode },
+    headers: userNo ? { "X-User-No": String(userNo) } : undefined,
+  });
 }
 
 // 기간 내 이벤트 조회 (두 키 모두 전송: calendarId, calId)
@@ -190,6 +422,7 @@ export async function fetchEvents(params: {
   }));
 }
 
+
 // ── 일정 생성 → { eventId }
 export async function createEvent(req: {
   calId: number;
@@ -205,8 +438,8 @@ export async function createEvent(req: {
   typeId?: number;
   rrule?: string;
   exdates?: string;
-  attendeeUserNos?: number[];    // 참석자
-  shareUserNos?: number[];       // 공유자
+  // attendeeUserNos?: number[];    // 참석자
+  // shareUserNos?: number[];       // 공유자
 }): Promise<{ eventId: number }> {
   const r = await api.post("/events", req);
   const data = unwrap<any>(r);
