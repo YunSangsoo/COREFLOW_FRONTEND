@@ -3,6 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { RootState } from '../store/store';
 import { logout } from '../features/authSlice';
 import { api } from '../api/coreflowApi';
+import AttButton from './AttButton';
+import { useQuery } from '@tanstack/react-query';
+import type { LoginUser } from '../types/vacation';
+import { loginUser } from '../api/vacationApi';
+import type { Attendance } from '../types/attendance';
+import { useState } from 'react';
+import dayjs from 'dayjs';
+import { loginUserAttendance } from '../api/attendanceApi';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -29,6 +37,24 @@ const Header = () => {
       navigate('/auth/login'); // 로그인 페이지로 리디렉션
     }
   };
+
+
+
+  // 출퇴근 기록용 날짜 상태
+  const [selectYear, setSelectYear] = useState(dayjs().year());
+  const [selectMonth, setSelectMonth] = useState(dayjs().month() +1);
+
+  // 출퇴근 기록용 로그인 사용자 정보
+  const { data: loginUserProfile } = useQuery<LoginUser>({
+      queryKey: ['userProfile'],
+      queryFn: () => loginUser()
+  })
+
+  // 출퇴근 기록용 로그인 사용자 근태 정보
+  const {data : loginUserAtt} = useQuery<Attendance[]>({
+      queryKey:['loginUserAtt',selectYear,selectMonth],
+      queryFn:() => loginUserAttendance(selectYear,selectMonth)
+  });
 
   return (
     <header 
@@ -57,7 +83,10 @@ const Header = () => {
           >
             로그아웃
           </button>
+
+          <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt}/>
         </div>
+        
       ) : (
         // 로그아웃 상태일 때 표시될 UI (예시)
         <div>

@@ -142,7 +142,8 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         }
     }
 
-
+    const originalImageUrl = `${import.meta.env.VITE_API_BASE_URL}/images/${initData?.files?.imageCode}/${initData?.files?.changeName}`;
+    
     return (
         <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-opacity-50">
             <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
@@ -300,9 +301,18 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                                 <input 
                                 onChange={(e)=>handleFileChange(e)}
                                 type="file" multiple />
-                                {/* <span className="text-gray-600 font-medium">파일 선택</span> */}
+                                {/* <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                    {noticeForm.initFile?.map((file, index) => (
+                                            <a 
+                                            download={file.originName || "download"}
+                                            href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}
+                                            key={index} className="text-gray-800">
+                                                {file.originName}
+                                                {index < (noticeForm.initFile?.length ?? 0) - 1 && ", "}
+                                            </a>
+                                        ))}
+                                </div> */}
                             </label>
-                            
                         </div>
                     </div>
 

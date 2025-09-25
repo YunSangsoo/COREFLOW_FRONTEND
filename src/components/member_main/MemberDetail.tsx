@@ -147,6 +147,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         }
     }
 
+    const originalImageUrl = `${import.meta.env.VITE_API_BASE_URL}/images/${data?.profile.imageCode}/${data?.profile.changeName}`;
     // 날짜 포맷
     const hireDateFormat = updateData?.hireDate?.split('T')[0];
     const updateDateFormat = updateData?.updateDate?.split('T')[0];
@@ -161,7 +162,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
                 <h2 className="text-xl font-semibold mb-4">사원 상세 조회</h2>
                 <div className={styles.profileSection}>
                     <div className={styles.profileImage}>
-                        <img src={preview || "/path/to/profile/image.jpg"} alt="Profile" />
+                        <img src={preview || originalImageUrl} alt="Profile" />
                         <label htmlFor="profile-image-upload" className={styles.plusIcon}>+</label>
                         <input id="profile-image-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleChangeProfile} />
                     </div>

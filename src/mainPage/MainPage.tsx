@@ -102,22 +102,21 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                 onClick={openNoticeModal} 
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-bold"> 공지 썸네일이 될 공간
             </div> */}
-            
             <div className="p-8 mt-36">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {menuItems.map((item) => (
                     // 하위 메뉴가 있는 항목은 그룹 카드로 렌더링
                     item.subItems ? (
                         <div 
-                            key={item.name} 
-                            className={openCard===item.name ? "bg-white p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
-                                'bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
-                            }
+                        key={item.name} 
+                        className={openCard===item.name ? "bg-white p-8 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-4":
+                            'bg-white p-8 m-3 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer'
+                        }
                         >
                         <div 
                             onClick={() => handleCardClick(item)}
                             className="flex justify-between items-center cursor-pointer"
-                        >
+                            >
                         <div>
                         <h2 className="text-2xl font-semibold text-gray-700">{item.name}</h2>
                         {openCard !== item.name && (
