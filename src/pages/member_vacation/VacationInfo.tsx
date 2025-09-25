@@ -15,30 +15,34 @@ export default function VacationInfo() {
     if (isError) return <div>{error.message}</div>
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white">
-            <h1 className="text-2xl font-bold mb-6">휴가관리</h1>
-            
-            <div className="flex gap-6">
-                <VacSideBar/>
-                        
-                <div className="flex-1">
-                    <div className="border border-gray-300 max-w-md">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-600 text-white">
-                                    <th className="px-3 py-2 text-center font-medium w-20">no</th>
-                                    <th className="px-3 py-2 text-center font-medium w-50">근무기간</th>
-                                    <th className="px-3 py-2 text-center font-medium w-40">연차 일 수</th>
+        <div className="max-w-6xl mx-auto p-8 lg:p-12 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">휴가 관리</h1>
+
+            <div className="flex flex-col lg:flex-row gap-8">
+                <div className="lg:w-64"><VacSideBar /></div>
+
+                <div className="flex-1 min-w-0">
+                    <div className="bg-white shadow-lg rounded-xl overflow-hidden max-w-2xl lg:max-w-full">
+                        <table className="min-w-full text-sm divide-y divide-gray-200">
+                            <thead className="bg-blue-600 text-white">
+                                <tr>
+                                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-16 rounded-tl-xl">No</th>
+                                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-auto">근무 기간</th>
+                                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-32 rounded-tr-xl">연차 일 수</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {data?.map((vacation, index) => (
-                                    <tr key={index} className="border-b border-gray-300">
-                                        <td className="px-3 py-2 text-center bg-gray-100">{index + 1}</td>
-                                        <td className="px-3 py-2 text-center">
-                                            {vacation.workPrd}년 이상
+                                    <tr key={index} className="hover:bg-blue-50 transition duration-150 ease-in-out">
+                                        <td className="px-4 py-3 text-center font-medium bg-gray-50 text-gray-700">
+                                            {index + 1}
                                         </td>
-                                        <td className="px-3 py-2 text-center">{vacation.vacAmount}일</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">
+                                            <span className="font-semibold">{vacation.workPrd}</span>년 이상
+                                        </td>
+                                        <td className="px-4 py-3 text-center font-bold text-lg text-blue-600">
+                                            {vacation.vacAmount}일
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

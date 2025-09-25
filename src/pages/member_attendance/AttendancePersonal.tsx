@@ -12,12 +12,12 @@ export default function AttendancePersonal() {
 
     // 연도 상태 관리용 훅
     const [selectYear, setSelectYear] = useState(dayjs().year());
-    const [selectMonth, setSelectMonth] = useState(dayjs().month() +1);
-    
+    const [selectMonth, setSelectMonth] = useState(dayjs().month() + 1);
+
     // 날짜 상태 업데이트
-    const handleDateChange = (year:number, month?:number) => {
+    const handleDateChange = (year: number, month?: number) => {
         setSelectYear(year);
-        if(month !== undefined){
+        if (month !== undefined) {
             setSelectMonth(month);
         }
     }
@@ -29,20 +29,20 @@ export default function AttendancePersonal() {
     })
 
     // 로그인 사용자 근태정보
-    const {data : loginUserAtt, isLoading, isError, error} = useQuery<Attendance[]>({
-        queryKey:['loginUserAtt',selectYear,selectMonth],
-        queryFn:() => loginUserAttendance(selectYear,selectMonth)
+    const { data: loginUserAtt, isLoading, isError, error } = useQuery<Attendance[]>({
+        queryKey: ['loginUserAtt', selectYear, selectMonth],
+        queryFn: () => loginUserAttendance(selectYear, selectMonth)
     });
 
-    if(isLoading) return <div>Loading...</div>
-    if(isError) return <div>{error.message}</div>
+    if (isLoading) return <div>Loading...</div>
+    if (isError) return <div>{error.message}</div>
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white">
-            <h1 className="text-2xl font-bold mb-6">근태관리</h1>
+        <div className="max-w-6xl mx-auto p-8 lg:p-12 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">근태 관리</h1>
 
-            <div className="flex gap-6">
-                <AttSideBar />
+            <div className="flex flex-col lg:flex-row gap-8">
+                <div className="lg:w-64"><AttSideBar /></div>
 
                 <div className="flex-1">
                     <div className="bg-gray-100 p-4 rounded-t-lg border border-gray-300">
@@ -64,7 +64,7 @@ export default function AttendancePersonal() {
                     </div>
 
                     <div className="border border-gray-300 rounded overctDate={selectDate} onDateChange={setSelectDate}flow-hidden">
-                        <VacDate selectYear={selectYear} selectMonth={selectMonth} onDateChange={handleDateChange}/>
+                        <VacDate selectYear={selectYear} selectMonth={selectMonth} onDateChange={handleDateChange} />
                         <table className="min-w-full bg-white border-collapse">
                             <thead>
                                 <tr className="bg-gray-200 border-b border-gray-300 text-sm font-semibold">

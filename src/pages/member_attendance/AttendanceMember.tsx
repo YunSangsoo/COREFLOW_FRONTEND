@@ -10,38 +10,38 @@ import AttDate from "../../components/member_attendance/AttDate";
 import { vacType } from "../../api/attendanceApi";
 import Pagination from "../../components/Approval/Pagination";
 
-export default function AttendanceMember () {
+export default function AttendanceMember() {
     const queryClient = useQueryClient();
     const [searchName, setSearchName] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectMember,setSelectMember] = useState<MemberChoice|null>(null);
+    const [selectMember, setSelectMember] = useState<MemberChoice | null>(null);
     const [currentDate, setCurrentDate] = useState(dayjs());
-    const [vacTypeList, setVacTypeList] = useState<number|null>(null);
+    const [vacTypeList, setVacTypeList] = useState<number | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 15;
 
-    const {data:attData,isLoading,isError,error} = useQuery<Attendance[]>({
-        queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
-        queryFn:() => memAttendance(currentDate.format('YYYY-MM-DD'),selectMember?.userNo ?? null),
+    const { data: attData, isLoading, isError, error } = useQuery<Attendance[]>({
+        queryKey: ['memAtt', currentDate.format('YYYY-MM-DD'), selectMember?.userNo],
+        queryFn: () => memAttendance(currentDate.format('YYYY-MM-DD'), selectMember?.userNo ?? null),
     });
 
-    const {data : vacData} = useQuery<VacType[]>({
-        queryKey:['vacType'],
-        queryFn:vacType,
-        enabled:vacTypeList !== null
+    const { data: vacData } = useQuery<VacType[]>({
+        queryKey: ['vacType'],
+        queryFn: vacType,
+        enabled: vacTypeList !== null
     })
 
     const mutation = useMutation({
-        mutationFn : vacTypeUpdate,
-        onSuccess:() => {
+        mutationFn: vacTypeUpdate,
+        onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo]
+                queryKey: ['memAtt', currentDate.format('YYYY-MM-DD'), selectMember?.userNo]
             });
             setVacTypeList(null);
         },
-        onError:(error) => {
-            console.log('비고 업데이트 실패 : ',error);
+        onError: (error) => {
+            console.log('비고 업데이트 실패 : ', error);
         }
     })
 
@@ -49,7 +49,7 @@ export default function AttendanceMember () {
         setSearchQuery(searchName);
     }
 
-    const handleSelectMember = (member:MemberChoice) => {
+    const handleSelectMember = (member: MemberChoice) => {
         setSearchName(member.userName);
         setSearchQuery(member.userName);
         setSelectMember(member);
@@ -63,11 +63,11 @@ export default function AttendanceMember () {
         setCurrentPage(1);
     }
 
-    const handleVacType = (attId:number) => {
+    const handleVacType = (attId: number) => {
         setVacTypeList(vacTypeList === attId ? null : attId);
     }
-    
-    const handleVacSelect = (attId:number, vacCode:number) => {
+
+    const handleVacSelect = (attId: number, vacCode: number) => {
         mutation.mutate({
             attId,
             vacCode
@@ -75,53 +75,53 @@ export default function AttendanceMember () {
     }
 
     useEffect(() => {
-        const handleClickOutside = (e:MouseEvent) => {
-            if(listRef.current && !listRef.current.contains(e.target as Node)){
+        const handleClickOutside = (e: MouseEvent) => {
+            if (listRef.current && !listRef.current.contains(e.target as Node)) {
                 setVacTypeList(null);
             }
         }
-        document.addEventListener('mousedown',handleClickOutside);
-        return() => {
-            document.removeEventListener('mousedown',handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
         }
-    },[])
+    }, [])
 
     const indexOfLastAttendance = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstAttendance = indexOfLastAttendance - ITEMS_PER_PAGE;
     const currentAttendance = attData?.slice(indexOfFirstAttendance, indexOfLastAttendance);
     const totalPages = attData && Math.ceil(attData.length / ITEMS_PER_PAGE) || 0;
 
-    if(isLoading) return <div>Loading...</div>
-    if(isError) return <div>{error.message}</div>
-    
-    return (
-        <div className="max-w-4xl mx-auto p-6 bg-white">
-            <h1 className="text-2xl font-bold mb-6">근태관리</h1>
+    if (isLoading) return <div>Loading...</div>
+    if (isError) return <div>{error.message}</div>
 
-            <div className="flex gap-6">
-                <AttSideBar/>
+    return (
+        <div className="max-w-6xl mx-auto p-8 lg:p-12 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">근태 관리</h1>
+
+            <div className="flex flex-col lg:flex-row gap-8">
+                <div className="lg:w-64"><AttSideBar /></div>
 
                 <div className="flex-1">
                     <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded">
                         <div className="flex items-center">
                             <div className="px-3 py-1 border bg-gray-800 text-white rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">사원명</div>
-                            <input 
-                                onChange={(e) => setSearchName(e.target.value)} value={searchName} type="text" placeholder="사원명을 입력하세요" 
-                                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"/>
-                            <button 
+                            <input
+                                onChange={(e) => setSearchName(e.target.value)} value={searchName} type="text" placeholder="사원명을 입력하세요"
+                                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <button
                                 onClick={handleSearch}
                                 className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">검색
                             </button>
-                            <button 
+                            <button
                                 onClick={handleReset}
                                 className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">초기화
                             </button>
                         </div>
                     </div>
-                    {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember}/>}
+                    {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
 
                     <div className="border border-gray-300 rounded">
-                        <AttDate selectDate={currentDate} onDateChange={setCurrentDate}/>
+                        <AttDate selectDate={currentDate} onDateChange={setCurrentDate} />
                         <table className="min-w-full bg-white border-collapse">
                             <thead>
                                 <tr className="bg-gray-200 border-b border-gray-300 text-sm font-semibold">
@@ -136,54 +136,54 @@ export default function AttendanceMember () {
                                 </tr>
                             </thead>
                             <tbody>
-                            {
-                                currentAttendance && currentAttendance.length > 0 ? (
-                                    currentAttendance.map((data,index) => (
-                                    <tr className="border-b border-gray-200" key={data.attId}>
-                                        <td className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</td>
-                                        <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
-                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
-                                        <td className="w-24 p-2 border-r border-gray-200 text-center">{data.depName}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime||null}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime||null}</td>
-                                        <td className="w-16 p-2 border-r border-gray-200 text-center">
-                                            <div className="relative">
-                                            <button
-                                                onClick={() => handleVacType(data.attId)}
-                                                className="w-16 p-2 text-white bg-blue-600 text-center">{data.vacName}
-                                            </button>
-                                            {vacTypeList === data.attId&& (
-                                                <div ref={listRef} className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                                                    <div className="max-h-40 overflow-y-auto">
-                                                    {vacData && vacData.length > 0 && (
-                                                        <ul>
-                                                            {vacData.map((vac)=>(
-                                                                <li key={vac.vacCode} onClick={() => handleVacSelect(data.attId, vac.vacCode)}
-                                                                    className="p-2 hover:bg-gray-100 cursor-pointer">
-                                                                    {vac.vacName}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    )}
+                                {
+                                    currentAttendance && currentAttendance.length > 0 ? (
+                                        currentAttendance.map((data, index) => (
+                                            <tr className="border-b border-gray-200" key={data.attId}>
+                                                <td className="w-12 p-2 border-r border-gray-200 text-center">{index + 1}</td>
+                                                <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
+                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
+                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.depName}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime || null}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime || null}</td>
+                                                <td className="w-16 p-2 border-r border-gray-200 text-center">
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={() => handleVacType(data.attId)}
+                                                            className="w-16 p-2 text-white bg-blue-600 text-center">{data.vacName}
+                                                        </button>
+                                                        {vacTypeList === data.attId && (
+                                                            <div ref={listRef} className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                                                <div className="max-h-40 overflow-y-auto">
+                                                                    {vacData && vacData.length > 0 && (
+                                                                        <ul>
+                                                                            {vacData.map((vac) => (
+                                                                                <li key={vac.vacCode} onClick={() => handleVacSelect(data.attId, vac.vacCode)}
+                                                                                    className="p-2 hover:bg-gray-100 cursor-pointer">
+                                                                                    {vac.vacName}
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                </div>
-                                            )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    ))
-                                ):
-                                <tr>
-                                    <td colSpan={8} className="p-4 text-center text-gray-500">근태 기록이 없습니다.</td>
-                                </tr>
-                            }
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) :
+                                        <tr>
+                                            <td colSpan={8} className="p-4 text-center text-gray-500">근태 기록이 없습니다.</td>
+                                        </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
     );
 }

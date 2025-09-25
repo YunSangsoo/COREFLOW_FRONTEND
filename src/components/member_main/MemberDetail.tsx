@@ -103,7 +103,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
 
     // 부서 선택창 핸들러
     const handleDepOpen = () => {
-        setIsDepartment(true)
+        setIsDepartment(prev => !prev)
     }
 
     // 부서 선택 데이터 (DepartmentMap에서부터 받아올 예정)

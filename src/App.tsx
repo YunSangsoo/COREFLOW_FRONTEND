@@ -31,11 +31,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
-<<<<<<< HEAD
-=======
 import MainPages from './mainPage/MainPages';
 import NoticeMain from './components/notice/NoticeMain';
->>>>>>> origin/main
 
 
 function App() {
@@ -43,7 +40,7 @@ function App() {
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
     const isMainPage = location.pathname === '/';
-
+    const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
 
     useEffect(() => {
         api.post("/auth/refresh")
@@ -84,7 +81,7 @@ function App() {
 
     return (
         <>
-        <div className="flex w-full min-h-screen">
+        <div className="container">
                 {!isMainPage && !isAuthPage && 
                 <> 
                 <div className='w-56 shrink-0'>
@@ -92,7 +89,7 @@ function App() {
                 </div>
                 </>
                 }
-                <div className={`flex-1 w-full overflow-auto ${!isMainPage && !isAuthPage ? 'pr-20' : ''}`}>
+                <div>
                     <Routes>
                         <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
@@ -134,6 +131,7 @@ function App() {
                             }/>
                             <Route path="personal" element={<AttendancePersonal/>}/>
                         </Route>
+                        <Route path="/organization" element={<Organization/>}/>
                         <Route path='/approvals'>
                             <Route path="my-documents" element={<DocumentTable />} />
                             <Route path="received" element={<ReceivedDocumentTable />} />
@@ -142,10 +140,6 @@ function App() {
                             <Route path=":id" element={<DocumentDetailPage />} />
                             <Route path='cc-documents' element={<CcDocumentTable/>}/>
                         </Route>
-                        <Route path="/organization" element={<Organization/>}/>
-                        
-
-
                         <Route path='/unAuthorized' element={<Unauthorized/>}/>
                     </Routes>
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
