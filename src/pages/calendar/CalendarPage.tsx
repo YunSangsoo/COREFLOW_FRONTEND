@@ -12,6 +12,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MonthCalendar } from "@mui/x-date-pickers/MonthCalendar";
 import { GlobalStyles } from "@mui/material";
 import { fetchPositions } from "../../api/calendarApi";
+import "./CalendarPage.css"
 
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ko";
@@ -126,8 +127,8 @@ export default function CalendarPage() {
   const [editInit, setEditInit] = useState<{ name: string; color: string; defaultRole?: ApiCalendarDefaultRole }>({ name: "", color: "#4096ff" });
   const [editSharesInit, setEditSharesInit] = useState<ShareUpsertReq | undefined>(undefined);
 
-  const [depMap, setDepMap]   = useState<Map<number, string>>(new Map());
-  const [posMap, setPosMap]   = useState<Map<number, string>>(new Map());
+  const [depMap, setDepMap] = useState<Map<number, string>>(new Map());
+  const [posMap, setPosMap] = useState<Map<number, string>>(new Map());
   const [userMap, setUserMap] = useState<Map<number, string>>(new Map());
 
   // 일정 생성 모달
@@ -140,6 +141,10 @@ export default function CalendarPage() {
   });
   const [eventErr, setEventErr] = useState<{ calId?: string; title?: string; time?: string }>({});
   const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
+
+  // 오늘 일정 목록
+  const [todayEvents, setTodayEvents] = useState<CalendarEvent[]>([]);
+  const [loadingToday, setLoadingToday] = useState(false);
 
   // 반복등록
   const [recurrenceOpen, setRecurrenceOpen] = useState(false);
@@ -198,12 +203,12 @@ export default function CalendarPage() {
       try {
         const deps = await fetchDepartments();
         setDepMap(new Map(deps.map(d => [Number(d.depId), String(d.depName)])));
-      } catch {}
+      } catch { }
 
       try {
         const poss = await fetchPositions();
         setPosMap(new Map(poss.map(p => [Number(p.posId), String(p.posName)])));
-      } catch {}
+      } catch { }
 
       // 사용자 이름 맵: 많이 필요하면 limit를 늘리세요(백엔드 성능 고려)
       try {
@@ -212,7 +217,7 @@ export default function CalendarPage() {
           Number(m.userNo),
           String(m.userName ?? (m as any).name ?? m.email ?? m.userNo)
         ])));
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -254,10 +259,64 @@ export default function CalendarPage() {
         }));
       }
       setEvents(all);
+      const cur = dayjs(fcApi.getDate());
+      const mStart = cur.startOf("month");
+      const mEnd = cur.endOf("month");
+
+      // 월 범위와 겹치는 이벤트 개수 산출
+      const count = all.filter(ev => {
+        const s = dayjs(ev.start as string);
+        const e = dayjs((ev.end as string) || (ev.start as string));
+        return s.isBefore(mEnd.add(1, "millisecond")) && e.isAfter(mStart.subtract(1, "millisecond"));
+      }).length;
+      setMonthCount(count);
     } catch (e: any) {
       setError(e?.message ?? "이벤트 조회 실패");
     } finally { setLoading(false); }
   };
+
+  useEffect(() => {
+    const selectedCalIds = visibleCals.filter(c => c.checked).map(c => c.calId);
+    if (selectedCalIds.length === 0) { setTodayEvents([]); return; }
+
+    (async () => {
+      try {
+        setLoadingToday(true);
+        const start = dayjs().startOf("day").format("YYYY-MM-DD HH:mm:ss");
+        const end = dayjs().endOf("day").format("YYYY-MM-DD HH:mm:ss");
+
+        const all: CalendarEvent[] = [];
+        for (const calId of selectedCalIds) {
+          const data = await fetchEvents({ calendarId: calId, from: start, to: end });
+          all.push(...(data as EventDto[]).map((e) => {
+            const labelId = (e as any).labelId ?? null;
+            const base = getEventBaseColor(calId, labelId, labelColorMap);
+            const text = pickTextColor(base);
+            return {
+              id: String(e.eventId),
+              eventId: e.eventId,
+              calId: e.calId,
+              labelId,
+              title: e.title,
+              start: e.startAt,
+              end: e.endAt,
+              allDay: e.allDayYn === "Y",
+              backgroundColor: base, borderColor: base, textColor: text,
+            } as CalendarEvent;
+          }));
+        }
+
+        // 시작시간 기준 정렬
+        all.sort((a, b) => dayjs(a.start as string).valueOf() - dayjs(b.start as string).valueOf());
+        setTodayEvents(all);
+      } catch {
+        setTodayEvents([]);
+      } finally {
+        setLoadingToday(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleCals.map(c => `${c.calId}:${c.checked}`).join("|")]);
 
   // 미니 달력 연/월 이동
   const handleMiniChange = (v: Dayjs | null) => {
@@ -313,7 +372,7 @@ export default function CalendarPage() {
         const withChecked: CalendarVisibilityItem[] =
           (list || []).map(c => ({ calId: c.calId, name: c.name, color: c.color, checked: true }));
         setVisibleCals(dedupByCalId(withChecked));
-      } catch {}
+      } catch { }
 
       setCreateOpen?.(false);
     } catch (e: any) {
@@ -324,114 +383,114 @@ export default function CalendarPage() {
   // [EDIT] 캘린더 편집 열기
   const openEditCalendar = async (calId: number) => {
     function augmentShareNames(shares: any) {
-  const users = (shares?.users ?? []).map((u: any) => {
-    const id = Number(u.userNo);
-    return {
-      userNo: id,
-      role: u.role,
-      // 서버에 userName이 없으면 userMap에서 보강
-      userName: u.userName ?? userMap.get(id) ?? "",
-    };
-  });
+      const users = (shares?.users ?? []).map((u: any) => {
+        const id = Number(u.userNo);
+        return {
+          userNo: id,
+          role: u.role,
+          // 서버에 userName이 없으면 userMap에서 보강
+          userName: u.userName ?? userMap.get(id) ?? "",
+        };
+      });
 
-  const departments = (shares?.departments ?? []).map((d: any) => {
-    const id = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
-    return {
-      depId: id,
-      role: d.role,
-      depName: d.depName ?? depMap.get(id) ?? "",
-    };
-  });
+      const departments = (shares?.departments ?? []).map((d: any) => {
+        const id = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
+        return {
+          depId: id,
+          role: d.role,
+          depName: d.depName ?? depMap.get(id) ?? "",
+        };
+      });
 
-  const positions = (shares?.positions ?? []).map((p: any) => {
-    const id = Number(p.posId ?? p.id ?? p.POS_ID);
-    return {
-      posId: id,
-      role: p.role,
-      posName: p.posName ?? posMap.get(id) ?? "",
-    };
-  });
+      const positions = (shares?.positions ?? []).map((p: any) => {
+        const id = Number(p.posId ?? p.id ?? p.POS_ID);
+        return {
+          posId: id,
+          role: p.role,
+          posName: p.posName ?? posMap.get(id) ?? "",
+        };
+      });
 
-  return { users, departments, positions };
-}
-  
-  
-    try {
-    setLoading(true); setError(null);
-    setEditingCalId(calId);
-
-    // 이름/색상은 누구나 조회 가능
-    const detail = await getCalendar(calId);
-
-    // 공유는 권한 없으면 401/403 → 여기서 막아줌
-    let sharesInit: any | undefined = undefined;
-    try {
-      sharesInit = await getCalendarShares(calId);
-    } catch (e: any) {
-      const status = e?.response?.status ?? e?.status;
-      if (status === 401 || status === 403) {
-        alert("이 캘린더를 수정할 권한이 없습니다.");
-        return; // 편집 모달 자체를 열지 않음 (정책: 관리자/편집자만 수정)
-      }
-      throw e;
+      return { users, departments, positions };
     }
 
-    setEditInit({ name: detail.calName, color: detail.color });
 
-    // 이름 보존형으로 매핑
-    const filled = augmentShareNames(sharesInit);
-setEditSharesInit(filled);
+    try {
+      setLoading(true); setError(null);
+      setEditingCalId(calId);
 
-    setEditOpen(true);
-  } catch (e: any) {
-    setError(e?.message ?? "캘린더 정보를 불러오지 못했습니다.");
-  } finally {
-    setLoading(false);
-  }
-};
+      // 이름/색상은 누구나 조회 가능
+      const detail = await getCalendar(calId);
 
-  // [EDIT] 편집 저장
-  const handleEditSubmit = async (form: {
-  name: string;
-  color: string;
-  defaultRole: ApiCalendarDefaultRole;
-  shares?: {
-    users?: any[];
-    departments?: any[];
-    positions?: any[];
-    mode?: "merge" | "replace";
-  };
-}) => {
-  if (!editingCalId) return;
-  try {
-    setLoading(true); setError(null);
-
-    // ⚠ calendarApi.ts에 이미 있는 함수 이름은 updateCalendar 입니다.
-    await updateCalendar(editingCalId, { name: form.name, color: form.color });
-
-    if (form.shares) {
+      // 공유는 권한 없으면 401/403 → 여기서 막아줌
+      let sharesInit: any | undefined = undefined;
       try {
-        await saveCalendarShares({
-          calId: editingCalId,
-          mode: form.shares.mode ?? "replace",           // 편집은 기본 replace
-          payload: {
-            users: form.shares.users ?? [],
-            departments: form.shares.departments ?? [],
-            positions: form.shares.positions ?? [],
-          },
-          userNo: Number(userNo),
-        });
+        sharesInit = await getCalendarShares(calId);
       } catch (e: any) {
         const status = e?.response?.status ?? e?.status;
         if (status === 401 || status === 403) {
-          alert("공유 변경 권한이 없어 이름/색상만 저장되었습니다.");
-        } else {
-          throw e;
+          alert("이 캘린더를 수정할 권한이 없습니다.");
+          return; // 편집 모달 자체를 열지 않음 (정책: 관리자/편집자만 수정)
+        }
+        throw e;
+      }
+
+      setEditInit({ name: detail.calName, color: detail.color });
+
+      // 이름 보존형으로 매핑
+      const filled = augmentShareNames(sharesInit);
+      setEditSharesInit(filled);
+
+      setEditOpen(true);
+    } catch (e: any) {
+      setError(e?.message ?? "캘린더 정보를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // [EDIT] 편집 저장
+  const handleEditSubmit = async (form: {
+    name: string;
+    color: string;
+    defaultRole: ApiCalendarDefaultRole;
+    shares?: {
+      users?: any[];
+      departments?: any[];
+      positions?: any[];
+      mode?: "merge" | "replace";
+    };
+  }) => {
+    if (!editingCalId) return;
+    try {
+      setLoading(true); setError(null);
+
+      // ⚠ calendarApi.ts에 이미 있는 함수 이름은 updateCalendar 입니다.
+      await updateCalendar(editingCalId, { name: form.name, color: form.color });
+
+      if (form.shares) {
+        try {
+          await saveCalendarShares({
+            calId: editingCalId,
+            mode: form.shares.mode ?? "replace",           // 편집은 기본 replace
+            payload: {
+              users: form.shares.users ?? [],
+              departments: form.shares.departments ?? [],
+              positions: form.shares.positions ?? [],
+            },
+            userNo: Number(userNo),
+          });
+        } catch (e: any) {
+          const status = e?.response?.status ?? e?.status;
+          if (status === 401 || status === 403) {
+            alert("공유 변경 권한이 없어 이름/색상만 저장되었습니다.");
+          } else {
+            throw e;
+          }
         }
       }
-    }
 
-    setEditOpen(false);
+      setEditOpen(false);
 
       // 좌측 목록/이벤트 갱신
       const list = await (userNo ? fetchVisibleCalendars(userNo) : fetchVisibleCalendars());
@@ -545,6 +604,14 @@ setEditSharesInit(filled);
     }
     setPickOpen(false);
   };
+
+  const [calQuery, setCalQuery] = useState("");
+  const filteredCals = useMemo(() => {
+    const q = calQuery.trim().toLowerCase();
+    if (!q) return visibleCals;
+    return visibleCals.filter(c => (c.name ?? "").toLowerCase().includes(q));
+  }, [calQuery, visibleCals]);
+  const [monthCount, setMonthCount] = useState(0);
 
   // 일정 저장 (기존 그대로)
   const hasOverlap = (att: Member[], shr: Member[]) => {
@@ -748,77 +815,191 @@ setEditSharesInit(filled);
         }
       }} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "280px minmax(900px, 1fr)", gap: 24, alignItems: "start", width: "100%" }}>
-        {/* 왼쪽 패널 */}
-        <div style={{ maxWidth: 280, position: "sticky", top: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <button style={styles.button} onClick={() => setMiniDate(prev => prev.subtract(1, "year"))}>◀</button>
-            <strong>{miniDate.format("YYYY년")}</strong>
-            <button style={styles.button} onClick={() => setMiniDate(prev => prev.add(1, "year"))}>▶</button>
-          </div>
-          <MonthCalendar value={miniDate} onChange={handleMiniChange} />
+      {/* 뷰포트 고정 래퍼 + 바깥 여백 */}
+      <div className="cf-escape">
+        {/* 가운데 정렬 + 최대 폭 제한 */}
+        <div className="cf-container">
+          {/* 카드형 내부 여백(선택) */}
+          <div className="cf-card">
 
-          <div style={{ marginTop: 12 }}>
-            <h4 style={{ margin: "8px 0" }}>캘린더</h4>
-            {visibleCals.length === 0 && <div>캘린더가 없습니다.</div>}
-            {visibleCals.map((c) => (
-              <label key={`${c.calId}-${c.name}`} style={{ display: "flex", alignItems: "center", gap: 10, margin: "8px 0" }}>
-                <input
-                  type="checkbox"
-                  checked={!!c.checked}
-                  onChange={(e) => setVisibleCals((prev) => prev.map((x) => (x.calId === c.calId ? { ...x, checked: e.target.checked } : x)))}
+            {/* 2단 레이아웃 */}
+            <div className="cf-calpage">
+              {/* 왼쪽 패널 */}
+              <div className="cf-cal-left">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <button style={styles.button} onClick={() => setMiniDate(prev => prev.subtract(1, "year"))}>◀</button>
+                  <strong>{miniDate.format("YYYY년")}</strong>
+                  <button style={styles.button} onClick={() => setMiniDate(prev => prev.add(1, "year"))}>▶</button>
+                </div>
+                <MonthCalendar value={miniDate} onChange={handleMiniChange} />
+
+                <div style={{ marginTop: 12 }}>
+                  <div className="cf-section-head">
+                    <h4 style={{ margin: 0, fontWeight: 700, color: "#0f172a" }}>캘린더</h4>
+                    <span className="cf-badge">{visibleCals.length}</span>
+                  </div>
+
+                  {/* 🔎 검색 인풋 */}
+                  <div className="cf-search">
+                    <input
+                      className="cf-input"
+                      type="text"
+                      placeholder="캘린더 검색"
+                      value={calQuery}
+                      onChange={(e) => setCalQuery(e.target.value)}
+                    />
+                  </div>
+
+                  {filteredCals.length === 0 && <div>결과가 없습니다.</div>}
+                  {filteredCals.map((c) => (
+                    <label
+                      key={`${c.calId}-${c.name}`}
+                      style={{ display: "flex", alignItems: "center", gap: 10, margin: "8px 0" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!!c.checked}
+                        onChange={(e) =>
+                          setVisibleCals((prev) =>
+                            prev.map((x) =>
+                              x.calId === c.calId ? { ...x, checked: e.target.checked } : x
+                            )
+                          )
+                        }
+                        style={{ accentColor: c.color || undefined }}
+                      />
+                      <span style={styles.colorDot(c.color)} />
+                      <button
+                        style={styles.nameBtn}
+                        onClick={() => openEditCalendar(c.calId)}
+                        title="클릭하면 수정/삭제"
+                      >
+                        {c.name}
+                      </button>
+                    </label>
+                  ))}
+                </div>
+
+                {loading && <div style={{ marginTop: 12 }}>불러오는 중…</div>}
+                {error && <div style={{ marginTop: 12, color: "tomato" }}>{error}</div>}
+                {/* 오늘 일정 */}
+                <div className="cf-today">
+                  <h4 className="cf-today-title">
+                    <span>오늘 일정</span>
+                    <span className="cf-badge">{todayEvents.length}</span>
+                  </h4>
+
+                  {loadingToday && <div className="cf-today-empty">불러오는 중…</div>}
+
+                  {!loadingToday && todayEvents.length === 0 && (
+                    <div className="cf-today-empty">오늘 일정이 없습니다.</div>
+                  )}
+
+                  {!loadingToday && todayEvents.length > 0 && (
+                    <ul className="cf-today-list">
+                      {todayEvents.map(ev => {
+                        const timeText = ev.allDay ? "종일" : dayjs(ev.start as string).format("HH:mm");
+                        const color = (ev as any).backgroundColor || findCalColor(ev.calId) || "#64748b";
+                        return (
+                          <li key={ev.eventId} className="cf-today-item">
+                            <button
+                              type="button"
+                              className="cf-today-link"
+                              onClick={() => { setSelectedEventId(Number(ev.eventId)); setDetailOpen(true); }}
+                              title={ev.title}
+                            >
+                              <span className="cf-dot" style={{ background: color }} />
+                              <span className="cf-time">{timeText}</span>
+                              <span className="cf-title">{ev.title}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
+
+              </div>
+
+
+
+              {/* 오른쪽 메인 캘린더 */}
+              <div className="cf-cal-main">
+                <div className="cf-actions">
+                  <button className="cf-btn" onClick={handleClickCreateCalendar}>+ 새 캘린더</button>
+                  <button className="cf-btn cf-btn-primary" onClick={handleCreateEvent}>+ 새 일정</button>
+                </div>
+
+                <FullCalendar
+                  ref={calendarRef as any}
+                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                  locale="ko"
+                  timeZone="local"
+                  initialView="dayGridMonth"
+                  customButtons={{
+                    monthCount: {
+                      text: `${monthCount}건`,
+                      click: () => { },            // 배지 용도라 동작 없음
+                    },
+                  }}
+                  headerToolbar={{
+                    left: "prev,next today",
+                    center: "title",
+                    right: "monthCount dayGridMonth,timeGridWeek,timeGridDay",
+                  }}
+                  height={"calc(100vh - 180px)"} // 상하 여백/카드 패딩 고려해 살짝 줄임
+                  expandRows
+                  stickyHeaderDates
+                  views={{
+                    dayGridMonth: { dayMaxEventRows: 3 },
+                    timeGridWeek: {
+                      slotMinTime: "08:00:00",
+                      slotMaxTime: "20:00:00",
+                      slotDuration: "00:30:00",
+                      expandRows: true,
+                    },
+                    timeGridDay: {
+                      slotMinTime: "08:00:00",
+                      slotMaxTime: "20:00:00",
+                      slotDuration: "00:30:00",
+                      expandRows: true,
+                    },
+                  }}
+                  selectable
+                  editable
+                  weekends
+                  selectMirror
+                  dayMaxEvents
+                  moreLinkClick="popover"
+                  moreLinkText={(n: number) => `+${n}개`}
+                  navLinks
+                  nowIndicator
+                  eventDisplay="block"
+                  eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
+                  dayHeaderFormat={{ weekday: "short" }}
+                  events={events}
+                  select={handleSelect}
+                  dateClick={handleDateClick}
+                  eventDrop={handleEventDrop}
+                  eventResize={handleEventResize}
+                  eventClick={handleEventClick}
+                  datesSet={handleViewDidMount}
+                  eventClassNames={() => ["cf-calstripe"]}
+                  eventDidMount={(info) => {
+                    const calId = info.event.extendedProps?.calId as number;
+                    const calHex = findCalColor(calId) || "#64748b";
+                    (info.el as HTMLElement).style.setProperty("--cf-cal", calHex);
+                  }}
                 />
-                <span style={styles.colorDot(c.color)} />
-                {/* [EDIT] 캘린더명 클릭 → 편집 모달 */}
-                <button style={styles.nameBtn} onClick={() => openEditCalendar(c.calId)} title="클릭하면 수정/삭제">
-                  {c.name}
-                </button>
-              </label>
-            ))}
+              </div>
+            </div>
+            {/* /.cf-calpage */}
           </div>
-
-          {loading && <div style={{ marginTop: 12 }}>불러오는 중…</div>}
-          {error && <div style={{ marginTop: 12, color: "tomato" }}>{error}</div>}
+          {/* /.cf-card */}
         </div>
-
-        {/* 오른쪽 메인 캘린더 */}
-        <div className="calendar-right" style={{ minWidth: 0 }}>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
-            <button style={styles.button} onClick={() => handleClickCreateCalendar()}>+ 새 캘린더</button>
-            <button style={styles.button} onClick={handleCreateEvent}>+ 새 일정</button>
-          </div>
-
-          <FullCalendar
-            ref={calendarRef as any}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            locale="ko" timeZone="local" initialView="dayGridMonth"
-            headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" }}
-            height={"calc(100vh - 140px)"}
-            expandRows stickyHeaderDates
-            views={{
-              dayGridMonth: { dayMaxEventRows: 3 },
-              timeGridWeek: { slotMinTime: "08:00:00", slotMaxTime: "20:00:00", slotDuration: "00:30:00", expandRows: true },
-              timeGridDay: { slotMinTime: "08:00:00", slotMaxTime: "20:00:00", slotDuration: "00:30:00", expandRows: true },
-            }}
-            selectable editable weekends selectMirror dayMaxEvents
-            moreLinkClick="popover" moreLinkText={(n: number) => `+${n}개`}
-            navLinks nowIndicator eventDisplay="block"
-            eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
-            dayHeaderFormat={{ weekday: "short" }}
-            events={events}
-            select={handleSelect} dateClick={handleDateClick}
-            eventDrop={handleEventDrop} eventResize={handleEventResize} eventClick={handleEventClick}
-            datesSet={handleViewDidMount}
-            eventClassNames={() => ["cf-calstripe"]}
-            eventDidMount={(info) => {
-              const calId = info.event.extendedProps?.calId as number;
-              const calHex = findCalColor(calId) || "#64748b";
-              (info.el as HTMLElement).style.setProperty("--cf-cal", calHex);
-            }}
-          />
-        </div>
+        {/* /.cf-container */}
       </div>
-
       {/* 새 캘린더 모달 (기존) */}
       <CalendarCreateDialog
         open={createOpen}
