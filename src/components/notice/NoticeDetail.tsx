@@ -4,6 +4,7 @@ import type { NotiDetail } from "../../types/notice";
 import { useState } from "react";
 import NoticeInsert from "./NoticeInsert";
 import { store } from "../../store/store";
+import NoticeFileModal from "./NoticeFileModal";
 
 interface NoticeDetailProps {
     notiId: number;
@@ -15,20 +16,29 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
     const loginUser = store.getState().auth.user;
 
     const [isNoticeInsertOpen, setIsNoticeInsertOpen] = useState(false);
+    const [isNoticeFileOpen, setNoticeFileOpen] = useState(false);
 
     const openNoticeInsert = () => {
         setIsNoticeInsertOpen(true);
     }
     const closeNoticeInsert = () => {
         setIsNoticeInsertOpen(false);
-    }  
+    }
+
+    const OpenNoticeFile = () => {
+        setNoticeFileOpen(true);
+    }
+
+    const CloseNoticeFile = () => {
+        setNoticeFileOpen(false);
+    }
 
     const { data } = useQuery<NotiDetail>({
         queryKey: ['noticeDetail', notiId],
         queryFn: () => notiDetail(notiId),
         enabled: notiId != null
     })
-
+    console.log(data?.files);
     const deleteMutation = useMutation({
         mutationFn: (notiId: number) => notiDelete(notiId),
         onSuccess: () => {
@@ -50,7 +60,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
     if (!data) {
         return null
     }
-    console.log(data);
+
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">
@@ -93,30 +103,23 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                 <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border border-gray-200 min-h-[150px]">
                     <p className="text-gray-800 whitespace-pre-wrap">{data?.content}</p>
                 </div>
+                    
+                {data.files && data.files.length > 0 && (
+                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 flex justify-between items-center">
+                        <span className="font-bold text-gray-700">첨부파일 ({data.files.length}개)</span>
+                        <button onClick={OpenNoticeFile} className="text-blue-600 hover:underline">파일 목록 보기</button>
+                    </div>
+                )}
 
-                {/* {data?.attachments && data?.attachments.length > 0 && ( */}
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                    <span className="font-bold text-gray-700">첨부 : </span>
-                    {data.files?.map((file, index) => (
-                            <a 
-                            download={file.originName || "download"}
-                            href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}
-                            key={index} className="text-gray-800">
-                                {file.originName}
-                                {index < (data.files?.length ?? 0) - 1 && ", "}
-                            </a>
-                        ))}
-                </div>
-                {/* )} */}
-                
                 {loginUser?.userNo === data.writer && (
                     <div className="flex justify-end space-x-4 p-4">
                         <button type="button" onClick={handleDeleteClick} className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">삭제</button>
                         <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">수정</button>
-                        {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
                     </div>
                 )}
             </div>
+            {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
+            {isNoticeFileOpen && <NoticeFileModal files={data.files ?? []} onClose={CloseNoticeFile}/>}
         </div>
     );
 }

@@ -74,7 +74,7 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                         <div 
                             onClick={() => handleCardClick(item)}
                             className="flex justify-between items-center cursor-pointer"
-                        >
+                            >
                         <div>
                         <h2 className="text-2xl font-semibold text-gray-700">{item.name}</h2>
                         {openCard !== item.name && (
