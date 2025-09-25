@@ -108,7 +108,6 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 flex justify-between items-center">
                         <span className="font-bold text-gray-700">첨부파일 ({data.files.length}개)</span>
                         <button onClick={OpenNoticeFile} className="text-blue-600 hover:underline">파일 목록 보기</button>
-                        {isNoticeFileOpen && <NoticeFileModal files={data.files} onClose={CloseNoticeFile}/>}
                     </div>
                 )}
 
@@ -116,10 +115,11 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                     <div className="flex justify-end space-x-4 p-4">
                         <button type="button" onClick={handleDeleteClick} className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">삭제</button>
                         <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">수정</button>
-                        {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
                     </div>
                 )}
             </div>
+            {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
+            {isNoticeFileOpen && <NoticeFileModal files={data.files ?? []} onClose={CloseNoticeFile}/>}
         </div>
     );
 }

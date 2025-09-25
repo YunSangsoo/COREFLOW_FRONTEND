@@ -5,15 +5,26 @@ import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { notiInsert, notiInsertForm, notiUpdate, notiUpdateForm } from "../../api/noticeApi";
 import type { NotiDetail, NotiInsert } from "../../types/notice";
 import dayjs from "dayjs";
+import NoticeFileModal from "./NoticeFileModal";
 
 interface NoticeInsertProps {
     onClose: () => void;
-    initData?:NotiDetail;
+    initData?: NotiDetail;
 }
 
-export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
+export default function NoticeInsert({ initData, onClose }: NoticeInsertProps) {
     const queryClient = useQueryClient();
-    console.log(initData);
+
+    const [isNoticeFileOpen, setNoticeFileOpen] = useState(false);
+
+    const OpenNoticeFile = (e: FormEvent) => {
+        e.preventDefault();
+        setNoticeFileOpen(true);
+    }
+
+    const CloseNoticeFile = () => {
+        setNoticeFileOpen(false);
+    }
 
     const [noticeForm, setNoticeForm] = useState<NotiInsert>({
         title: initData?.title || '',
@@ -45,13 +56,13 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
-        
+
         setNoticeForm(prevForm => {
-            if(name === 'parentDepId'){
+            if (name === 'parentDepId') {
                 return {
                     ...prevForm,
-                    parentDepId:value ? Number(value) : null,
-                    childDepId:null
+                    parentDepId: value ? Number(value) : null,
+                    childDepId: null
                 }
             }
             if (name === 'childDepId' || name === 'posId') {
@@ -72,7 +83,7 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
             };
         });
     };
-    
+
     const insertMutation = useMutation({
         //mutationFn: notiInsert,
         mutationFn: notiInsertForm,
@@ -86,22 +97,22 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
             alert('공지 등록에 실패했습니다.');
         }
     })
-    
+
     const updateMutation = useMutation({
         //mutationFn:notiUpdate,
-        mutationFn:notiUpdateForm,
-        onSuccess:()=>{
-            queryClient.invalidateQueries({queryKey:['notices']});
-            queryClient.invalidateQueries({queryKey:['noticeDetail']});
+        mutationFn: notiUpdateForm,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notices'] });
+            queryClient.invalidateQueries({ queryKey: ['noticeDetail'] });
             onClose();
             alert('공지가 수정되었습니다.');
         },
-        onError:(error) =>{
+        onError: (error) => {
             console.error("공지 수정 실패 : ", error);
             alert('공지 수정에 실패했습니다.');
         }
     })
-    
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
@@ -113,13 +124,13 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
         formData.append('content', noticeForm.content);
         formData.append('endDate', noticeForm.endDate ?? '');
         formData.append('endTime', noticeForm.endTime ?? '');
-        if(depId)
+        if (depId)
             formData.append('depId', depId.toString());
-        if(noticeForm.parentDepId)
+        if (noticeForm.parentDepId)
             formData.append('parentDepId', noticeForm.parentDepId.toString());
-        if(noticeForm.childDepId)
+        if (noticeForm.childDepId)
             formData.append('childDepId', noticeForm.childDepId.toString());
-        if(noticeForm.posId)
+        if (noticeForm.posId)
             formData.append('posId', noticeForm.posId.toString());
         noticeForm.sendFile?.forEach(file => {
             formData.append('files', file);
@@ -127,23 +138,24 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
 
         console.log(noticeForm);
 
-        if(initData){
-            updateMutation.mutate({notiId:initData.notiId, params:formData})
-        }else{
+        if (initData) {
+            updateMutation.mutate({ notiId: initData.notiId, params: formData })
+        } else {
             insertMutation.mutate(formData);
         }
     };
 
-    const handleFileChange =(event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const fileList: FileList | null = event.currentTarget.files;
-        if(fileList){
+        if (fileList) {
             const fileArray = Array.from(fileList);
-            noticeForm.sendFile=fileArray;
+            noticeForm.sendFile = fileArray;
         }
     }
+    const originalImageUrl = initData?.files?.map(file => `${import.meta.env.VITE_API_BACE_URL}/images/${file.imageCode}/${file.changeName}`) ?? [];
 
-    const originalImageUrl = `${import.meta.env.VITE_API_BASE_URL}/images/${initData?.files?.imageCode}/${initData?.files?.changeName}`;
-    
+
+
     return (
         <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-opacity-50">
             <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
@@ -261,8 +273,8 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                                             <input
                                                 type="date"
                                                 name="endDate"
-                                                value={noticeForm.endDate||''}
-                                                
+                                                value={noticeForm.endDate || ''}
+
                                                 onChange={handleChange}
                                                 className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                             />
@@ -274,7 +286,7 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
                                     <input
                                         type="time"
                                         name="endTime"
-                                        value={noticeForm.endTime||''}
+                                        value={noticeForm.endTime || ''}
                                         onChange={handleChange}
                                         className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                     />
@@ -297,29 +309,30 @@ export default function NoticeInsert({ initData,onClose }: NoticeInsertProps) {
 
                         <div>
                             <label className="font-semibold text-gray-700 block mb-2">첨부</label>
-                            <label className="inline-flex items-center justify-center h-10 w-auto min-w-[120px] px-4 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-                                <input 
-                                onChange={(e)=>handleFileChange(e)}
-                                type="file" multiple />
-                                {/* <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                    {noticeForm.initFile?.map((file, index) => (
-                                            <a 
-                                            download={file.originName || "download"}
-                                            href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}
-                                            key={index} className="text-gray-800">
-                                                {file.originName}
-                                                {index < (noticeForm.initFile?.length ?? 0) - 1 && ", "}
-                                            </a>
-                                        ))}
-                                </div> */}
-                            </label>
+
+                            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                <div className="flex items-center space-x-4">
+                                    <label className="relative flex h-10 w-auto min-w-[120px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-4 text-gray-500 transition-colors duration-200 hover:bg-gray-50">
+                                        <input
+                                            onChange={(e) => handleFileChange(e)}
+                                            type="file" multiple
+                                            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                                        />
+                                        <span className="text-sm font-medium">파일 선택</span>
+                                    </label>
+                                    <span className="font-bold text-gray-700">첨부파일 ({initData?.files?.length ?? 0}개)</span>
+                                </div>
+                                <button onClick={OpenNoticeFile} className="text-blue-600 hover:underline">
+                                    파일 목록 보기
+                                </button>
+                            </div>
                         </div>
                     </div>
-
                     <div className="flex justify-end space-x-4 bg-gray-100 p-4">
-                        <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">{initData ? '수정':'등록'}</button>
+                        <button type="submit" className="rounded-md bg-gray-700 px-6 py-2 text-white hover:bg-gray-800">{initData ? '수정' : '등록'}</button>
                     </div>
                 </div>
+                {isNoticeFileOpen && <NoticeFileModal files={initData?.files ?? []} onClose={CloseNoticeFile} />}
             </div>
         </form>
     );
