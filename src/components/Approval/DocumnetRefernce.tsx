@@ -96,7 +96,7 @@ const handleTabClick = (tabName: '일반문서'|'휴가원') =>{
 };
 
 return (
-    <div>
+    <div className="approvalpage">
         <div>
 
         <button className={activeTab === '일반문서' ? 'active' : ''}
