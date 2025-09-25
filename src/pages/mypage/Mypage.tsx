@@ -160,8 +160,8 @@ export default function Mypage() {
                     {/* 주소 */}
                     {!isEditingAddress ? (
                         <MemberControll
-                            label="도로명/지번"
-                            value={roadAddr}
+                            label="주소"
+                            value={`${roadAddr} ${detailAddr}`}
                             isEditing={false}
                             children={
                                 <button
@@ -220,9 +220,9 @@ export default function Mypage() {
                         <MemberControll
                             label="프로필"
                             isEditing={false}
+                            currentProfileImage={currentProfileImage}
                             children={
                                 <>
-                                    <img src={currentProfileImage} alt="프로필" className="w-16 h-16 object-cover border mr-2" />
                                     <button
                                         onClick={() => setIsEditingProfile(true)}
                                         className="px-3 py-1 bg-blue-500 text-white rounded"
@@ -235,7 +235,7 @@ export default function Mypage() {
                     ) : (
                         <MemberControll label="프로필">
                             <>
-                                <img src={currentProfileImage} alt="프로필" className="w-16 h-16 object-cover border mr-2" />
+                                <img src={currentProfileImage} alt="프로필" className="w-50 h-50 object-cover border mr-2" />
                                 <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
                                 <div className="flex gap-2 mt-2">
                                     <button
