@@ -9,7 +9,6 @@ import { api } from './api/coreflowApi';
 import FindPwd from './pages/login/Find-pwd'
 import CompanyPolicyMainAdmin from './pages/company_policy/CompanyPolicyMainAdmin';
 import CompanyPolicyMain from './pages/company_policy/CompanyPolicyMain';
-import { getPolicies } from './api/companyPolicyApi';
 import Mypage from './pages/mypage/Mypage';
 import Sidebar from './components/SideBar';
 import ChatManager from './components/chat/ChatManager';
@@ -30,10 +29,10 @@ import { connectWebSocket, disconnectWebSocket } from './api/webSocketApi';
 import Organization from './pages/member_organization/Organization';
 import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
-import Header from './components/Header';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
 import MainPages from './mainPage/MainPages';
+import NoticeMain from './components/notice/NoticeMain';
 
 
 function App() {
@@ -41,7 +40,7 @@ function App() {
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
     const isMainPage = location.pathname === '/';
-
+    const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
 
     useEffect(() => {
         api.post("/auth/refresh")
@@ -132,6 +131,7 @@ function App() {
                             }/>
                             <Route path="personal" element={<AttendancePersonal/>}/>
                         </Route>
+                        <Route path="/organization" element={<Organization/>}/>
                         <Route path='/approvals'>
                             <Route path="my-documents" element={<DocumentTable />} />
                             <Route path="received" element={<ReceivedDocumentTable />} />
@@ -140,10 +140,6 @@ function App() {
                             <Route path=":id" element={<DocumentDetailPage />} />
                             <Route path='cc-documents' element={<CcDocumentTable/>}/>
                         </Route>
-                        <Route path="/organization" element={<Organization/>}/>
-                        
-
-
                         <Route path='/unAuthorized' element={<Unauthorized/>}/>
                     </Routes>
             {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}

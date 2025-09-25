@@ -35,7 +35,7 @@ const DocumentTable: React.FC = () => {
 
         const fetchMyDocuments = async () =>{
             try{
-                const response = await axios.get('http://localhost:8081/api/approvals/my-documents',{
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/my-documents`,{
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     },

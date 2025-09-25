@@ -8,6 +8,7 @@ import SearchMember from "../../components/member_vacation/SearchMember";
 import type { MemberChoice, VacType } from "../../types/vacation";
 import AttDate from "../../components/member_attendance/AttDate";
 import { vacType } from "../../api/attendanceApi";
+import Pagination from "../../components/Approval/Pagination";
 
 export default function AttendanceMember () {
     const queryClient = useQueryClient();
@@ -17,6 +18,8 @@ export default function AttendanceMember () {
     const [currentDate, setCurrentDate] = useState(dayjs());
     const [vacTypeList, setVacTypeList] = useState<number|null>(null);
     const listRef = useRef<HTMLDivElement>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 15;
 
     const {data:attData,isLoading,isError,error} = useQuery<Attendance[]>({
         queryKey:['memAtt',currentDate.format('YYYY-MM-DD'),selectMember?.userNo],
@@ -50,12 +53,14 @@ export default function AttendanceMember () {
         setSearchName(member.userName);
         setSearchQuery(member.userName);
         setSelectMember(member);
+        setCurrentPage(1);
     }
 
     const handleReset = () => {
         setSearchName('');
         setSearchQuery('');
         setSelectMember(null);
+        setCurrentPage(1);
     }
 
     const handleVacType = (attId:number) => {
@@ -80,6 +85,11 @@ export default function AttendanceMember () {
             document.removeEventListener('mousedown',handleClickOutside);
         }
     },[])
+
+    const indexOfLastAttendance = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstAttendance = indexOfLastAttendance - ITEMS_PER_PAGE;
+    const currentAttendance = attData?.slice(indexOfFirstAttendance, indexOfLastAttendance);
+    const totalPages = attData && Math.ceil(attData.length / ITEMS_PER_PAGE) || 0;
 
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>{error.message}</div>
@@ -127,8 +137,8 @@ export default function AttendanceMember () {
                             </thead>
                             <tbody>
                             {
-                                attData && attData.length > 0 ? (
-                                    attData.map((data,index) => (
+                                currentAttendance && currentAttendance.length > 0 ? (
+                                    currentAttendance.map((data,index) => (
                                     <tr className="border-b border-gray-200" key={data.attId}>
                                         <td className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</td>
                                         <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
@@ -165,7 +175,7 @@ export default function AttendanceMember () {
                                     ))
                                 ):
                                 <tr>
-                                    <td colSpan={8} className="p-4 text-center text-gray-500">근퇴 기록이 없습니다.</td>
+                                    <td colSpan={8} className="p-4 text-center text-gray-500">근태 기록이 없습니다.</td>
                                 </tr>
                             }
                             </tbody>
@@ -173,6 +183,7 @@ export default function AttendanceMember () {
                     </div>
                 </div>
             </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
         </div>
     );
 }

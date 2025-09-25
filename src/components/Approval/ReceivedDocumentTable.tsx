@@ -51,7 +51,7 @@ const ReceivedDocumentTable: React.FC = () => {
         const fetchReceivedDocuments = async () => {
             setLoading(true);
             try{
-                const response = await axios.get('http://localhost:8081/api/approvals/received-documents',{
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/approvals/received-documents`,{
                     headers: {
                         'Authorization':`Bearer ${accessToken}`
                     },
