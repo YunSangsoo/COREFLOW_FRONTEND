@@ -98,6 +98,7 @@ interface MemberControllProps {
   onSave?: () => void;
   onCancel?: () => void;
   fileInputRef?: React.RefObject<HTMLInputElement | null>;
+  currentProfileImage?: string;
   children?: React.ReactNode;
 }
 
@@ -110,12 +111,13 @@ export const MemberControll: React.FC<MemberControllProps> = ({
   onSave,
   onCancel,
   fileInputRef,
+  currentProfileImage,
   children,
 }) => {
   return (
     <div className="mb-4">
       <label className="block font-semibold mb-1">{label}</label>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 min-w-80">
         {type === "file" && isEditing ? (
           <>
             <input
@@ -135,7 +137,12 @@ export const MemberControll: React.FC<MemberControllProps> = ({
             className="border rounded px-2 py-1 flex-1"
           />
         ) : (
-          <span className="flex-1">{value || ""}</span>
+          <>
+            {/* 이미지가 있으면 이미지를 렌더링 */}
+            {currentProfileImage && <img src={currentProfileImage} alt="프로필" className="w-50 h-50 object-cover border mr-2" />}
+            {/* 이미지가 없거나, 텍스트가 필요한 경우 value를 렌더링 */}
+            <span className="flex-1">{value || ""}</span>
+          </>
         )}
 
         {/* 편집 모드에서 저장/취소 버튼 */}

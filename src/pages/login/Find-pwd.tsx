@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../../api/coreflowApi";
+import styles from './Login.module.css'
 
 const FindPwd = () => {
     const [userName, setUserName] = useState("");
@@ -19,22 +20,28 @@ const FindPwd = () => {
     };
 
     return (
-        <div>
-            <h2>비밀번호 찾기</h2>
-            <input
-                placeholder="이름"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-            />
-            <input
-                placeholder="이메일"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <button onClick={sendTempPwd}>임시 비밀번호 발송</button>
+        <div className={styles.page}>
+            <section className={styles.card}>
+                <h2 className={styles.title}>비밀번호 찾기</h2>
+                <form className={styles.form}>
+                    <label htmlFor="text" className={styles.label}>이름</label>
+                    <input
+                        className={styles.input}
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                    />
+                    <label htmlFor="email" className={styles.label}>이메일</label>
+                    <input
+                        className={styles.input}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <button className={styles.primaryBtn} onClick={sendTempPwd}>임시 비밀번호 발송</button>
 
-        {successMessage && <p>{successMessage}</p>}
-        {errorMessage && <p>{errorMessage}</p>}
+                    {successMessage && <p>{successMessage}</p>}
+                    {errorMessage && <p>{errorMessage}</p>}
+                </form>
+            </section>
         </div>
     );
 };
