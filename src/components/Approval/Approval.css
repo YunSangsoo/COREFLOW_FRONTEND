@@ -1,6 +1,16 @@
+:root:has(#approvals-root) .ml-56 { margin-left: 0 !important; }
+:root:has(#approvals-root) .pr-20 { padding-right: 0 !important; }
+:root:has(#approvals-root) .min-w-fit { min-width: 0 !important; }
+/* ✅ 테이블 래퍼 추가: 화면보다 넓으면 가로 스크롤 */
+.approval-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
 
-table {
-  width: 1500px;
+/* ✅ 테이블 자체는 고정 1500px 대신 최소 폭만 설정하거나 100% 사용 */
+.approval-table {
+  width: 100%;
+  min-width: 1000px;     /* 필요 시 조정 */
   border-collapse: collapse;
 }
 
@@ -9,81 +19,42 @@ th, td {
   padding: 10px;
 }
 
-tr:hover {
-  background-color: #f9f9f9;
-}
+tr:hover { background-color: #f9f9f9; }
 
-.arrbtn {
-   width: 150px;
-   border: solid 1px;
-}
+.arrbtn { width: 150px; border: solid 1px; }
+.arrbtn1 { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
 
-.arrbtn1{
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
+/* 상태 뱃지 */
 .status {
-    /* height: 28px; */
-    width: 5%;
-    border-radius: 10px;
-    text-align: center;
-    display: inline-block; 
-    min-width: 50px;       
-    font-size: 12px;      
-    padding: 2px 6px;     
-    color: rgb(255, 255, 255);  
-    background-color: #FF8E1D;
-    /* margin-top: 5px */
-
+  border-radius: 10px;
+  text-align: center;
+  display: inline-block;
+  min-width: 50px;
+  font-size: 12px;
+  padding: 2px 6px;
+  color: #fff;
 }
-.status-waiting {
-    background-color: #FF8E1D;
-}
+.status-waiting   { background-color: #FF8E1D; } /* 진행중 */
+.status-completed { background-color: #1D87FF; } /* 승인 */
+.status-rejected  { background-color: #FF301D; } /* 반려 */
 
-.status-completed {
-    background-color: #1D87FF; 
-       
-}
-
-.status-rejected {
-    background-color: #FF301D;
-}
-
+/* ✅ 검색 바: 고정 margin-left 제거하고 우측 정렬 */
 .scbar{
   align-items: center;
   display: flex;
   width: 350px;
-  margin-left: 510px;
+  margin-left: auto;   /* ← 기존 510px 제거 */
 }
 
 .search-input, .search-button {
-  border: 1px solid #ccc; 
-  font-size: 16px;       
-  padding: 10px;         
-  outline: none;         
-  height: 40px;          
+  border: 1px solid #ccc;
+  font-size: 16px;
+  padding: 10px;
+  outline: none;
+  height: 40px;
   box-sizing: border-box;
 }
-
-.search-input {
-  border-right: none;
-  border-radius: 5px 0 0 5px;
-}
-
-.search-button {
-  border-radius: 0 5px 5px 0; 
-  background-color: #f0f0f0;
-  cursor: pointer;
-  white-space: nowrap; 
-}
-
-.search-button:hover {
-  background-color: #e0e0e0;
-}
-
-.search-input:focus {
-  border-color: #007bff;
-}
+.search-input  { border-right: none; border-radius: 5px 0 0 5px;  }
+.search-button { border-radius: 0 5px 5px 0; background-color: #f0f0f0; cursor: pointer; white-space: nowrap; }
+.search-button:hover { background-color: #e0e0e0; }
+.search-input:focus  { border-color: #007bff; }

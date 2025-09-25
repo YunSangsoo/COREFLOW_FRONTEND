@@ -33,6 +33,7 @@ import Unauthorized from './components/Unauthorized';
 import Header from './components/Header';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
+import MainPages from './mainPage/MainPages';
 
 
 function App() {
