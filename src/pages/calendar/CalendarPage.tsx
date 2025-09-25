@@ -832,6 +832,7 @@ export default function CalendarPage() {
                             )
                           )
                         }
+                        style={{ accentColor: c.color || undefined }}
                       />
                       <span style={styles.colorDot(c.color)} />
                       <button
@@ -889,9 +890,9 @@ export default function CalendarPage() {
               {/* 오른쪽 메인 캘린더 */}
               <div className="cf-cal-main">
                 <div className="cf-actions">
-                  <button style={styles.button} onClick={() => handleClickCreateCalendar()}>+ 새 캘린더</button>
-                  <button style={styles.button} onClick={handleCreateEvent}>+ 새 일정</button>
-                </div>
+  <button className="cf-btn" onClick={handleClickCreateCalendar}>+ 새 캘린더</button>
+  <button className="cf-btn cf-btn-primary" onClick={handleCreateEvent}>+ 새 일정</button>
+</div>
 
                 <FullCalendar
                   ref={calendarRef as any}

@@ -79,22 +79,22 @@ export default function CalendarCreateDialog({
     // 서버용 정규화 (id + role만)
     const normalizedShares = shares
       ? {
-          users:
-            (Array.isArray((shares as any).users) ? (shares as any).users
-             : Array.isArray((shares as any).members) ? (shares as any).members : []
-            ).map((u: any) => ({ userNo: Number(u.userNo), role: u.role as CalendarDefaultRole })),
+        users:
+          (Array.isArray((shares as any).users) ? (shares as any).users
+            : Array.isArray((shares as any).members) ? (shares as any).members : []
+          ).map((u: any) => ({ userNo: Number(u.userNo), role: u.role as CalendarDefaultRole })),
 
-          departments: (shares as any).departments?.map((d: any) => ({
-            depId: Number(d.depId), role: d.role as CalendarDefaultRole
-          })) ?? [],
+        departments: (shares as any).departments?.map((d: any) => ({
+          depId: Number(d.depId), role: d.role as CalendarDefaultRole
+        })) ?? [],
 
-          positions: (shares as any).positions?.map((p: any) => ({
-            posId: Number(p.posId), role: p.role as CalendarDefaultRole
-          })) ?? [],
+        positions: (shares as any).positions?.map((p: any) => ({
+          posId: Number(p.posId), role: p.role as CalendarDefaultRole
+        })) ?? [],
 
-          // ✅ 생성 시 merge, 편집 시 replace
-          mode: (isEdit ? "replace" : "merge") as "replace" | "merge",
-        }
+        // ✅ 생성 시 merge, 편집 시 replace
+        mode: (isEdit ? "replace" : "merge") as "replace" | "merge",
+      }
       : undefined;
 
     onSubmit({
@@ -113,8 +113,8 @@ export default function CalendarCreateDialog({
     const arr = (v: any) => (Array.isArray(v) ? v : []);
 
     const srcMembers = arr(sh?.members).length ? arr(sh?.members) : arr(sh?.users);
-    const srcDepts   = arr(sh?.departments).length ? arr(sh?.departments) : arr(sh?.depts);
-    const srcPos     = arr(sh?.positions);
+    const srcDepts = arr(sh?.departments).length ? arr(sh?.departments) : arr(sh?.depts);
+    const srcPos = arr(sh?.positions);
 
     const members = srcMembers.map((u: any) => ({
       userNo: Number(u.userNo ?? u.id ?? u.USER_NO ?? 0),
@@ -146,8 +146,8 @@ export default function CalendarCreateDialog({
   function fromPickerPayload(p: any) {
     const arr = (v: any) => (Array.isArray(v) ? v : []);
     const srcMembers = arr(p?.members).length ? arr(p?.members) : arr(p?.users);
-    const srcDepts   = arr(p?.departments).length ? arr(p?.departments) : arr(p?.depts);
-    const srcPos     = arr(p?.positions);
+    const srcDepts = arr(p?.departments).length ? arr(p?.departments) : arr(p?.depts);
+    const srcPos = arr(p?.positions);
 
     return {
       members: srcMembers.map((m: any) => ({
@@ -184,6 +184,7 @@ export default function CalendarCreateDialog({
           helperText={err.name}
           autoFocus
           fullWidth
+          margin="normal"
         />
 
         {/* 색상 선택 */}
@@ -239,25 +240,25 @@ export default function CalendarCreateDialog({
             const arr = (v: any) => (Array.isArray(v) ? v : []);
             const s: any = shares ?? {};
             const membersSrc = arr(s.members).length ? arr(s.members) : arr(s.users);
-            const deptsSrc   = arr(s.departments).length ? arr(s.departments) : arr(s.depts);
+            const deptsSrc = arr(s.departments).length ? arr(s.departments) : arr(s.depts);
             const positionsSrc = arr(s.positions);
 
             const memberChips = membersSrc.map((m: any) => {
-              const id   = Number(m.userNo ?? m.id ?? m.USER_NO);
+              const id = Number(m.userNo ?? m.id ?? m.USER_NO);
               const name = m.userName ?? m.name ?? m.email ?? `#${id}`;
               const role = (m.role as CalendarDefaultRole) ?? "READER";
               return <Chip key={`m-${id}`} size="small" sx={{ mr: 1, mb: 1 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
             });
 
             const deptChips = deptsSrc.map((d: any) => {
-              const id   = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
+              const id = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
               const name = d.depName ?? d.name ?? `#${id}`;
               const role = (d.role as CalendarDefaultRole) ?? "READER";
               return <Chip key={`d-${id}`} size="small" sx={{ mr: 1, mb: 1 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
             });
 
             const posChips = positionsSrc.map((p: any) => {
-              const id   = Number(p.posId ?? p.id ?? p.POS_ID);
+              const id = Number(p.posId ?? p.id ?? p.POS_ID);
               const name = p.posName ?? p.name ?? `#${id}`;
               const role = (p.role as CalendarDefaultRole) ?? "READER";
               return <Chip key={`p-${id}`} size="small" sx={{ mr: 1, mb: 1 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
