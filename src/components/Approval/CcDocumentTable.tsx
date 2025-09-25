@@ -98,7 +98,7 @@ const CcDocumentTable: React.FC = () => {
     const totalPages = Math.ceil(documents.length / ITEMS_PER_PAGE);
 
     return (
-        <div> 
+        <div className="approvalpage"> 
             <br />
         <div className="arrbtn1">
             {DOCUMENT_TYPES.map(type => (

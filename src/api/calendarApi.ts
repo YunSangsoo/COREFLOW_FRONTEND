@@ -438,8 +438,8 @@ export async function createEvent(req: {
   typeId?: number;
   rrule?: string;
   exdates?: string;
-  // attendeeUserNos?: number[];    // 참석자
-  // shareUserNos?: number[];       // 공유자
+  attendeeUserNos?: number[];    // 참석자
+  shareUserNos?: number[];       // 공유자
 }): Promise<{ eventId: number }> {
   const r = await api.post("/events", req);
   const data = unwrap<any>(r);

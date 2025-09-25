@@ -31,6 +31,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
+<<<<<<< HEAD
+=======
+import MainPages from './mainPage/MainPages';
+import NoticeMain from './components/notice/NoticeMain';
+>>>>>>> origin/main
 
 
 function App() {

@@ -201,7 +201,10 @@ export default function EventCreateDialog({
 
         <DialogContent sx={{ pt: 2, display: "grid", gap: 2 }}>
           {/* 캘린더 선택 */}
-          <FormControl fullWidth error={!!error?.calId}>
+          <FormControl 
+          fullWidth error={!!error?.calId}
+           margin="normal" 
+          >
             <InputLabel id="cal-sel-label">캘린더</InputLabel>
             <Select
               labelId="cal-sel-label"

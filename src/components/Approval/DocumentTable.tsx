@@ -101,7 +101,7 @@ const DocumentTable: React.FC = () => {
 };
 
     return (
-        <div>
+        <div className="approvalpage">
             <br />
             <div className="arrbtn1">
                 {DOCUMENT_TYPES.map(type => (

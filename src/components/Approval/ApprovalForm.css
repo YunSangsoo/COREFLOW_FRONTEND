@@ -24,9 +24,7 @@ tr:hover {
 }
 
 .edbtn{
-  display: 'flex'; 
-  gap: '5px'; 
-  padding: '10px';
+  display: flex;
   border: solid 1px;
   border-radius: 5px;
   border-color: gray;
