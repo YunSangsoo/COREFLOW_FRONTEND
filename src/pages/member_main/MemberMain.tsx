@@ -4,9 +4,12 @@ import type { Department, DepartmentDetail, MemberResponse, Position, SearchPara
 import { depDetailList, depList, memberList, posList } from "../../api/memberApi";
 import MemberDetail from "../../components/member_main/MemberDetail";
 import MemberCreate from "../../components/member_main/MemberCreate";
+import Pagination from "../../components/Approval/Pagination";
 
 export default function MemberMain() {
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 15;
+    
     // 사원 조회 및 검색용 훅
     const [searchValues, setSearchValues] = useState({
         userName: '',
@@ -111,6 +114,7 @@ export default function MemberMain() {
             posName: searchValues.posName,
             status: searchValues.status
         });
+        setCurrentPage(1);
     };
 
     // 초기화 버튼
@@ -128,6 +132,7 @@ export default function MemberMain() {
             posName: '',
             status: '',
         })
+        setCurrentPage(1);
     }
 
     // 사원 상세 조회
@@ -143,6 +148,11 @@ export default function MemberMain() {
 
     const handleCreateOpen = () => setIsCreateModal(true);
     const handleCreateClose = () => setIsCreateModal(false);
+
+    const indexOfLastMember = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstMember = indexOfLastMember - ITEMS_PER_PAGE;
+    const currentMember = members?.slice(indexOfFirstMember, indexOfLastMember);
+    const totalPages = members && Math.ceil(members.length / ITEMS_PER_PAGE) || 0;
 
     if (isLoading) return <div>Loading...</div>
     if (isError) return <div>{error.message}</div>
@@ -264,8 +274,9 @@ export default function MemberMain() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {members && members.length > 0 ? (
-                            members.map((member, index) => (
+                        
+                        {currentMember && currentMember?.length > 0?(
+                            currentMember.map((member, index) => (
                                 <tr key={member.userNo} onDoubleClick={() => handleDetailOpen(member.userNo)} className="hover:bg-gray-100 transition-colors cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.userNo}</td>
@@ -286,6 +297,7 @@ export default function MemberMain() {
                     </tbody>
                 </table>
             </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
 
             {/* 상세조회 모달 */}
             {isModal && selectedUser !== null && (

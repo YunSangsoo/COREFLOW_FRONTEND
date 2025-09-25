@@ -6,8 +6,11 @@ import type { LoginUser, MemberVacation } from "../../types/vacation";
 import { useQuery } from "@tanstack/react-query";
 import { loginUser, loginUserVacation } from "../../api/vacationApi";
 import PutVacation from "../../components/member_vacation/putVacation";
+import Pagination from "../../components/Approval/Pagination";
 
 export default function VacationPersonal() {
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 15;
 
     const [selectYear, setSelectYear] = useState(dayjs().year());
 
@@ -21,6 +24,7 @@ export default function VacationPersonal() {
 
     const handleDateChange = (year: number) => {
         setSelectYear(year);
+        setCurrentPage(1);
     }
 
     const { data: loginUserProfile } = useQuery<LoginUser>({
@@ -32,6 +36,11 @@ export default function VacationPersonal() {
         queryKey: ['personalVacation', selectYear],
         queryFn: () => loginUserVacation(selectYear)
     })
+
+    const indexOfLastUserVacation = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstUserVacation = indexOfLastUserVacation - ITEMS_PER_PAGE;
+    const currentUserVacation = loinUserVacation?.slice(indexOfFirstUserVacation, indexOfLastUserVacation);
+    const totalPages = loinUserVacation && Math.ceil(loinUserVacation.length / ITEMS_PER_PAGE) || 0;
 
     return (
         <div className="max-w-7xl mx-auto p-8 bg-white rounded-lg shadow-lg">
@@ -81,8 +90,8 @@ export default function VacationPersonal() {
                         </div>
 
                         <div className="bg-white">
-                            {loinUserVacation && loinUserVacation?.length > 0 ? (
-                                loinUserVacation.map((item, index) => (
+                            {currentUserVacation && currentUserVacation?.length > 0 ? (
+                                currentUserVacation.map((item, index) => (
                                     <div key={index} className="flex text-sm border-b border-gray-200">
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{index + 1}</div>
                                         <div className="w-20 p-2 border-r border-gray-300 text-center">{item.vacName}</div>
@@ -99,6 +108,7 @@ export default function VacationPersonal() {
                     </div>
                 </div>
             </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
         </div>
     );
 }

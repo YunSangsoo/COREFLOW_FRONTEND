@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { memVacation, memVacationAll, vacStatusUpdate } from "../../api/vacationApi";
 import dayjs from "dayjs";
 import VacDate from "../../components/member_vacation/VacDate";
+import Pagination from "../../components/Approval/Pagination";
 
 export default function VacationMember() {
     const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export default function VacationMember() {
         queryKey:['allVacation',selectYear, selectMonth],
         queryFn:() => memVacationAll(selectYear,selectMonth)
     })
-
+    
     // 특정 사원 연차내역 조회용 훅(사원 선택시)
     const {data:memberVacation, error:memberError} = useQuery<MemberVacation[]>({
         queryKey:['memberVacation',selectMember?.userNo, selectYear,selectMonth],
@@ -39,6 +40,9 @@ export default function VacationMember() {
         },
         enabled: !! selectMember
     })
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 15;
 
     // 사원 선택 or 선택안함
     const displayData = selectMember ? memberVacation : allVacation;
@@ -54,6 +58,7 @@ export default function VacationMember() {
         setSearchName(member.userName);
         setSearchQuery(member.userName);
         setSelectMember(member);
+        setCurrentPage(1);
     }
 
     // 초기화 버튼
@@ -61,6 +66,7 @@ export default function VacationMember() {
         setSearchName('');
         setSearchQuery('');
         setSelectMember(null);
+        setCurrentPage(1);
     }
 
     // 날짜 상태 업데이트
@@ -68,6 +74,7 @@ export default function VacationMember() {
         setSelectYear(year);
         if(month !== undefined){
             setSelectMonth(month);
+            setCurrentPage(1);
         }
     }
 
@@ -84,6 +91,11 @@ export default function VacationMember() {
         const updateStatus = (status % 3) + 1;
         mutation.mutate({vacId,newState:updateStatus});
     }
+
+    const indexOfLastVacation = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstVacation = indexOfLastVacation - ITEMS_PER_PAGE;
+    const currentVacation = displayData?.slice(indexOfFirstVacation, indexOfLastVacation);
+    const totalPages = displayData && Math.ceil(displayData.length / ITEMS_PER_PAGE) || 0;
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
@@ -128,8 +140,8 @@ export default function VacationMember() {
 
                         <div className="bg-white">
                             {
-                                displayData && displayData.length > 0 ? (
-                                    displayData.map((item,index) => (
+                                currentVacation && currentVacation.length > 0 ? (
+                                    currentVacation.map((item,index) => (
                                     <div key={item.vacId} className="flex text-sm border-b border-gray-200">
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{index+1}</div>
                                         <div className="w-12 p-2 border-r border-gray-200 text-center">{item.userName}</div>
@@ -150,6 +162,7 @@ export default function VacationMember() {
                     </div>
                 </div>
             </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
         </div>
     );
 }
