@@ -5,6 +5,34 @@ export interface MenuItem {
   subItems?: Omit<MenuItem, 'subItems'>[]; // 하위 메뉴
 }
 
+// export const menuItems: MenuItem[] = [
+//   {
+//     name: '인사관리',
+//     action: 'toggleSubMenu', // 이 항목은 하위 메뉴를 열고 닫는 역할
+//     subItems: [
+//       { name: '사원관리', path: '/members' },
+//       { name: '휴가관리', path: '/vacation/personal' },
+//       { name: '근태관리', path: '/attendance/personal' },
+//       { name: '조직도', path: '/organization' },
+//     ],
+//   },{
+//     name: '전자결재',
+//     action: 'toggleSubMenu', // 이 항목은 하위 메뉴를 열고 닫는 역할
+//     subItems: [
+//       { name: '작성문서목록', path: '/approvals/my-documents' },
+//       { name: '문서작성', path: '/approvals/new' },
+//       { name: '받은 문서함', path: '/approvals/received' },
+//       { name: '결재 완료함', path: '/approvals/processed' },
+//       { name: '참조 문서함', path: '/approvals/cc-documents' },
+//     ],
+//   },
+//   { name: '캘린더', path: '/calendar' },
+//   { name: '회의실', path: '/rooms' },
+//   { name: '회사 규정', path: '/cpolicies' },
+//   { name: '공지', action: 'notice' },
+//   { name: '채팅', action: 'chat' }, // 이 항목은 채팅창을 여는 역할
+// ];
+
 export const menuItems: MenuItem[] = [
   {
     name: '인사관리',

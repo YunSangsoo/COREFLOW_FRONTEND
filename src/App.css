@@ -5,7 +5,10 @@
         /* padding: 2rem; */
         /* text-align: center; */
     }
-
+    body:has([data-page="main"]) #root {
+        max-width: none;
+        margin: 0;
+    }
     .logo {
         height: 6em;
         padding: 1.5em;
