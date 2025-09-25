@@ -73,7 +73,7 @@ export const sendSignal = (
     return;
   }
   stompClient.publish({
-    destination: '/app/webrtc/signal',
+    destination: '/api/webrtc/signal',
     body: JSON.stringify({
       type,
       from: fromUser.userNo,

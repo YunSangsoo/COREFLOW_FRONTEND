@@ -165,7 +165,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
 
       if(myProfile){
         stompClient.publish({
-            destination: `/app/chat/exit/${roomId}`,
+            destination: `/api/chat/exit/${roomId}`,
             body: JSON.stringify({
               userNo : myProfile.userNo,
               userName : myProfile.userName,

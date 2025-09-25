@@ -90,7 +90,7 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete,direct
 
     if (stompClient?.connected) {
       stompClient?.publish({
-        destination: `/app/chat/file/${chatRoom.roomId}`, // 메시지 전송용 엔드포인트
+        destination: `/api/chat/file/${chatRoom.roomId}`, // 메시지 전송용 엔드포인트
         body: JSON.stringify({
           messageId:message.messageId,
           roomId:chatRoom.roomId,
@@ -127,7 +127,7 @@ export const ChatRoomUploadFile = ({ chatRoom,myProfile, onUploadComplete,direct
       response.data.forEach(message => {
         if (stompClient?.connected) {
           stompClient?.publish({
-            destination: `/app/chat/file/${chatRoom.roomId}`,
+            destination: `/api/chat/file/${chatRoom.roomId}`,
             body: JSON.stringify({
               messageId:message.messageId,
               roomId:chatRoom.roomId,

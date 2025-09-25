@@ -145,7 +145,7 @@ const ChatRoom = (props : ChatRoomProps) => {
   const sendMessage = () => {
     if (newMessage.trim() && stompClient?.connected) {
       stompClient?.publish({
-        destination: `/app/chat/message/${roomId}`, // 메시지 전송용 엔드포인트
+        destination: `/api/chat/message/${roomId}`, // 메시지 전송용 엔드포인트
         body: JSON.stringify({
           roomId:roomId,
           userName : myProfile.userName,
