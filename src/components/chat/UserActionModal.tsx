@@ -6,6 +6,7 @@ import { api } from '../../api/coreflowApi';
 import { ChatRoomUploadFile } from './ChatRoomUploadFile';
 import { updateChatRoom } from '../../features/chatSlice';
 import { useDispatch } from 'react-redux';
+import stompClient from '../../api/webSocketApi';
 
 interface UserActionModalProps {
   user: chatProfile;
@@ -207,6 +208,21 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
 
         setPickerOpen(false); // 초대 모달 닫기
         onClose(); // 메인 모달 닫기
+
+        pickedUsers.forEach(user =>{
+            stompClient.publish({
+            destination: `/app/chat/enter/${chatRooms.roomId}`,
+            body: JSON.stringify({
+              userNo : user.userNo,
+              userName : user.userName,
+              roomId:chatRooms.roomId,
+              sentAt: new Date(),
+              messageText: '',
+              type: 'ENTER',
+            }),
+          });
+        })
+      
       }
     } catch (error) {
       // 4. 요청 실패 시 에러 처리

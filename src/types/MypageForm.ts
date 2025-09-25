@@ -82,7 +82,7 @@ export const useMypageForm = () => {
                 setNewProfileFile(null);
                 setPreview(`${import.meta.env.VITE_API_BASE_URL}/images/${profile.imageCode}/${profile.changeName}`);
                 setIsEditingProfile(false);
-                
+
                 alert("프로필 이미지가 변경되었습니다.");
             })
             .catch(() => alert("프로필 이미지 업로드 실패"));

@@ -132,35 +132,8 @@ const ChatRoom = (props : ChatRoomProps) => {
 
       subscriptionRef.current = subscription;
       
-
-
-      // 2. 입장 메시지 발행
-      stompClient.publish({
-          destination: `/app/chat/enter/${roomId}`,
-          body: JSON.stringify({
-            userNo : myProfile.userNo,
-            userName : myProfile.userName,
-            roomId:roomId,
-            sentAt: new Date(),
-            messageText: '',
-            type: 'ENTER',
-          }),
-        });
-      
-      // 3. 컴포넌트가 사라질 때 구독을 해제하고 퇴장 메시지를 보냄
       return () => {
         if (subscriptionRef.current) {
-          stompClient.publish({
-            destination: `/app/chat/exit/${roomId}`,
-            body: JSON.stringify({
-              userNo : myProfile.userNo,
-              userName : myProfile.userName,
-              roomId:roomId,
-              sentAt: new Date(),
-              messageText: '',
-              type: 'EXIT',
-            }),
-          });
           subscription.unsubscribe();
           markAsRead(roomId);
         };
