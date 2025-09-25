@@ -259,6 +259,17 @@ export default function CalendarPage() {
         }));
       }
       setEvents(all);
+      const cur = dayjs(fcApi.getDate());
+      const mStart = cur.startOf("month");
+      const mEnd = cur.endOf("month");
+
+      // 월 범위와 겹치는 이벤트 개수 산출
+      const count = all.filter(ev => {
+        const s = dayjs(ev.start as string);
+        const e = dayjs((ev.end as string) || (ev.start as string));
+        return s.isBefore(mEnd.add(1, "millisecond")) && e.isAfter(mStart.subtract(1, "millisecond"));
+      }).length;
+      setMonthCount(count);
     } catch (e: any) {
       setError(e?.message ?? "이벤트 조회 실패");
     } finally { setLoading(false); }
@@ -594,6 +605,14 @@ export default function CalendarPage() {
     setPickOpen(false);
   };
 
+  const [calQuery, setCalQuery] = useState("");
+  const filteredCals = useMemo(() => {
+    const q = calQuery.trim().toLowerCase();
+    if (!q) return visibleCals;
+    return visibleCals.filter(c => (c.name ?? "").toLowerCase().includes(q));
+  }, [calQuery, visibleCals]);
+  const [monthCount, setMonthCount] = useState(0);
+
   // 일정 저장 (기존 그대로)
   const hasOverlap = (att: Member[], shr: Member[]) => {
     const A = new Set(att.map(a => a.userNo));
@@ -815,9 +834,24 @@ export default function CalendarPage() {
                 <MonthCalendar value={miniDate} onChange={handleMiniChange} />
 
                 <div style={{ marginTop: 12 }}>
-                  <h4 style={{ margin: "8px 0" }}>캘린더</h4>
-                  {visibleCals.length === 0 && <div>캘린더가 없습니다.</div>}
-                  {visibleCals.map((c) => (
+                  <div className="cf-section-head">
+                    <h4 style={{ margin: 0, fontWeight: 700, color: "#0f172a" }}>캘린더</h4>
+                    <span className="cf-badge">{visibleCals.length}</span>
+                  </div>
+
+                  {/* 🔎 검색 인풋 */}
+                  <div className="cf-search">
+                    <input
+                      className="cf-input"
+                      type="text"
+                      placeholder="캘린더 검색"
+                      value={calQuery}
+                      onChange={(e) => setCalQuery(e.target.value)}
+                    />
+                  </div>
+
+                  {filteredCals.length === 0 && <div>결과가 없습니다.</div>}
+                  {filteredCals.map((c) => (
                     <label
                       key={`${c.calId}-${c.name}`}
                       style={{ display: "flex", alignItems: "center", gap: 10, margin: "8px 0" }}
@@ -850,7 +884,10 @@ export default function CalendarPage() {
                 {error && <div style={{ marginTop: 12, color: "tomato" }}>{error}</div>}
                 {/* 오늘 일정 */}
                 <div className="cf-today">
-                  <h4 className="cf-today-title">오늘 일정</h4>
+                  <h4 className="cf-today-title">
+                    <span>오늘 일정</span>
+                    <span className="cf-badge">{todayEvents.length}</span>
+                  </h4>
 
                   {loadingToday && <div className="cf-today-empty">불러오는 중…</div>}
 
@@ -890,9 +927,9 @@ export default function CalendarPage() {
               {/* 오른쪽 메인 캘린더 */}
               <div className="cf-cal-main">
                 <div className="cf-actions">
-  <button className="cf-btn" onClick={handleClickCreateCalendar}>+ 새 캘린더</button>
-  <button className="cf-btn cf-btn-primary" onClick={handleCreateEvent}>+ 새 일정</button>
-</div>
+                  <button className="cf-btn" onClick={handleClickCreateCalendar}>+ 새 캘린더</button>
+                  <button className="cf-btn cf-btn-primary" onClick={handleCreateEvent}>+ 새 일정</button>
+                </div>
 
                 <FullCalendar
                   ref={calendarRef as any}
@@ -900,10 +937,16 @@ export default function CalendarPage() {
                   locale="ko"
                   timeZone="local"
                   initialView="dayGridMonth"
+                  customButtons={{
+                    monthCount: {
+                      text: `${monthCount}건`,
+                      click: () => { },            // 배지 용도라 동작 없음
+                    },
+                  }}
                   headerToolbar={{
                     left: "prev,next today",
                     center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
+                    right: "monthCount dayGridMonth,timeGridWeek,timeGridDay",
                   }}
                   height={"calc(100vh - 180px)"} // 상하 여백/카드 패딩 고려해 살짝 줄임
                   expandRows
