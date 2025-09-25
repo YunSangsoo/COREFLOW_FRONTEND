@@ -1,12 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './MemberDetail.module.css';
 import { memberDelete, memberDetail, memberUpdate, posList } from '../../api/memberApi';
-import type { MemberDetail, MemberPatch, Position } from '../../types/member';
+import type { MemberDetail, MemberPatch, MemberResponse, Position } from '../../types/member';
 import React, { useEffect, useRef, useState } from 'react';
 import DepartmentMap from './DepartmentMap';
 
 export default function MemberDetail({ userNo, onClose }: { userNo: number, onClose: () => void }) {
     const queryClient = useQueryClient();
+
+    // 프로필사진용 훅
+    const [profileImg, setProfileImg] = useState<File | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
 
     // 초기 데이터용 훅
     const { data, isLoading, isError, error } = useQuery<MemberDetail>({
@@ -44,21 +48,35 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         }
     }, [isDepartmentMap]);
 
-
     useEffect(() => {
         if (data) {
             setUpdateData(data)
         }
     }, [data]);
 
+    // 프로필사진 핸들러
+    const handleChangeProfile = (e:React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setProfileImg(file);
+
+        if(file){
+            const reader = new FileReader();
+            reader.onload = () => setPreview(reader.result as string);
+            reader.readAsDataURL(file);
+        }else{
+            setPreview(null);
+        }
+    }
+
+
     // 사원 데이터 수정
     const updateMutation = useMutation({
-        mutationFn: (updatedMember: MemberPatch) => memberUpdate(userNo, updatedMember),
+        mutationFn: (updatedMember: FormData) => memberUpdate(userNo, updatedMember), //MemberPatch
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
             queryClient.invalidateQueries({ queryKey: ['memberDetail', userNo] });
             alert("회원 정보 수정 완료");
-            // onClose();
+            onClose();
         },
         onError: () => {
             alert("회원 정보 수정 실패");
@@ -93,6 +111,19 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         setUpdateData(prev => ({ ...(prev || {}), depName }));
         setIsDepartment(false)
     }
+    
+    // 주소 검색 핸들러
+    const handleSearchAddress = () => {
+        new window.daum.Postcode({
+            oncomplete:(data:any) => {
+                setUpdateData(prev => ({
+                    ...prev,
+                    address:data.address,
+                    addressDetail:data.buildingName || ''
+                }))
+            }
+        }).open();
+    }
 
     // 사원 정보 수정 버튼 (GPT HELP)
     const handleUpdate = () => {
@@ -101,27 +132,12 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
             return;
         };
 
-        const isChanged = Object.keys(updateData).some(key => {
-            const initialValue = data[key as keyof MemberDetail];
-            const updatedValue = updateData[key as keyof MemberPatch];
-
-            if (key === 'hireDate' || key === 'updateDate') {
-                const initialDateStr = typeof initialValue === 'string'
-                    ? initialValue.split('T')[0] : '';
-
-                const updatedDateStr = typeof updatedValue === 'string'
-                    ? updatedValue.split('T')[0] : '';
-
-                return initialDateStr !== updatedDateStr;
-            }
-            return initialValue !== updatedValue;
-        });
-
-        if (isChanged) {
-            updateMutation.mutate(updateData);
-        } else {
-            alert("수정사항이 없습니다.");
+        const formData = new FormData();
+        formData.append('memberdata', new Blob([JSON.stringify(updateData)], { type: 'application/json' }));
+        if(profileImg){
+            formData.append('profile',profileImg);
         }
+        updateMutation.mutate(formData);
     }
 
     // 사원 삭제 버튼
@@ -131,6 +147,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         }
     }
 
+    const originalImageUrl = `${import.meta.env.VITE_API_BASE_URL}/images/${data?.profile.imageCode}/${data?.profile.changeName}`;
     // 날짜 포맷
     const hireDateFormat = updateData?.hireDate?.split('T')[0];
     const updateDateFormat = updateData?.updateDate?.split('T')[0];
@@ -142,10 +159,12 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
+                <h2 className="text-xl font-semibold mb-4">사원 상세 조회</h2>
                 <div className={styles.profileSection}>
                     <div className={styles.profileImage}>
-                        <img src="/path/to/profile/image.jpg" alt="Profile" />
-                        <button className={styles.plusIcon}>+</button>
+                        <img src={preview || originalImageUrl} alt="Profile" />
+                        <label htmlFor="profile-image-upload" className={styles.plusIcon}>+</label>
+                        <input id="profile-image-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleChangeProfile} />
                     </div>
                 </div>
 
@@ -212,7 +231,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
                     <div className={styles.addressRow}>
                         <span>주소</span>
                         <input type="text" name='address' value={updateData.address || ''} onChange={handleChange} />
-                        <button className={styles.addressButton}>주소찾기</button>
+                        <button className={styles.addressButton} onClick={handleSearchAddress}>주소찾기</button>
                     </div>
                     <div className={styles.addressRow}>
                         <span>상세주소</span>

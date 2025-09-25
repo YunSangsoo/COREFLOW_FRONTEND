@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './Login.module.css'
 import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
@@ -87,6 +87,9 @@ export default function Login() {
                         {loading ? "로그인 중…" : "로그인"}
                     </button>
                     {error && <p className={styles.error}>{error}</p>}
+                    <Link to="/auth/find-pwd" className="border-1 rounded-xl h-11 flex items-center justify-center">
+                        비밀번호 찾기
+                    </Link>
                 </form>
             </section>
         </div>

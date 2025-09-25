@@ -7,7 +7,6 @@ import type { LoginUser } from "../../types/vacation";
 import VacDate from "../../components/member_vacation/VacDate";
 import { loginUser } from "../../api/vacationApi";
 import { loginUserAttendance } from "../../api/attendanceApi";
-import AttButton from "../../components/AttButton";
 
 export default function AttendancePersonal() {
 
@@ -102,7 +101,6 @@ export default function AttendancePersonal() {
                             </tbody>
                         </table>
                     </div>
-                    <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt}/>
                 </div>
             </div>
         </div>

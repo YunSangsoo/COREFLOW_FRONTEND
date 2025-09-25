@@ -79,9 +79,11 @@ export const memberDetail = async (userNo: number) => {
 }
 
 // 사원 정보 수정
-export const memberUpdate = async (userNo: number, updatedMember: MemberPatch) => {
-    const response = await api.patch<void>(`/members/${userNo}`, updatedMember)
-    return response.status;
+export const memberUpdate = async (userNo: number, updatedMember: FormData) => {
+    const response = await api.patch<void>(`/members/${userNo}`, updatedMember,{
+        headers: { 'Content-Type': 'multipart/form-data'},
+    })
+    return response.data;
 }
 
 export const memberDelete = async (userNo: number) => {

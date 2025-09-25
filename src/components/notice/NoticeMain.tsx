@@ -4,6 +4,7 @@ import { notiList } from "../../api/noticeApi";
 import { useState } from "react";
 import NoticeDetail from "./NoticeDetail";
 import NoticeInsert from "./NoticeInsert";
+import Pagination from "../Approval/Pagination";
 
 interface NoticeMainProps {
     onClose: () => void;
@@ -16,6 +17,9 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
     const [isNoticeDetailOpen, setIsNoticeDetailOpen] = useState(false);
     const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
+    
     const openNoticeInsert = () => {
         setIsNoticeInsertOpen(true);
     }
@@ -57,13 +61,21 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
     }
     const handleSearch = () => {
         setSearchParams(inputParams);
+        setCurrentPage(1);
     }
 
     const handleReset = () => {
         const resetParams = { searchType: "title", keyword: "" } as SearchParams;
         setInputParams(resetParams);
         setSearchParams(resetParams);
+        setCurrentPage(1);
     }
+
+    const indexOfLastNotice = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstNotice = indexOfLastNotice - ITEMS_PER_PAGE;
+    const currentNotice = noticeList?.slice(indexOfFirstNotice, indexOfLastNotice);
+    const totalPages = noticeList && Math.ceil(noticeList.length / ITEMS_PER_PAGE) || 0;
+    
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">
@@ -103,7 +115,8 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {noticeList && noticeList.map((notice, index) => (
+                                {currentNotice && currentNotice.length > 0 ? (
+                                currentNotice.map((notice, index) => (
                                 <tr key={notice.notiId} onDoubleClick={() => openNoticeDetail(notice.notiId)} className="hover:bg-gray-100 cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
@@ -118,11 +131,12 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(notice.enrollDate).toLocaleDateString()}
                                     </td>
-                                </tr>))
+                                </tr>))) : <div>공지가 없습니다.</div>
                             }
                         </tbody>
                     </table>
                 </div>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
             </div>
             {isNoticeInsertOpen && <NoticeInsert onClose={closeNoticeInsert} />}
             {isNoticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail} />)}

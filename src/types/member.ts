@@ -1,3 +1,5 @@
+import type { customFile } from "./type";
+
 // 부모 부서 조회
 export interface Department{
     depId : number;
@@ -53,6 +55,7 @@ export interface MemberDetail{
     address : string;
     addressDetail : string;
     status : string;
+    profile : customFile;
 }
 
 // 사원 정보 수정
