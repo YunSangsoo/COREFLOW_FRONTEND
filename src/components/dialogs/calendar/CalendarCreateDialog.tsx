@@ -10,6 +10,9 @@ import {
 } from "../../../constants/calendar/calendar";
 import type { CalendarDefaultRole, ShareUpsertReq } from "../../../types/calendar/calendar";
 import SharePickerDialog from "../calendar/SharePickerDialog";
+import PersonOutline from "@mui/icons-material/PersonOutline";
+import CorporateFareRounded from "@mui/icons-material/CorporateFareRounded";
+import BadgeOutlined from "@mui/icons-material/BadgeOutlined";
 
 type Props = {
   open: boolean;
@@ -69,18 +72,18 @@ export default function CalendarCreateDialog({
 
     const normalizedShares = shares
       ? {
-          users:
-            (Array.isArray((shares as any).users) ? (shares as any).users
-             : Array.isArray((shares as any).members) ? (shares as any).members : []
-            ).map((u: any) => ({ userNo: Number(u.userNo), role: u.role as CalendarDefaultRole })),
-          departments: (shares as any).departments?.map((d: any) => ({
-            depId: Number(d.depId), role: d.role as CalendarDefaultRole
-          })) ?? [],
-          positions: (shares as any).positions?.map((p: any) => ({
-            posId: Number(p.posId), role: p.role as CalendarDefaultRole
-          })) ?? [],
-          mode: (isEdit ? "replace" : "merge") as "replace" | "merge",
-        }
+        users:
+          (Array.isArray((shares as any).users) ? (shares as any).users
+            : Array.isArray((shares as any).members) ? (shares as any).members : []
+          ).map((u: any) => ({ userNo: Number(u.userNo), role: u.role as CalendarDefaultRole })),
+        departments: (shares as any).departments?.map((d: any) => ({
+          depId: Number(d.depId), role: d.role as CalendarDefaultRole
+        })) ?? [],
+        positions: (shares as any).positions?.map((p: any) => ({
+          posId: Number(p.posId), role: p.role as CalendarDefaultRole
+        })) ?? [],
+        mode: (isEdit ? "replace" : "merge") as "replace" | "merge",
+      }
       : undefined;
 
     onSubmit({
@@ -94,8 +97,8 @@ export default function CalendarCreateDialog({
   function toPickerPayload(sh: any) {
     const arr = (v: any) => (Array.isArray(v) ? v : []);
     const srcMembers = arr(sh?.members).length ? arr(sh?.members) : arr(sh?.users);
-    const srcDepts   = arr(sh?.departments).length ? arr(sh?.departments) : arr(sh?.depts);
-    const srcPos     = arr(sh?.positions);
+    const srcDepts = arr(sh?.departments).length ? arr(sh?.departments) : arr(sh?.depts);
+    const srcPos = arr(sh?.positions);
 
     const members = srcMembers.map((u: any) => ({
       userNo: Number(u.userNo ?? u.id ?? u.USER_NO ?? 0),
@@ -122,8 +125,8 @@ export default function CalendarCreateDialog({
   function fromPickerPayload(p: any) {
     const arr = (v: any) => (Array.isArray(v) ? v : []);
     const srcMembers = arr(p?.members).length ? arr(p?.members) : arr(p?.users);
-    const srcDepts   = arr(p?.departments).length ? arr(p?.departments) : arr(p?.depts);
-    const srcPos     = arr(p?.positions);
+    const srcDepts = arr(p?.departments).length ? arr(p?.departments) : arr(p?.depts);
+    const srcPos = arr(p?.positions);
 
     return {
       members: srcMembers.map((m: any) => ({
@@ -283,39 +286,77 @@ export default function CalendarCreateDialog({
               const arr = (v: any) => (Array.isArray(v) ? v : []);
               const s: any = shares ?? {};
               const membersSrc = arr(s.members).length ? arr(s.members) : arr(s.users);
-              const deptsSrc   = arr(s.departments).length ? arr(s.departments) : arr(s.depts);
+              const deptsSrc = arr(s.departments).length ? arr(s.departments) : arr(s.depts);
               const positionsSrc = arr(s.positions);
 
               const memberChips = membersSrc.map((m: any) => {
-                const id   = Number(m.userNo ?? m.id ?? m.USER_NO);
+                const id = Number(m.userNo ?? m.id ?? m.USER_NO);
                 const name = m.userName ?? m.name ?? m.email ?? `#${id}`;
                 const role = (m.role as CalendarDefaultRole) ?? "READER";
                 return <Chip key={`m-${id}`} size="small" sx={{ mr: .5, mb: .5 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
               });
 
               const deptChips = deptsSrc.map((d: any) => {
-                const id   = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
+                const id = Number(d.depId ?? d.deptId ?? d.DEP_ID ?? d.DEPT_ID);
                 const name = d.depName ?? d.name ?? `#${id}`;
                 const role = (d.role as CalendarDefaultRole) ?? "READER";
                 return <Chip key={`d-${id}`} size="small" sx={{ mr: .5, mb: .5 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
               });
 
               const posChips = positionsSrc.map((p: any) => {
-                const id   = Number(p.posId ?? p.id ?? p.POS_ID);
+                const id = Number(p.posId ?? p.id ?? p.POS_ID);
                 const name = p.posName ?? p.name ?? `#${id}`;
                 const role = (p.role as CalendarDefaultRole) ?? "READER";
                 return <Chip key={`p-${id}`} size="small" sx={{ mr: .5, mb: .5 }} label={`${name} · ${DEFAULT_ROLE_LABELS[role] ?? role}`} />;
               });
 
+              const Section = ({
+                icon,
+                label,
+                count,
+                children,
+              }: {
+                icon: React.ReactNode;
+                label: string;
+                count: number;
+                children: React.ReactNode;
+              }) => (
+                <Box sx={{ mb: 1.25 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: .5, mb: .5, color: "text.secondary" }}>
+                    {icon}
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{label}</Typography>
+                    <Chip size="small" label={count} sx={{ ml: .5, height: 20 }} />
+                  </Box>
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                    {children}
+                  </Stack>
+                </Box>
+              );
+
               const total = memberChips.length + deptChips.length + posChips.length;
+
               if (total === 0) {
                 return <Typography variant="body2" color="text.secondary">선택된 대상이 없습니다.</Typography>;
               }
 
               return (
-                <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                  {memberChips}{deptChips}{posChips}
-                </Stack>
+                <Box>
+                  {memberChips.length > 0 && (
+                    <Section icon={<PersonOutline fontSize="small" />} label="개인" count={memberChips.length}>
+                      {memberChips}
+                    </Section>
+                  )}
+                  {deptChips.length > 0 && (
+                    <Section icon={<CorporateFareRounded fontSize="small" />} label="부서" count={deptChips.length}>
+                      {deptChips}
+                    </Section>
+                  )}
+                  {posChips.length > 0 && (
+                    <Section icon={<BadgeOutlined fontSize="small" />} label="직급" count={posChips.length}>
+                      {posChips}
+                    </Section>
+                  )}
+                </Box>
               );
             })()}
           </Box>
