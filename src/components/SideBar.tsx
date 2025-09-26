@@ -12,6 +12,7 @@ import type { LoginUser } from '../types/vacation';
 import { loginUser } from '../api/vacationApi';
 import type { Attendance } from '../types/attendance';
 import { loginUserAttendance } from '../api/attendanceApi';
+import AttButton from './AttButton';
 
 
 // onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
@@ -74,21 +75,22 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                     {auth.accessToken && auth.user ? (
                         <ul>
                             <div className="px-4">
-                                <li className="block w-full text-left py-2 px-3 rounded text-white">
+                                <li className="block w-full text-center font-extrabold text-[20px] py-2 px-3 rounded text-white">
                                     {auth.user.userName}
                                 </li>
-                                <li className="block w-full text-left py-2 px-3 rounded hover:bg-gray-700 text-white">
-                                    마이페이지
+                                <li className="block w-full text-left py-2 px-3 rounded hover:bg-gray-700 ">
+                                    <Link to="/mypage" className='text-white'>마이페이지</Link>
                                 </li>
                             </div>
-                            <div className="pt-1 -mb-[1px] px-2.5">
+                            <div className="pt-1 -mb-[1px] px-2">
                                 <li className="flex justify-around w-full">
-                                    <button type="button" className="w-1/3 text-left py-2 px-3 rounded bg-blue-500 hover:bg-blue-400 text-white">
-                                        출근
-                                    </button>
-                                    <button type="button" className="w-1/2 text-left py-2 px-3 rounded bg-red-500 hover:bg-red-400 text-white">
+                                    <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt}/>
+                                    <div 
+                                        className="w-1/2 text-center py-2 px-3 bg-red-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:bg-red-400"
+                                        onClick={handleLogout}
+                                    >
                                         로그아웃
-                                    </button>
+                                    </div>
                                 </li>
                             </div>
                         </ul>
