@@ -3,8 +3,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 
 export default function AttSideBar() {
-    
-    const userRoles = useSelector((state:RootState) => state.auth.user?.roles);
+
+    const userRoles = useSelector((state: RootState) => state.auth.user?.roles);
     const hasAccess = userRoles?.includes("ROLE_ADMIN") || userRoles?.includes("ROLE_HR");
 
     return (

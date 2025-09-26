@@ -18,7 +18,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-
     const [openCard, setOpenCard] = useState<string | null>('');
     const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
     const totalUnreadCount = useSelector(selectGlobalUnreadCount);
@@ -116,7 +115,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                 ))}
                 </div>
             </div>
-            {isNoticeMainOpen && <NoticeMain onClose={closeNoticeModal}/>}
         </>
     )
 }

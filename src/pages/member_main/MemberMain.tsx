@@ -8,7 +8,7 @@ import Pagination from "../../components/Approval/Pagination";
 
 export default function MemberMain() {
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 15;
+    const ITEMS_PER_PAGE = 10;
     
     // 사원 조회 및 검색용 훅
     const [searchValues, setSearchValues] = useState({
@@ -59,7 +59,6 @@ export default function MemberMain() {
         queryFn: () => depDetailList(searchValues.parentDepId!),
         enabled: searchValues.parentDepId !== null
     })
-
     
     // 직위 목록 조회용 훅
     const { data: position } = useQuery<Position[]>({
@@ -158,28 +157,28 @@ export default function MemberMain() {
     if (isError) return <div>{error.message}</div>
 
     return (
-        <div className="max-w-7xl mx-auto p-5 font-sans text-gray-800">
-            <h1 className="text-2xl font-bold mb-5 text-left">사원관리</h1>
+        <div className="max-w-6xl mx-auto p-8 lg:p-12 min-h-screen">
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">휴가 관리</h1>
 
-            <div className="flex flex-wrap items-center justify-start gap-5 p-4 mb-5 border rounded-lg bg-gray-50 border-gray-200">
-                <span className="flex items-center font-bold whitespace-nowrap">
-                    사원명
+            <div className="flex flex-wrap items-center justify-center gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
+                <div className="flex items-center gap-3">
+                    <span className="font-semibold text-sm whitespace-nowrap text-gray-700">사원명</span>
                     <input
                         type="text"
                         placeholder="사원명 검색"
                         name="userName"
                         value={searchValues.userName}
                         onChange={handleChange}
-                        className="ml-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-40"
                     />
-                </span>
-                <span className="flex items-center font-bold whitespace-nowrap">
-                    부서
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-semibold text-sm whitespace-nowrap text-gray-700">부서</span>
                     <select
                         name="parentDepId"
                         value={searchValues.parentDepId || ''}
                         onChange={handleChange}
-                        className="ml-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
+                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[120px]"
                     >
                         <option value="">전체</option>
                         {parentDep?.map(dep => (
@@ -188,15 +187,15 @@ export default function MemberMain() {
                             </option>
                         ))}
                     </select>
-                </span>
-                <span className="flex items-center font-bold whitespace-nowrap">
-                    상세 부서
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-semibold text-sm whitespace-nowrap text-gray-700">상세 부서</span>
                     <select
                         name="childDepId"
                         value={searchValues.childDepId || ''}
                         onChange={handleChange}
                         disabled={!searchValues.parentDepId}
-                        className="ml-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] disabled:bg-gray-200 disabled:cursor-not-allowed"
+                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[120px] disabled:bg-gray-200 disabled:cursor-not-allowed"
                     >
                         <option value="">전체</option>
                         {childDep?.map(dep => (
@@ -205,14 +204,14 @@ export default function MemberMain() {
                             </option>
                         ))}
                     </select>
-                </span>
-                <span className="flex items-center font-bold whitespace-nowrap">
-                    직위
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-semibold text-sm whitespace-nowrap text-gray-700">직위</span>
                     <select
                         name="posName"
                         value={searchValues.posName}
                         onChange={handleChange}
-                        className="ml-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
+                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[120px]"
                     >
                         <option value="">전체</option>
                         {position?.map(pos => (
@@ -221,77 +220,75 @@ export default function MemberMain() {
                             </option>
                         ))}
                     </select>
-                </span>
-                <span className="flex items-center font-bold whitespace-nowrap">
-                    재직상태
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="font-semibold text-sm whitespace-nowrap text-gray-700">재직상태</span>
                     <select
                         name="status"
                         value={searchValues.status}
                         onChange={handleChange}
-                        className="ml-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
+                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[120px]"
                     >
                         <option value="">전체</option>
                         <option value="T">재직</option>
                         <option value="F">퇴직</option>
                     </select>
-                </span>
+                </div>
             </div>
 
-            <div className="flex justify-end gap-2 mb-5">
+            <div className="flex justify-end gap-3 mb-5">
                 <button
                     onClick={handleReset}
-                    className="py-2 px-4 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-gray-300 transition-colors"
+                    className="py-2 px-6 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-md"
                 >
                     초기화
                 </button>
                 <button
                     onClick={handleSearch}
-                    className="py-2 px-4 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600 transition-colors"
+                    className="py-2 px-6 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md"
                 >
                     검색
                 </button>
                 <button
                     onClick={handleCreateOpen}
-                    className="py-2 px-4 bg-green-500 text-white rounded-md font-semibold hover:bg-green-600 transition-colors"
+                    className="py-2 px-6 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md"
                 >
                     사원등록
                 </button>
             </div>
-
-            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+            <div className="flex flex-wrap items-center justify-start gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
                 <table className="min-w-full divide-y divide-gray-200 text-sm text-center">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-100">
                         <tr>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">NO</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">사원번호</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">사원명</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">이메일</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">입사일</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">소속</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">직위</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">전화번호</th>
-                            <th scope="col" className="px-6 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-600 uppercase tracking-wider">재직상태</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-10">NO</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">사원번호</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">사원명</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-50">이메일</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">입사일</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">소속</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">직위</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-35">전화번호</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">재직상태</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        
-                        {currentMember && currentMember?.length > 0?(
+                        {currentMember && currentMember?.length > 0 ? (
                             currentMember.map((member, index) => (
                                 <tr key={member.userNo} onDoubleClick={() => handleDetailOpen(member.userNo)} className="hover:bg-gray-100 transition-colors cursor-pointer">
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{index + 1}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.userNo}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.userName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.hireDate.split('T')[0]}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.depName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.posName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.phone}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{member.status === 'T' ? '재직' : '퇴직'}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{indexOfFirstMember + index + 1}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.userNo}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.userName}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.email}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.hireDate.split('T')[0]}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.depName}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.posName}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.phone}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-gray-700">{member.status === 'T' ? '재직' : '퇴직'}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={9} className="px-6 py-4 whitespace-nowrap text-center text-gray-600">조회하려는 사원이 없습니다.</td>
+                                <td colSpan={9} className="px-3 py-4 whitespace-nowrap text-center text-gray-600">조회하려는 사원이 없습니다.</td>
                             </tr>
                         )}
                     </tbody>
@@ -299,11 +296,9 @@ export default function MemberMain() {
             </div>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
 
-            {/* 상세조회 모달 */}
             {isModal && selectedUser !== null && (
                 <MemberDetail userNo={selectedUser} onClose={handleDetailClose} />
             )}
-            {/* 생성 모달 */}
             {isCreateModal && (
                 <MemberCreate isOpen={isCreateModal} onClose={handleCreateClose} />
             )}

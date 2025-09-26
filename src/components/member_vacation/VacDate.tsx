@@ -4,11 +4,11 @@ import 'dayjs/locale/ko';
 dayjs.locale('ko');
 
 interface VacationMemberProps {
-    selectYear : number;
-    selectMonth? : number;
-    onDateChange : (year:number,month?:number) => void;
+    selectYear: number;
+    selectMonth?: number;
+    onDateChange: (year: number, month?: number) => void;
 }
-export default function VacDate({selectYear,selectMonth,onDateChange}:VacationMemberProps) {
+export default function VacDate({ selectYear, selectMonth, onDateChange }: VacationMemberProps) {
 
     // 리스트 표시용 훅
     const [isYearList, setIsYearList] = useState(false);
@@ -17,76 +17,76 @@ export default function VacDate({selectYear,selectMonth,onDateChange}:VacationMe
 
     // 월 관리
     const prevMonth = () => {
-        if(selectMonth !== undefined){
-            const newDate = dayjs(new Date(selectYear, selectMonth -1)).subtract(1,'month');
+        if (selectMonth !== undefined) {
+            const newDate = dayjs(new Date(selectYear, selectMonth - 1)).subtract(1, 'month');
             onDateChange(newDate.year(), newDate.month() + 1);
         }
     }
     const nextMonth = () => {
-        if(selectMonth !== undefined) {
+        if (selectMonth !== undefined) {
             const currentMonthDayjs = dayjs();
-            const nextMonthDayjs = dayjs(new Date(selectYear, selectMonth -1)).add(1,'month');
-            
-            if(nextMonthDayjs.isAfter(currentMonthDayjs,'month')){
+            const nextMonthDayjs = dayjs(new Date(selectYear, selectMonth - 1)).add(1, 'month');
+
+            if (nextMonthDayjs.isAfter(currentMonthDayjs, 'month')) {
                 return;
             }
-            onDateChange(nextMonthDayjs.year(), nextMonthDayjs.month() +1);
+            onDateChange(nextMonthDayjs.year(), nextMonthDayjs.month() + 1);
         }
     }
 
     // 년도 관리
     const prevYear = () => {
-        if(selectMonth === undefined){
-            onDateChange(selectYear -1)
+        if (selectMonth === undefined) {
+            onDateChange(selectYear - 1)
         }
     }
     const nextYear = () => {
-        if(selectMonth === undefined) {
-            if(selectYear >= dayjs().year()) return;
-            onDateChange(selectYear +1);
+        if (selectMonth === undefined) {
+            if (selectYear >= dayjs().year()) return;
+            onDateChange(selectYear + 1);
         }
     }
-    
+
     // 리스트 관리
     const yearList = () => {
         setIsYearList(!isYearList);
         setIsMonthList(false);
     }
     const monthList = () => {
-        if(selectMonth !== undefined){
+        if (selectMonth !== undefined) {
             setIsMonthList(!isMonthList);
             setIsYearList(false);
         }
     }
 
-    const years = Array.from({length:31},(_,i) => dayjs().year() - i);
-    const months = Array.from({length:12},(_,i) => i + 1);
+    const years = Array.from({ length: 31 }, (_, i) => dayjs().year() - i);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
     // 리스트 선택시
-    const handleSelectYear = (year:number) => {
-        onDateChange(year,selectMonth);
+    const handleSelectYear = (year: number) => {
+        onDateChange(year, selectMonth);
         setIsYearList(false);
     }
-    const handleSelectMonth = (month:number) => {
-        if(selectMonth !== undefined){
-            onDateChange(selectYear,month);
+    const handleSelectMonth = (month: number) => {
+        if (selectMonth !== undefined) {
+            onDateChange(selectYear, month);
             setIsMonthList(false);
         }
     }
 
     // 리스트 외부 클릭시 닫기
     useEffect(() => {
-        const handleClickOutside = (e:MouseEvent) => {
-            if(listRef.current && !listRef.current.contains(e.target as Node)){
+        const handleClickOutside = (e: MouseEvent) => {
+            if (listRef.current && !listRef.current.contains(e.target as Node)) {
                 setIsYearList(false);
                 setIsMonthList(false);
             }
         }
-        document.addEventListener("mousedown",handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener("mousedown",handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         }
-    },[listRef])
+    }, [listRef])
 
 
     return (
@@ -101,10 +101,10 @@ export default function VacDate({selectYear,selectMonth,onDateChange}:VacationMe
                     {selectYear}년
                 </span>
                 {selectMonth !== undefined && (
-                <span onClick={monthList}
-                    className="p-2 rounded-md cursor-pointer transition-colors hover:bg-gray-100">
-                    {selectMonth}월
-                </span>
+                    <span onClick={monthList}
+                        className="p-2 rounded-md cursor-pointer transition-colors hover:bg-gray-100">
+                        {selectMonth}월
+                    </span>
                 )}
                 <button onClick={selectMonth !== undefined ? nextMonth : nextYear}
                     className="p-2 rounded-md transition-colors hover:bg-gray-100">
