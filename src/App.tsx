@@ -31,6 +31,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
+import MainPages from './mainPage/MainPages';
 import NoticeMain from './components/notice/NoticeMain';
 
 

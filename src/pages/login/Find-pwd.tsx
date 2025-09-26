@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { api } from "../../api/coreflowApi";
 import styles from './Login.module.css'
+import { useNavigate } from "react-router-dom";
 
 const FindPwd = () => {
     const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+    const navigate = useNavigate();
 
     const sendTempPwd = async () => {
         try {
             const res = await api.post("/auth/find-pwd", { userName, email });
-            setSuccessMessage(res.data);
-            setErrorMessage("");
+            alert(res.data);
+            navigate("/auth/login")
         } catch (err: any) {
-            setErrorMessage(err.response?.data || "오류가 발생했습니다.");
-            setSuccessMessage("");
+            const message = err.response?.data || "오류가 발생했습니다.";
+            alert(message);
         }
     };
 
@@ -36,10 +36,7 @@ const FindPwd = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
-                    <button className={styles.primaryBtn} onClick={sendTempPwd}>임시 비밀번호 발송</button>
-
-                    {successMessage && <p>{successMessage}</p>}
-                    {errorMessage && <p>{errorMessage}</p>}
+                    <button type="button" className={styles.primaryBtn} onClick={sendTempPwd}>임시 비밀번호 발송</button>
                 </form>
             </section>
         </div>

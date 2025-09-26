@@ -77,7 +77,7 @@ const Header = () => {
           </span>
           <Link 
             to="/mypage" 
-            className={`hover:underline${
+            className={`text-white hover:underline${
                 isMainPage ? 'text-white' : 'text-gray-700'
             }`}
           >
