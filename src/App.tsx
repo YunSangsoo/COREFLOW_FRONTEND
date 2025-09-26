@@ -33,13 +33,12 @@ import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
 import NoticeMain from './components/notice/NoticeMain';
 
-
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
     const isMainPage = location.pathname === '/';
-
+    
     useEffect(() => {
         api.post("/auth/refresh")
             .then(res => {

@@ -3,6 +3,31 @@ import type { ShareListRes, ShareUpsertReq } from "../types/calendar/calendar";
 import { api } from "./coreflowApi";
 import dayjs, { Dayjs } from "dayjs";
 
+const __calRoleCache = new Map<number, CalendarDefaultRole>(); // calId -> myRole
+const __shareReqCache = new Map<number, Promise<CalendarShares>>(); // 중복 호출 방지
+
+function pickMyRole(shares?: CalendarShares, userNo?: number): CalendarDefaultRole | undefined {
+  if (!shares) return undefined;
+  const direct = shares.users?.find(u => Number(u.userNo) === Number(userNo))?.role;
+  return direct || shares.defaultRole; // 디폴트 권한으로 폴백
+}
+
+async function ensureCalRoleCached(calId: number, userNo?: number): Promise<CalendarDefaultRole | undefined> {
+  if (__calRoleCache.has(calId)) return __calRoleCache.get(calId);
+  try {
+    let p = __shareReqCache.get(calId);
+    if (!p) {
+      p = getCalendarShares(calId);
+      __shareReqCache.set(calId, p);
+    }
+    const shares = await p;
+    const role = pickMyRole(shares, userNo);
+    if (role) __calRoleCache.set(calId, role);
+    return role;
+  } catch { /* 무시 */ }
+  return undefined;
+}
+
 // 서버 표준 형식: YYYY-MM-DDTHH:mm:ss (로컬 KST)
 export const fmt = (d: Date | string) =>
   dayjs(d).format("YYYY-MM-DD HH:mm:ss");
@@ -11,6 +36,8 @@ export type CalendarSummary = {
   calId: number;
   name: string;
   color? : string;
+    myRole?: CalendarDefaultRole;
+
 }
 
 // CalendarPage가 import해서 쓰는 타입
@@ -70,6 +97,11 @@ export async function getCalendarShares(calId: number): Promise<CalendarShares> 
   return r.data ?? {};
 }
   
+export async function getMyRole(calId: number): Promise<CalendarDefaultRole> {
+  const r = await api.get(`/calendar/${calId}/my-role`);
+  return (r?.data?.role ?? "NONE") as CalendarDefaultRole;
+}
+
 export type Member = {
   userNo : number;
   userName : string;
@@ -151,17 +183,30 @@ function num(n: any, d = 0): number {
 
 
 export async function fetchVisibleCalendars(userNo?: number): Promise<CalendarSummary[]> {
-  const url = typeof userNo === "number"
-    ? `/calendar/visible?userNo=${userNo}`   // 서버가 무시해도 무방, 과거 호출부와 호환
-    : `/calendar/visible`;
-
+  const url = typeof userNo === "number" ? `/calendar/visible?userNo=${userNo}` : `/calendar/visible`;
   const r = await api.get(url);
   const raw = unwrap<any[]>(r) ?? [];
-  return raw.map((c) => ({
+
+  const list = raw.map((c) => ({
     calId: num(c.calId ?? c.CAL_ID),
     name: String(c.name ?? c.calName ?? c.CAL_NAME ?? ""),
     color: String(c.color ?? c.COLOR ?? "#4096ff"),
-  }));
+    // myRole?: 나중에 채움
+  })) as CalendarSummary[];
+
+  // 권한 정보 필요할 때만 병렬 조회
+  if (typeof userNo === "number") {
+    await Promise.all(
+      list.map(async (c) => {
+        try {
+          c.myRole = await getMyRole(c.calId);
+        } catch {
+          c.myRole = "NONE"; // 방어
+        }
+      })
+    );
+  }
+  return list;
 }
 
 // ── 캘린더 생성 → { calId, name?, color? } 반환
@@ -386,13 +431,18 @@ export async function saveCalendarShares(args: {
   });
 }
 
-// 기간 내 이벤트 조회 (두 키 모두 전송: calendarId, calId)
+// 기간 내 이벤트 조회 (BUSY_ONLY 마스킹 + 클릭 차단용 id 부여)
 export async function fetchEvents(params: {
   calendarId: number;
   from: string; // "YYYY-MM-DDTHH:mm:ss"
   to: string;   // "YYYY-MM-DDTHH:mm:ss"
 }): Promise<EventDto[]> {
   const cid = num(params.calendarId);
+
+  // 내 권한 캐싱(없으면 최소한 defaultRole만이라도 채움)
+  await ensureCalRoleCached(cid);
+
+  // 원본 이벤트 조회
   const r = await api.get("/events", {
     params: {
       calendarId: cid,   // 컨트롤러가 기대하는 이름
@@ -402,24 +452,48 @@ export async function fetchEvents(params: {
     },
   });
   const raw = unwrap<any[]>(r) ?? [];
-  return raw.map((e) => ({
-    eventId: num(e.eventId ?? e.EVENT_ID),
-    calId: num(e.calId ?? e.CAL_ID ?? cid),
-    title: String(e.title ?? e.TITLE ?? ""),
-    startAt: String(e.startAt ?? e.START_AT ?? ""),
-    endAt: String(e.endAt ?? e.END_AT ?? ""),
-    allDayYn: (e.allDayYn ?? e.ALL_DAY_YN ?? "N") as "Y" | "N",
-    locationText: e.locationText ?? e.LOCATION_TEXT,
-    note: e.note ?? e.NOTE,
-    roomId: e.roomId ?? e.ROOM_ID,
-    status: e.status ?? e.STATUS,
-    labelId: e.labelId ?? e.LABEL_ID,
-    typeId: e.typeId ?? e.TYPE_ID,
-    typeName: e.typeName ?? e.TYPE_NAME ?? undefined,  
-    typeCode: e.typeCode ?? e.TYPE_CODE ?? undefined,  
-    rrule: e.rrule ?? e.RRULE,
-    exdates: e.exdates ?? e.EXDATES,
-  }));
+
+  // 이 캘린더에서의 나의 권한
+  const myRole = __calRoleCache.get(cid); // "BUSY_ONLY" | "READER" | ...
+
+  // 표준 DTO로 변환하면서 BUSY_ONLY는 마스킹
+  const out = raw.map((e) => {
+    const ev: EventDto = {
+      eventId: num(e.eventId ?? e.EVENT_ID),
+      calId: num(e.calId ?? e.CAL_ID ?? cid),
+      title: String(e.title ?? e.TITLE ?? ""),
+      startAt: String(e.startAt ?? e.START_AT ?? ""),
+      endAt: String(e.endAt ?? e.END_AT ?? ""),
+      allDayYn: (e.allDayYn ?? e.ALL_DAY_YN ?? "N") as "Y" | "N",
+      locationText: e.locationText ?? e.LOCATION_TEXT,
+      note: e.note ?? e.NOTE,
+      roomId: e.roomId ?? e.ROOM_ID,
+      status: e.status ?? e.STATUS,
+      labelId: e.labelId ?? e.LABEL_ID,
+      typeId: e.typeId ?? e.TYPE_ID,
+      typeName: e.typeName ?? e.TYPE_NAME ?? undefined,
+      typeCode: e.typeCode ?? e.TYPE_CODE ?? undefined,
+      rrule: e.rrule ?? e.RRULE,
+      exdates: e.exdates ?? e.EXDATES,
+    };
+
+    // 👉 BUSY_ONLY면 제목/세부를 숨기고, UI가 클릭을 막을 수 있도록 플래그를 붙임
+    if (myRole === "BUSY_ONLY") {
+      ev.title = "";                 // 제목 숨김 (UI에서 '바쁨' 같은 고정 문구로 대체)
+      ev.locationText = undefined;   // 위치/메모 등 디테일 제거
+      ev.note = undefined;
+      ev.labelId = undefined;
+      ev.typeId = undefined as any;
+
+      // 타입에는 없지만 UI에서 사용할 수 있도록 소프트 플래그 부여
+      (ev as any).__busyMasked = true;                    // 제목 숨김 여부
+      (ev as any).__clickBlockId = `busy:${ev.eventId}`;  // 클릭 차단용 가짜 id
+    }
+
+    return ev;
+  });
+
+  return out;
 }
 
 
