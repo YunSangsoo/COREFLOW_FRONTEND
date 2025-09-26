@@ -78,14 +78,11 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                 <li className="block w-full text-center font-extrabold text-[20px] py-2 px-3 rounded text-white">
                                     {auth.user.userName}
                                 </li>
-                                <li className="block w-full text-left py-2 px-3 rounded hover:bg-gray-700 ">
-                                    <Link to="/mypage" className='text-white'>마이페이지</Link>
-                                </li>
                             </div>
-                            <div className="pt-1 -mb-[1px] px-2">
+                            <div className="pt-1 px-2 my-2">
                                 <li className="flex justify-around w-full">
-                                    <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt}/>
-                                    <div 
+                                    <AttButton loginUserProfile={loginUserProfile} loginUserAtt={loginUserAtt} />
+                                    <div
                                         className="w-1/2 text-center py-2 px-3 bg-red-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:bg-red-400"
                                         onClick={handleLogout}
                                     >
@@ -93,15 +90,18 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                                     </div>
                                 </li>
                             </div>
+                            <li className="px-4 my-1">
+                                <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>홈</Link>
+                            </li>
+                            <li className="px-4 my-1">
+                                <Link to="/mypage" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>마이페이지</Link>
+                            </li>
                         </ul>
                     ) : (
                         <li>
                             로그인
                         </li>
                     )}
-                    <li className="px-4">
-                        <Link to="/" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>홈</Link>
-                    </li>
                     <li className="px-4">
                         <button type='button' onClick={() => setIsAttendanceOpen(!isAttendanceOpen)}
                             style={{ backgroundColor: "#1e2939", padding: "10px" }}
