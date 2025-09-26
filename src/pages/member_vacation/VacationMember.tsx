@@ -42,7 +42,7 @@ export default function VacationMember() {
     })
 
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 15;
+    const ITEMS_PER_PAGE = 10;
 
     // 사원 선택 or 선택안함
     const displayData = selectMember ? memberVacation : allVacation;
@@ -56,7 +56,7 @@ export default function VacationMember() {
     // 사원 선택시 실행
     const handleSelectMember = (member: MemberChoice) => {
         setSearchName(member.userName);
-        setSearchQuery(member.userName);
+        setSearchQuery('');
         setSelectMember(member);
         setCurrentPage(1);
     }
@@ -105,42 +105,39 @@ export default function VacationMember() {
                 <div className="lg:w-64"><VacSideBar /></div>
 
                 <div className="flex-1 min-w-0">
-                    {/* 사원 검색 섹션 */}
-                    <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
-                        <div className="bg-gray-50 p-6 flex flex-col sm:flex-row items-center gap-4">
-                            <label htmlFor="search-member" className="font-semibold text-gray-700 w-full sm:w-auto sm:text-left text-center">사원명 검색</label>
-                            <div className="flex flex-1 w-full gap-2 items-stretch">
-                                <input
-                                    id="search-member"
-                                    onChange={(e) => setSearchName(e.target.value)}
-                                    value={searchName}
-                                    type="text"
-                                    placeholder="사원명을 입력하세요"
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                                <button
-                                    onClick={handleSearch}
-                                    className="px-6 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
-                                    검색
-                                </button>
-                                <button
-                                    onClick={handleReset}
-                                    className="px-6 py-2 bg-gray-800 text-white font-bold text-sm rounded-lg shadow-md hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
-                                    초기화
-                                </button>
+                    <div className="relative">
+                        <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
+                            <div className="bg-gray-50 p-6 flex flex-col sm:flex-row items-center gap-4">
+                                <label htmlFor="search-member" className="font-semibold text-gray-700 w-full sm:w-auto sm:text-left text-center">사원명 검색</label>
+                                <div className="flex flex-1 w-full gap-2 items-stretch">
+                                    <input
+                                        id="search-member"
+                                        onChange={(e) => setSearchName(e.target.value)}
+                                        value={searchName}
+                                        type="text"
+                                        placeholder="사원명을 입력하세요"
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    />
+                                    <button
+                                        onClick={handleSearch}
+                                        className="px-6 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                        검색
+                                    </button>
+                                    <button
+                                        onClick={handleReset}
+                                        className="px-6 py-2 bg-gray-800 text-white font-bold text-sm rounded-lg shadow-md hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                        초기화
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                        {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
                     </div>
-
-                    {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
-                    
-                    {/* 날짜 선택 섹션 */}
-                    <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200 p-4">
-                        <VacDate selectYear={selectYear} selectMonth={selectMonth} onDateChange={handleDateChange} />
-                    </div>
-
-                    {/* 휴가 목록 테이블 */}
                     <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+                        <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <VacDate selectYear={selectYear} selectMonth={selectMonth} onDateChange={handleDateChange} />
+                        </div>
+
                         <table className="min-w-full text-sm divide-y divide-gray-200">
                             <thead className="bg-blue-50 border-b border-blue-200">
                                 <tr>
@@ -189,13 +186,13 @@ export default function VacationMember() {
                             </tbody>
                         </table>
                     </div>
+                    {totalPages > 1 && (
+                        <div className="mt-8 flex justify-center">
+                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                        </div>
+                    )}
                 </div>
             </div>
-            {totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                </div>
-            )}
         </div>
     );
 }

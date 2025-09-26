@@ -89,13 +89,11 @@ export default function VacationPersonal() {
                     
                     {isModalOpen && <PutVacation onClose={handleCloseModal} />}
                     
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-6 shadow-sm">
+                    <div className="border border-gray-300 rounded-b-lg overflow-hidden mb-8">
                         <VacDate selectYear={selectYear} onDateChange={handleDateChange} />
-                    </div>
 
-                    <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
                         <table className="min-w-full text-sm divide-y divide-gray-200">
-                            <thead className="bg-gray-100">
+                            <thead className="bg-blue-50 border-b border-blue-200">
                                 <tr>
                                     <th className="w-12 p-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">No</th>
                                     <th className="w-24 p-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">휴가 구분</th>
@@ -133,15 +131,14 @@ export default function VacationPersonal() {
                                 )}
                             </tbody>
                         </table>
+                        </div>
+                        {totalPages > 1 && (
+                            <div className="mt-6 flex justify-center">
+                                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-            
-            {totalPages > 1 && (
-                <div className="mt-6 flex justify-center">
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                </div>
-            )}
-        </div>
     );
 }

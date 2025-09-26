@@ -38,28 +38,28 @@ export default function SearchMember({ searchName, onSelectMember }: SearchMembe
 
     // 6. 필터링된 결과가 있을 경우에만 테이블을 렌더링
     return (
-        <div className="border border-gray-300 rounded overflow-hidden">
-            <div className="bg-white">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="bg-gray-600 text-white">
-                            <th className="px-3 py-2 text-center font-medium w-50">사원번호</th>
-                            <th className="px-3 py-2 text-center font-medium w-40">사원명</th>
-                            <th className="px-3 py-2 text-center font-medium w-30">부서</th>
-                            <th className="px-3 py-2 text-center font-medium w-30">직위</th>
+        <div className="absolute w-full top-full left-0 z-20">
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
+                <table className="w-full text-sm divide-y divide-gray-200">
+                    <thead className="bg-blue-100 border-b border-blue-200">
+                        <tr>
+                            <th className="p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700 w-[20%]">사원번호</th>
+                            <th className="p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700 w-[30%]">사원명</th>
+                            <th className="p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700 w-[30%]">부서</th>
+                            <th className="p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700 w-[20%]">직위</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                         {filteredMembers.map((member) => (
                             <tr
                                 key={member.userNo}
-                                className="border-b border-gray-300 hover:bg-gray-200 cursor-pointer"
+                                className="odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition duration-150 cursor-pointer"
                                 onClick={() => onSelectMember(member)}
                             >
-                                <td className="px-3 py-2 text-center">{member.userNo}</td>
-                                <td className="px-3 py-2 text-center">{member.userName}</td>
-                                <td className="px-3 py-2 text-center">{member.depName}</td>
-                                <td className="px-3 py-2 text-center">{member.posName}</td>
+                                <td className="p-3 text-center font-medium text-gray-700">{member.userNo}</td>
+                                <td className="p-3 text-center text-gray-800 font-medium">{member.userName}</td>
+                                <td className="p-3 text-center text-gray-700">{member.depName}</td>
+                                <td className="p-3 text-center text-gray-700">{member.posName}</td>
                             </tr>
                         ))}
                     </tbody>

@@ -8,7 +8,7 @@ import Pagination from "../../components/Approval/Pagination";
 
 export default function MemberMain() {
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 15;
+    const ITEMS_PER_PAGE = 10;
     
     // 사원 조회 및 검색용 훅
     const [searchValues, setSearchValues] = useState({

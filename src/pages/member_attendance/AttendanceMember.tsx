@@ -19,7 +19,7 @@ export default function AttendanceMember() {
     const [vacTypeList, setVacTypeList] = useState<number | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 15;
+    const ITEMS_PER_PAGE = 10;
 
     const { data: attData, isLoading, isError, error } = useQuery<Attendance[]>({
         queryKey: ['memAtt', currentDate.format('YYYY-MM-DD'), selectMember?.userNo],
@@ -51,7 +51,7 @@ export default function AttendanceMember() {
 
     const handleSelectMember = (member: MemberChoice) => {
         setSearchName(member.userName);
-        setSearchQuery(member.userName);
+        setSearchQuery('');
         setSelectMember(member);
         setCurrentPage(1);
     }
@@ -101,70 +101,87 @@ export default function AttendanceMember() {
             <div className="flex flex-col lg:flex-row gap-8">
                 <div className="lg:w-64"><AttSideBar /></div>
 
-                <div className="flex-1">
-                    <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded">
-                        <div className="flex items-center">
-                            <div className="px-3 py-1 border bg-gray-800 text-white rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">사원명</div>
-                            <input
-                                onChange={(e) => setSearchName(e.target.value)} value={searchName} type="text" placeholder="사원명을 입력하세요"
-                                className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            <button
-                                onClick={handleSearch}
-                                className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">검색
-                            </button>
-                            <button
-                                onClick={handleReset}
-                                className="px-4 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition-colors">초기화
-                            </button>
+                <div className="flex-1 min-w-0">
+                    <div className="relative">
+                        <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
+                            <div className="bg-gray-50 p-6 flex flex-col sm:flex-row items-center gap-4">
+                                <label htmlFor="search-member" className="font-semibold text-gray-700 w-full sm:w-auto sm:text-left text-center">사원명 검색</label>
+                                <div className="flex flex-1 w-full gap-2 items-stretch">
+                                    <input
+                                        id="search-member"
+                                        onChange={(e) => setSearchName(e.target.value)}
+                                        value={searchName}
+                                        type="text"
+                                        placeholder="사원명을 입력하세요"
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    />
+                                    <button
+                                        onClick={handleSearch}
+                                        className="px-6 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                        검색
+                                    </button>
+                                    <button
+                                        onClick={handleReset}
+                                        className="px-6 py-2 bg-gray-800 text-white font-bold text-sm rounded-lg shadow-md hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                        초기화
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                        {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
                     </div>
-                    {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
-
-                    <div className="border border-gray-300 rounded">
-                        <AttDate selectDate={currentDate} onDateChange={setCurrentDate} />
-                        <table className="min-w-full bg-white border-collapse">
-                            <thead>
-                                <tr className="bg-gray-200 border-b border-gray-300 text-sm font-semibold">
-                                    <th className="w-12 p-2 border-r border-gray-300 text-center">no</th>
-                                    <th className="w-20 p-2 border-r border-gray-300 text-center">날짜</th>
-                                    <th className="w-24 p-2 border-r border-gray-300 text-center">성명</th>
-                                    <th className="w-24 p-2 border-r border-gray-300 text-center">부서</th>
-                                    <th className="w-16 p-2 border-r border-gray-300 text-center">직위</th>
-                                    <th className="w-16 p-2 border-r border-gray-300 text-center">출근시각</th>
-                                    <th className="w-16 p-2 border-r border-gray-300 text-center">퇴근시각</th>
-                                    <th className="w-16 p-2 border-r border-gray-300 text-center">비고</th>
+                    <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+                        <div className="p-4 bg-gray-50 border-b border-gray-200">
+                            <AttDate selectDate={currentDate} onDateChange={setCurrentDate} />
+                        </div>
+                        
+                        <table className="min-w-full text-sm divide-y divide-gray-200">
+                            <thead className="bg-blue-50 border-b border-blue-200">
+                                <tr>
+                                    <th className="w-12 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">No</th>
+                                    <th className="w-20 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">날짜</th>
+                                    <th className="w-24 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">성명</th>
+                                    <th className="w-24 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">부서</th>
+                                    <th className="w-16 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">직위</th>
+                                    <th className="w-16 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">출근시각</th>
+                                    <th className="w-16 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">퇴근시각</th>
+                                    <th className="w-20 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">비고</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {
                                     currentAttendance && currentAttendance.length > 0 ? (
                                         currentAttendance.map((data, index) => (
-                                            <tr className="border-b border-gray-200" key={data.attId}>
-                                                <td className="w-12 p-2 border-r border-gray-200 text-center">{index + 1}</td>
-                                                <td className="w-20 p-2 border-r border-gray-200 text-center">{data.attDate}</td>
-                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.userName}</td>
-                                                <td className="w-24 p-2 border-r border-gray-200 text-center">{data.depName}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.posName}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkInTime || null}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">{data.checkOutTime || null}</td>
-                                                <td className="w-16 p-2 border-r border-gray-200 text-center">
-                                                    <div className="relative">
+                                            <tr className="odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition duration-150" key={data.attId}>
+                                                <td className="p-3 text-center font-medium text-gray-700">
+                                                    {index + 1 + indexOfFirstAttendance}
+                                                </td>
+                                                <td className="p-3 text-center text-gray-800">{data.attDate}</td>
+                                                <td className="p-3 text-center text-gray-800 font-medium">{data.userName}</td>
+                                                <td className="p-3 text-center">{data.depName}</td>
+                                                <td className="p-3 text-center">{data.posName}</td>
+                                                <td className="p-3 text-center font-extrabold text-green-600">{data.checkInTime || '-'}</td>
+                                                <td className="p-3 text-center font-extrabold text-red-600">{data.checkOutTime || '-'}</td>
+                                                <td className="p-3 text-center">
+                                                    <div className="relative inline-block" ref={listRef}>
                                                         <button
                                                             onClick={() => handleVacType(data.attId)}
-                                                            className="w-16 p-2 text-white bg-blue-600 text-center">{data.vacName}
+                                                            className="inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-full shadow-sm cursor-pointer whitespace-nowrap transition-colors">{data.vacName}
                                                         </button>
                                                         {vacTypeList === data.attId && (
-                                                            <div ref={listRef} className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                                            <div className="absolute top-0 right-full mr-2 w-40 bg-white border border-gray-300 rounded-md shadow-xl z-20 overflow-hidden">
                                                                 <div className="max-h-40 overflow-y-auto">
-                                                                    {vacData && vacData.length > 0 && (
+                                                                    {vacData && vacData.length > 0 ? (
                                                                         <ul>
                                                                             {vacData.map((vac) => (
                                                                                 <li key={vac.vacCode} onClick={() => handleVacSelect(data.attId, vac.vacCode)}
-                                                                                    className="p-2 hover:bg-gray-100 cursor-pointer">
+                                                                                    className="p-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer transition-colors border-b last:border-b-0">
                                                                                     {vac.vacName}
                                                                                 </li>
                                                                             ))}
                                                                         </ul>
+                                                                    ) : (
+                                                                        <div className="p-2 text-center text-xs text-gray-500">휴가 구분이 없습니다.</div>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -175,15 +192,21 @@ export default function AttendanceMember() {
                                         ))
                                     ) :
                                         <tr>
-                                            <td colSpan={8} className="p-4 text-center text-gray-500">근태 기록이 없습니다.</td>
+                                            <td colSpan={8} className="text-center p-12 text-lg text-gray-500 bg-white">
+                                                근태 기록이 없습니다.
+                                            </td>
                                         </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
+                    {totalPages > 1 && (
+                        <div className="mt-8 flex justify-center">
+                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                        </div>
+                    )}
                 </div>
             </div>
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
     );
 }
