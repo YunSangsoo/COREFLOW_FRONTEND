@@ -566,6 +566,9 @@ export default function CalendarPage() {
   const openPeoplePicker = (mode: "ATTENDEE" | "SHARER", _query = "") => {
     setPickMode(mode);
     setPickSelectedMembers(mode === "ATTENDEE" ? selectedAttendees : selectedSharers);
+    setPickDeptId(null);
+    setPickQuery(_query);          // "" 이면 전체 검색, 문자열이면 해당 키워드로 검색
+    setPickMembers([]);       // 오래된 결과 깔끔히 제거(깜빡임 방지)
     setPickOpen(true);
   };
   useEffect(() => {
@@ -1080,22 +1083,35 @@ export default function CalendarPage() {
           onSave={handleEventSave}
           attendees={selectedAttendees}
           sharers={selectedSharers}
-          onQuickAdd={async (q) => {
-            if (!q.trim()) return;
-            const found = await searchMembers(q.trim(), 5);
+          onQuickAdd={async (mode, q) => {
+            const query = q.trim();
+            if (!query) return;
+
+            const found = await searchMembers(query, 5);
+
             if (found.length === 1) {
               const m = found[0];
-              if (
-                (!selectedAttendees.some(a => a.userNo === m.userNo) && !selectedSharers.some(s => s.userNo === m.userNo)) ||
-                (!selectedSharers.some(s => s.userNo === m.userNo) && !selectedAttendees.some(a => a.userNo === m.userNo))
-              ) {
-                setSelectedAttendees(prev => [...prev, m]);
+              if (mode === "ATTENDEE") {
+                // 공유자에 없을 때만 참석자로 추가
+                const blocked = new Set(selectedSharers.map(s => s.userNo));
+                if (!blocked.has(m.userNo) && !selectedAttendees.some(a => a.userNo === m.userNo)) {
+                  setSelectedAttendees(prev => [...prev, m]);
+                }
+              } else {
+                // 참석자에 없을 때만 공유자로 추가
+                const blocked = new Set(selectedAttendees.map(a => a.userNo));
+                if (!blocked.has(m.userNo) && !selectedSharers.some(s => s.userNo === m.userNo)) {
+                  setSelectedSharers(prev => [...prev, m]);
+                }
               }
             } else {
-              setPickMode("ATTENDEE");
-              setPickSelectedMembers(selectedAttendees);
+              // 여러명일 때 → 해당 모드로 피커 열고 초기 검색어 주입
+              setPickMode(mode);
+              setPickSelectedMembers(mode === "ATTENDEE" ? selectedAttendees : selectedSharers);
+              setPickDeptId(null);     // 🔑 부서 필터도 초기화
+              setPickQuery(query);     // 🔑 여기서는 검색어 유지 (의도된 동작)
+              setPickMembers([]);      // 깔끔한 리프레시
               setPickOpen(true);
-              setPickQuery(q);
             }
           }}
           onOpenPeoplePicker={(m) => openPeoplePicker(m)}
@@ -1129,7 +1145,12 @@ export default function CalendarPage() {
         }
         loadingDepts={loadingDepts}
         loadingMembers={loadingMembers}
-        onClose={() => setPickOpen(false)}
+        onClose={() => {
+          setPickOpen(false);
+          setPickQuery("");       // 🔑 다음에 열면 전체 목록 나오도록
+          setPickDeptId(null);
+          setPickMembers([]);     // 이전 결과 즉시 비우기
+        }}
         onConfirm={confirmPick}
         onToggle={(m: any) => togglePick(m)}
         onQueryChange={(q) => setPickQuery(q)}

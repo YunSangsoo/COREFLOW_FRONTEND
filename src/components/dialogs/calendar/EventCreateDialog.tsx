@@ -1,15 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+// src/components/dialogs/calendar/EventCreateDialog.tsx
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createEventType, fetchEventTypes } from "../../../api/calendarApi";
 import type { EventTypeOption } from "../../../api/calendarApi";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment,
   TextField, Box, Select, MenuItem, InputLabel, FormControl,
-  FormControlLabel, Switch, Button, Divider, Stack, Typography, IconButton,
-  List, ListItemButton, ListItemText
+  FormControlLabel, Switch, Button, Divider, Stack, Typography,
+  IconButton, List, ListItemButton, ListItemText
 } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import SearchIcon from "@mui/icons-material/ManageSearch";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import CalendarMonthRounded from "@mui/icons-material/CalendarMonthRounded";
+import LabelOutlined from "@mui/icons-material/LabelOutlined";
+import EventRepeatRounded from "@mui/icons-material/RepeatRounded";
+import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
+import MeetingRoomRounded from "@mui/icons-material/MeetingRoomRounded";
+import GroupsRounded from "@mui/icons-material/GroupsRounded";
 import { useSelector } from "react-redux";
 import type { Dayjs } from "dayjs";
 import LabelSelectWithManager from "../../inputs/calendar/LabelSelectWithManager";
@@ -79,12 +86,19 @@ export default function EventCreateDialog({
     selectedRoom: { roomId: number; roomName: string } | null;
   }) => void;
 }) {
-  // ===== 권한/유형 관리 =====
   const authUser = useSelector((state: any) => state.auth?.user);
   const roles: string[] = authUser?.roles ?? [];
   const canManageType = roles.includes("ROLE_ADMIN") || roles.includes("ROLE_HR");
 
-  // 유형 옵션
+  // ===== 색상(액센트) : 라벨 > 캘린더 > 기본 =====
+  const accentColor = useMemo(() => {
+    const labelHex = value.label?.labelColor;
+    if (labelHex) return labelHex;
+    const calHex = visibleCals.find(c => Number(c.calId) === Number(value.calId))?.color;
+    return calHex || "#4096ff";
+  }, [value.label, value.calId, visibleCals]);
+
+  // ===== 유형 옵션 로딩 =====
   const [typeOptions, setTypeOptions] = useState<EventTypeOption[]>([]);
   useEffect(() => {
     let alive = true;
@@ -106,13 +120,12 @@ export default function EventCreateDialog({
       }
     })();
     return () => { alive = false; };
-  }, []); // 1회
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [typeManagerOpen, setTypeManagerOpen] = useState(false);
 
-  // ======================================================
-  // ✅ 회의실 예약(옵션)
-  // ======================================================
+  // ===== 회의실 =====
   const [needsRoom, setNeedsRoom] = useState(false);
   const [roomFinderOpen, setRoomFinderOpen] = useState(false);
   const [isFindingRooms, setIsFindingRooms] = useState(false);
@@ -123,32 +136,19 @@ export default function EventCreateDialog({
   const [roomErr, setRoomErr] = useState<string | null>(null);
   const findRoomBtnRef = useRef<HTMLButtonElement | null>(null);
 
-  // 종일이면 회의실 사용 X (자동 OFF)
-  useEffect(() => {
-    if (value.allDay) setNeedsRoom(false);
-  }, [value.allDay]);
+  useEffect(() => { if (value.allDay) setNeedsRoom(false); }, [value.allDay]);
 
-  // ── 닫기/선택 전, 포커스를 모달 “바깥”으로 잠깐 이동 (경고 방지)
   const focusOutsideModals = () => {
     try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
-    const sentinel = document.createElement("button");
-    sentinel.type = "button";
-    sentinel.tabIndex = -1;
-    sentinel.style.position = "fixed";
-    sentinel.style.opacity = "0";
-    sentinel.style.pointerEvents = "none";
-    sentinel.setAttribute("data-focus-sentinel", "true");
-    document.body.appendChild(sentinel);
-    sentinel.focus({ preventScroll: true });
-    // 다음 틱에 정리
-    setTimeout(() => sentinel.remove(), 0);
+    const el = document.createElement("button");
+    el.tabIndex = -1;
+    el.style.position = "fixed"; el.style.opacity = "0"; el.style.pointerEvents = "none";
+    document.body.appendChild(el); el.focus({ preventScroll: true }); setTimeout(() => el.remove(), 0);
   };
 
-  // 가용성 조회 (조회만; 선점 없음) — 모달은 먼저 열고, 데이터는 뒤이어 로딩
   async function fetchRoomAvailability() {
     try {
-      setRoomErr(null);
-      setIsFindingRooms(true);
+      setRoomErr(null); setIsFindingRooms(true);
       const r = await api.get("/rooms/availability", {
         params: {
           startAt: value.start.format("YYYY-MM-DD HH:mm:ss"),
@@ -159,181 +159,206 @@ export default function EventCreateDialog({
     } catch (e: any) {
       setRoomErr(e?.response?.data?.message || "회의실 가용성 조회 실패");
       setRoomOptions([]);
-    } finally {
-      setIsFindingRooms(false);
-    }
+    } finally { setIsFindingRooms(false); }
   }
-
-  // 목록에서 회의실 클릭 → 상태만 세팅 (서버 호출 없음)
   function selectRoom(roomId: number) {
     const picked = roomOptions.find(o => o.roomId === roomId);
     setSelectedRoom({ roomId, roomName: picked?.roomName || "" });
-
-    // ⬇️ 먼저 포커스를 바깥으로 옮긴 뒤 닫기
-    focusOutsideModals();
-    setRoomFinderOpen(false);
-
-    // 닫힌 뒤 이전 버튼으로 포커스 복원
+    focusOutsideModals(); setRoomFinderOpen(false);
     setTimeout(() => findRoomBtnRef.current?.focus(), 0);
   }
 
-  // 저장: 부모에게 선택 정보 전달
+  // ===== 저장 가능 =====
+  const timeInvalid = !value.start || !value.end || value.start.isAfter(value.end);
+  const canSubmit = !!value.calId && !!value.title?.trim() && !timeInvalid;
+
   const handleSave = () => {
     onBeforeSave?.({ needsRoom, selectedRoom });
     onSave();
   };
 
-  const timeInvalid = !value.start || !value.end || value.start.isAfter(value.end);
-
   return (
     <>
-      {/* 부모 다이얼로그: 자식 모달이 열려있을 때 포커스 트랩/오토포커스/복원 비활성화 */}
       <Dialog
         open={open}
         onClose={onClose}
         fullWidth
         maxWidth="sm"
-        disableEnforceFocus={roomFinderOpen}
-        disableAutoFocus={roomFinderOpen}
-        disableRestoreFocus={roomFinderOpen}
+        PaperProps={{ sx: { borderRadius: 3, overflow: "hidden" } }}
       >
-        <DialogTitle>새 일정</DialogTitle>
+        {/* 헤더: 색 점 + 타이틀 */}
+        <DialogTitle sx={{ py: 2.25, pr: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+            <Box sx={{
+              width: 12, height: 12, borderRadius: "50%",
+              background: accentColor,
+              boxShadow: "inset 0 0 0 2px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.08)"
+            }} />
+            <Box sx={{ fontWeight: 800 }}>새 일정</Box>
+          </Box>
+        </DialogTitle>
+        <Divider />
 
-        <DialogContent sx={{ pt: 2, display: "grid", gap: 2 }}>
-          {/* 캘린더 선택 */}
-          <FormControl 
-          fullWidth error={!!error?.calId}
-           margin="normal" 
-          >
-            <InputLabel id="cal-sel-label">캘린더</InputLabel>
-            <Select
-              labelId="cal-sel-label"
-              label="캘린더"
-              value={value.calId ?? ""}
-              onChange={(e) => onChange({ calId: Number(e.target.value) })}
-            >
-              {visibleCals.map((c) => (
-                <MenuItem key={c.calId} value={c.calId}>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: 10, height: 10, borderRadius: 6,
-                      background: c.color || "#999",
-                      boxShadow: "inset 0 0 0 1px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.08)",
-                      marginRight: 8,
-                    }}
-                  />
-                  {c.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {error?.calId && <Box sx={{ color: "tomato", fontSize: 12, mt: 0.5 }}>{error.calId}</Box>}
-          </FormControl>
-
-          {/* 제목 */}
-          <TextField
-            label="제목"
-            value={value.title}
-            onChange={(e) => onChange({ title: e.target.value })}
-            error={!!error?.title}
-            helperText={error?.title}
-            autoFocus
-            fullWidth
-          />
-
-          {/* 라벨 + 유형 */}
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <LabelSelectWithManager
-              value={value.label}
-              onChange={(l) => onChange({ label: l })}
-            />
+        <DialogContent sx={{ pt: 2.5, pb: 1.5, display: "grid", gap: 2.25 }}>
+          {/* 제목 + 미리보기 */}
+          <Box>
             <TextField
-              select
+              label="제목"
+              placeholder="예: 주간 스탠드업"
+              value={value.title}
+              onChange={(e) => onChange({ title: e.target.value })}
+              error={!!error?.title}
+              helperText={error?.title}
               fullWidth
-              label="유형"
-              value={value.typeId ?? ""}
-              onChange={(e) => onChange({ typeId: Number(e.target.value) })}
+              variant="outlined"
               slotProps={{
-                input: {
-                  startAdornment: canManageType ? (
-                    <InputAdornment position="start" sx={{ ml: 0.5 }}>
-                      <IconButton
-                        size="small"
-                        edge="start"
-                        disableRipple
-                        title="유형 관리"
-                        onClick={() => setTypeManagerOpen(true)}
-                        sx={{ p: 0.5, color: "action.active" }}
-                      >
-                        <SearchIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : undefined,
-                },
+                input: { notched: true },
+                inputLabel: { shrink: true, sx: { overflow: "visible" } },
               }}
-              sx={{ "& .MuiSelect-select": { pl: canManageType ? 0 : 1.5 } }}
-            >
-              <MenuItem value="" disabled>유형 선택</MenuItem>
-              {typeOptions.map((t) => (
-                <MenuItem key={t.typeId} value={t.typeId}>{t.typeName}</MenuItem>
-              ))}
-            </TextField>
+            />
+            {/* <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1.25 }}>
+              <Box sx={{
+                width: 18, height: 18, borderRadius: "50%",
+                background: accentColor,
+                boxShadow: "inset 0 0 0 2px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.1)"
+              }} />
+              <Typography variant="body2" color="text.secondary">
+                {(value.title?.trim() || "새 일정")}
+              </Typography>
+            </Box> */}
           </Box>
 
-          {/* 시간/종일 + 반복 */}
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
-            <FormControlLabel
-              control={<Switch checked={value.allDay} onChange={(e) => onChange({ allDay: e.target.checked })} />}
-              label="종일"
-            />
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {recurrence && recurrence.enabled && (
-                <Chip size="small" label={recurrenceBadge(recurrence) ?? ""} />
-              )}
-              <Button variant="outlined" onClick={onOpenRecurrence}>반복등록</Button>
+       {/* ✅ 캘린더 (한 줄 전체) */}
+<Box>
+  {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+    <LabelOutlined fontSize="small" /> 캘린더
+  </Box> */}
+  <FormControl fullWidth error={!!error?.calId}>
+    <InputLabel id="cal-sel-label">캘린더</InputLabel>
+    <Select
+      labelId="cal-sel-label"
+      label="캘린더"
+      value={value.calId ?? ""}
+      onChange={(e) => onChange({ calId: Number(e.target.value) })}
+    >
+      {visibleCals.map((c) => (
+        <MenuItem key={c.calId} value={c.calId}>
+          <span
+            style={{
+              display: "inline-block",
+              width: 10, height: 10, borderRadius: 6,
+              background: c.color || "#999",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.08)",
+              marginRight: 8,
+            }}
+          />
+          {c.name}
+        </MenuItem>
+      ))}
+    </Select>
+    {error?.calId && <Box sx={{ color: "tomato", fontSize: 12, mt: 0.5 }}>{error.calId}</Box>}
+  </FormControl>
+</Box>
+
+{/* ✅ 라벨 · 유형 (한 줄 나란히) */}
+<Box>
+  {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+    <LabelOutlined fontSize="small" /> 라벨 · 유형
+  </Box> */}
+
+  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+    {/* ⬇️ 첫 칸: 유형 */}
+    <TextField
+      select
+      fullWidth
+      label="유형"
+      value={value.typeId ?? ""}
+      onChange={(e) => onChange({ typeId: Number(e.target.value) })}
+      slotProps={{
+        input: canManageType ? {
+          startAdornment: (
+            <InputAdornment position="start" sx={{ ml: 0.5 }}>
+              <IconButton
+                size="small"
+                edge="start"
+                disableRipple
+                title="유형 관리"
+                onClick={() => setTypeManagerOpen(true)}
+                sx={{ p: 0.5, color: "action.active" }}
+              >
+                <ManageSearchIcon fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          ),
+        } : undefined,
+      }}
+      sx={{ "& .MuiSelect-select": { pl: canManageType ? 0 : 1.5 } }}
+    >
+      <MenuItem value="" disabled>유형 선택</MenuItem>
+      {typeOptions.map((t) => (
+        <MenuItem key={t.typeId} value={t.typeId}>{t.typeName}</MenuItem>
+      ))}
+    </TextField>
+
+    {/* ⬇️ 두 번째 칸: 라벨 */}
+    <LabelSelectWithManager
+      value={value.label}
+      onChange={(l) => onChange({ label: l })}
+    />
+  </Box>
+</Box>
+          {/* 시간/반복 */}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+              <AccessTimeRounded fontSize="small" /> 시간 · 반복
+              <Box sx={{ flex: 1 }} />
+              {recurrence?.enabled && <Chip size="small" icon={<EventRepeatRounded />} label={recurrenceBadge(recurrence) ?? ""} />}
+              <Button variant="outlined" size="small" onClick={onOpenRecurrence}>반복등록</Button>
             </Box>
+
+            <Stack direction="row" spacing={2}>
+              <DateTimePicker
+                label="시작" ampm={false}
+                value={value.start}
+                onChange={(v) => v && onChange({ start: v })}
+                format="YYYY-MM-DD HH:mm:ss"
+              />
+              <DateTimePicker
+                label="종료" ampm={false} disabled={value.allDay}
+                value={value.end}
+                onChange={(v) => v && onChange({ end: v })}
+                format="YYYY-MM-DD HH:mm:ss"
+              />
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: 1 }}>
+              <FormControlLabel
+                control={<Switch checked={value.allDay} onChange={(e) => onChange({ allDay: e.target.checked })} />}
+                label="종일"
+              />
+              {error?.time && <Typography variant="caption" color="error">{error.time}</Typography>}
+            </Stack>
           </Box>
 
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <DateTimePicker
-              label="시작" ampm={false}
-              value={value.start}
-              onChange={(v) => v && onChange({ start: v })}
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-            <DateTimePicker
-              label="종료" ampm={false}
-              disabled={value.allDay}
-              value={value.end}
-              onChange={(v) => v && onChange({ end: v })}
-              format="YYYY-MM-DD HH:mm:ss"
-            />
-          </Box>
-          {error?.time && <Box sx={{ color: "tomato", fontSize: 12 }}>{error.time}</Box>}
-
-          {/* ✅ 회의실 예약(옵션) — 선택만 */}
+          {/* 회의실 */}
           <Divider sx={{ my: 1 }} />
-          <Box sx={{ display: "grid", gap: 1 }}>
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+              <MeetingRoomRounded fontSize="small" /> 회의실
+            </Box>
             <Stack direction="row" alignItems="center" spacing={2}>
               <FormControlLabel
                 control={<Switch checked={needsRoom} onChange={(e) => setNeedsRoom(e.target.checked)} />}
                 label="회의실 예약"
               />
-              {selectedRoom ? (
-                <Typography variant="body2">선택됨: {selectedRoom.roomName}</Typography>
-              ) : (
-                <Typography variant="body2" color="text.secondary">회의실 미선택</Typography>
-              )}
+              {selectedRoom
+                ? <Typography variant="body2">선택됨: {selectedRoom.roomName}</Typography>
+                : <Typography variant="body2" color="text.secondary">회의실 미선택</Typography>}
               <Box sx={{ flex: 1 }} />
               <Button
                 ref={findRoomBtnRef}
-                variant="outlined"
-                size="small"
+                variant="outlined" size="small"
                 disabled={!needsRoom || value.allDay || timeInvalid}
-                onClick={() => {
-                  setRoomFinderOpen(true);             // 모달 먼저 열기
-                  void fetchRoomAvailability();        // 데이터 로딩
-                }}
+                onClick={() => { setRoomFinderOpen(true); void fetchRoomAvailability(); }}
               >
                 가용 회의실 찾기
               </Button>
@@ -341,37 +366,41 @@ export default function EventCreateDialog({
             {roomErr && <Typography variant="caption" color="error">{roomErr}</Typography>}
           </Box>
 
-          {/* 위치/메모 */}
-          <TextField
-            label="위치"
-            value={value.locationText ?? ""}
-            onChange={(e) => onChange({ locationText: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="메모"
-            value={value.note ?? ""}
-            onChange={(e) => onChange({ note: e.target.value })}
-            fullWidth
-            multiline
-            minRows={2}
-          />
+          {/* 위치/메모 (2열) */}
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <TextField
+              label="위치" value={value.locationText ?? ""}
+              onChange={(e) => onChange({ locationText: e.target.value })} fullWidth
+              variant="outlined"
+              slotProps={{ input: { notched: true }, inputLabel: { shrink: true, sx: { overflow: "visible" } } }}
+            />
+            <TextField
+              label="메모" value={value.note ?? ""}
+              onChange={(e) => onChange({ note: e.target.value })} fullWidth
+              variant="outlined"
+              slotProps={{ input: { notched: true }, inputLabel: { shrink: true, sx: { overflow: "visible" } } }}
+            />
+          </Box>
 
           {/* 참석자 */}
-          <Box sx={{ display: "grid", gap: 1 }}>
-            <Typography variant="subtitle2">참석자</Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
+          <Divider sx={{ my: 1 }} />
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+              <GroupsRounded fontSize="small" /> 참석자
+            </Box>
+            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
               {attendees.map((m) => (
-                <Chip key={m.userNo} label={`${m.userName}${m.email ? ` (${m.email})` : ""}`} />
+                <Chip key={m.userNo} size="small" label={`${m.userName}${m.email ? ` (${m.email})` : ""}`} />
               ))}
-              {attendees.length === 0 && (
-                <Typography variant="body2" color="text.secondary">선택된 참석자가 없습니다.</Typography>
-              )}
+              {attendees.length === 0 && <Typography variant="body2" color="text.secondary">선택된 참석자가 없습니다.</Typography>}
             </Stack>
             <Box sx={{ display: "flex", gap: 1 }}>
               <TextField
                 size="small" placeholder="이름 입력 후 Enter 또는 추가"
-                onKeyDown={(e) => { if (e.key === "Enter") onQuickAdd("ATTENDEE", (e.target as HTMLInputElement).value); }}
+                onKeyDown={(e) => {
+                  const q = (e.target as HTMLInputElement).value;
+                  if (e.key === "Enter" && q.trim()) onQuickAdd("ATTENDEE", q);
+                }}
                 sx={{ flex: 1 }}
               />
               <Button variant="contained" onClick={() => onOpenPeoplePicker("ATTENDEE")}>
@@ -380,23 +409,24 @@ export default function EventCreateDialog({
             </Box>
           </Box>
 
-          <Divider sx={{ my: 1 }} />
-
           {/* 공유자 */}
-          <Box sx={{ display: "grid", gap: 1 }}>
-            <Typography variant="subtitle2">공유자</Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: .5, color: "text.secondary", fontSize: 14, fontWeight: 700 }}>
+              <GroupsRounded fontSize="small" /> 공유자
+            </Box>
+            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
               {sharers.map((m) => (
-                <Chip key={m.userNo} label={`${m.userName}${m.email ? ` (${m.email})` : ""}`} />
+                <Chip key={m.userNo} size="small" label={`${m.userName}${m.email ? ` (${m.email})` : ""}`} />
               ))}
-              {sharers.length === 0 && (
-                <Typography variant="body2" color="text.secondary">선택된 공유자가 없습니다.</Typography>
-              )}
+              {sharers.length === 0 && <Typography variant="body2" color="text.secondary">선택된 공유자가 없습니다.</Typography>}
             </Stack>
             <Box sx={{ display: "flex", gap: 1 }}>
               <TextField
                 size="small" placeholder="이름 입력 후 Enter 또는 추가"
-                onKeyDown={(e) => { if (e.key === "Enter") onQuickAdd("SHARER", (e.target as HTMLInputElement).value); }}
+                onKeyDown={(e) => {
+                  const q = (e.target as HTMLInputElement).value;
+                  if (e.key === "Enter" && q.trim()) onQuickAdd("SHARER", q);
+                }}
                 sx={{ flex: 1 }}
               />
               <Button variant="contained" onClick={() => onOpenPeoplePicker("SHARER")}>
@@ -406,42 +436,27 @@ export default function EventCreateDialog({
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2 }}>
           <Button onClick={onClose}>취소</Button>
-          <Button variant="contained" onClick={handleSave}>만들기</Button>
+          <Button variant="contained" onClick={handleSave} disabled={!canSubmit}>
+            만들기
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ✅ 가용 회의실 모달 — 클릭하면 선택만 */}
+      {/* 회의실 찾기 모달 */}
       <Dialog
         open={roomFinderOpen}
-        onClose={() => {
-          // ⬇️ 닫기 직전 포커스를 바깥으로 이동
-          focusOutsideModals();
-          setRoomFinderOpen(false);
-          setTimeout(() => findRoomBtnRef.current?.focus(), 0);
-        }}
-        fullWidth
-        maxWidth="sm"
-        keepMounted
-        disableRestoreFocus
-        transitionDuration={{ exit: 0 }}  // 닫힘 애니메이션 제거 → 경고 레이스 완화
+        onClose={() => { focusOutsideModals(); setRoomFinderOpen(false); setTimeout(() => findRoomBtnRef.current?.focus(), 0); }}
+        fullWidth maxWidth="sm" keepMounted disableRestoreFocus transitionDuration={{ exit: 0 }}
       >
         <DialogTitle>가용 회의실</DialogTitle>
         <DialogContent dividers>
-          {isFindingRooms && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              조회 중…
-            </Typography>
-          )}
+          {isFindingRooms && <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>조회 중…</Typography>}
           <List dense>
             {roomOptions.map((o, idx) => (
-              <ListItemButton
-                key={o.roomId}
-                onClick={() => selectRoom(o.roomId)}
-                disabled={!o.available}
-                autoFocus={idx === 0}
-              >
+              <ListItemButton key={o.roomId} onClick={() => selectRoom(o.roomId)} disabled={!o.available} autoFocus={idx === 0}>
                 <ListItemText
                   primary={`${o.roomName}${o.capacity ? ` · ${o.capacity}명` : ""}`}
                   secondary={`${o.buildingName ?? ""} ${o.floor ?? ""} ${o.available ? "(예약 가능)" : "(불가)"}`}
@@ -449,27 +464,19 @@ export default function EventCreateDialog({
               </ListItemButton>
             ))}
             {roomOptions.length === 0 && !isFindingRooms && (
-              <Typography variant="body2" color="text.secondary">
-                해당 시간에 가용한 회의실이 없습니다.
-              </Typography>
+              <Typography variant="body2" color="text.secondary">해당 시간에 가용한 회의실이 없습니다.</Typography>
             )}
           </List>
-          {roomErr && (
-            <Typography variant="caption" color="error">
-              {roomErr}
-            </Typography>
-          )}
+          {roomErr && <Typography variant="caption" color="error">{roomErr}</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            focusOutsideModals();
-            setRoomFinderOpen(false);
-            setTimeout(() => findRoomBtnRef.current?.focus(), 0);
-          }}>닫기</Button>
+          <Button onClick={() => { focusOutsideModals(); setRoomFinderOpen(false); setTimeout(() => findRoomBtnRef.current?.focus(), 0); }}>
+            닫기
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* 유형관리 모달 (HR/ADMIN만) */}
+      {/* 유형 관리 (권한자) */}
       {canManageType && (
         <TypeManagerDialog
           open={typeManagerOpen}
