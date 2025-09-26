@@ -21,9 +21,19 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
 
     useEffect(() => {
     // 1. WebRTC Peer Connection 생성 및 설정
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }], // Google의 공개 STUN 서버
-    });
+    const iceServers = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun.twilio.com:3478' },
+      {
+        urls: 'turn:coreflow.duckdns.org:3478',
+        username: 'coreflow', // ✅ 새로 만든 아이디
+        credential: '1234', // ✅ 새로 만든 비밀번호
+      },
+    ];
+
+    const pc = new RTCPeerConnection({ iceServers: iceServers });
     peerConnectionRef.current = pc;
 
     // a. ICE Candidate가 수집되었을 때
@@ -35,6 +45,8 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
 
     // b. 상대방의 미디어 스트림이 도착했을 때
     pc.ontrack = (event) => {
+      console.log(event);
+      console.log(remoteVideoRef.current);
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
       }
@@ -80,7 +92,7 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
       .catch(error => 
         alert("미디어 장치를 확인할 수 없습니다. 카메라를 확인 한 후 다시 통화를 시도해주세요.")
       );
-
+      console.log(pc);
     // 3. 컴포넌트가 사라질 때 ChatManager에서 핸들러를 '등록 해제'합니다.
     return () => {
         unregisterSignalHandler(partnerProfile.userNo);
@@ -100,7 +112,6 @@ export const VideoChatWindow = ({ myProfile, partnerProfile, initialOffer, onHan
     // 2. 자신의 창을 닫기 위해 부모의 onHangUp 함수를 호출합니다.
     onHangUp();
   };
-
   return (
     <div className="relative w-full h-full bg-black flex items-center justify-center">
       {/* 상대방 영상 */}

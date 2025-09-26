@@ -486,10 +486,11 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             </FloatingWindow>
           ))}
         </DndContext>
-      </div>
+      </div >
+      <div className="fixed top-0 left-0 border-black ">
         {incomingCalls.map(call => (
-          <div key={call.from} className="bg-white p-4 rounded-lg shadow-xl">
-            <p className="font-semibold">{call.from}님으로부터 영상통화 요청이 왔습니다.</p>
+          <div key={call.from} className=" bg-white p-4 rounded-lg shadow-xl">
+            <p className="font-semibold">영상통화 요청이 왔습니다.</p>
             <div className="flex justify-end mt-4 space-x-2">
               <button 
                 onClick={() => handleDeclineCall(call)} 
@@ -506,6 +507,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             </div>
           </div>
         ))}
+        </div>
     </>
   );
 };
