@@ -5,7 +5,7 @@ import {
   Stack, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody,
   Link as MuiLink, Tooltip, Skeleton, GlobalStyles, Button
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import {
   Refresh as RefreshIcon,
@@ -45,6 +45,8 @@ import {
 
 import Header from "../components/Header";
 import { menuItems, type MenuItem } from "../types/menuItems";
+import NoticeDetail from "../components/notice/NoticeDetail";
+import { clearGlobalUnreadCount, selectGlobalUnreadCount } from "../features/chatSlice";
 
 type FCEvent = {
   id: string;
@@ -69,6 +71,7 @@ const roleOf = (obj: any) =>
 const isBusyRole = (obj: any) => roleOf(obj) === "BUSY_ONLY";
 
 export default function MainPages({ onChatClick }: Props) {
+  const dispatch = useDispatch();
   // ── 헤더 높이(겹침 방지)
   const headerRef = useRef<HTMLDivElement | null>(null);
   const [headerH, setHeaderH] = useState(140);
@@ -215,11 +218,29 @@ export default function MainPages({ onChatClick }: Props) {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const openNotice = () => setNoticeOpen(true);
   const closeNotice = () => setNoticeOpen(false);
+  const [noticeDetailOpen, setNoticeDetailOpen] = useState(false);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
+      const totalUnreadCount = useSelector(selectGlobalUnreadCount);
+  const openNoticeDetail = (notiId: number) => {
+    setSelectedNoticeId(notiId);
+    setNoticeDetailOpen(true);
+  }
+
+  const closeNoticeDetail = () => {
+    setSelectedNoticeId(null);
+    setNoticeDetailOpen(false);
+  }
 
   const [chatOpen, setChatOpen] = useState(false);
   const openChatLocal = () => setChatOpen(true);
   const closeChatLocal = () => setChatOpen(false);
-  const openChat = () => { if (onChatClick) onChatClick(); else openChatLocal(); };
+  const openChat = () => { if (onChatClick) {
+    if (totalUnreadCount > 0) {
+            dispatch(clearGlobalUnreadCount());
+    }
+    onChatClick();
+  }
+   else openChatLocal(); };
 
   // 아이콘바(토글형 서브메뉴) 상태
   const [openCard, setOpenCard] = useState<string | null>(null);
@@ -389,7 +410,9 @@ export default function MainPages({ onChatClick }: Props) {
                     <TableRow key={i}><TableCell colSpan={5}><Skeleton height={24} /></TableCell></TableRow>
                   ))}
                   {!loading && notices.map(n => (
-                    <TableRow key={n.noticeId} hover onClick={openNotice}>
+
+                    <TableRow key={n.noticeId} hover onClick={() => openNoticeDetail(n.noticeId)}>
+
                       <TableCell><MuiLink underline="hover" component="button">{n.title}</MuiLink></TableCell>
                       <TableCell>{dayjs(n.createdAt).format("YYYY/MM/DD")}</TableCell>
                       <TableCell>{n.writerName ?? "-"}</TableCell>
@@ -520,6 +543,9 @@ export default function MainPages({ onChatClick }: Props) {
                             }}
                           >
                             {sub.name}
+                          {(item.action==='chat')&&(totalUnreadCount > 0) && (
+                                <span className="w-2 h-2 float-right bg-red-500 rounded-full"></span>
+                          )}
                           </Button>
                         ))}
                       </Box>
@@ -549,6 +575,9 @@ export default function MainPages({ onChatClick }: Props) {
 
       {/* 공지 전체보기 모달 */}
       {noticeOpen && <NoticeMain onClose={closeNotice} />}
+
+      {/* 공지 상세보기 모달 */}
+      {noticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail} />)}
     </>
   );
 }

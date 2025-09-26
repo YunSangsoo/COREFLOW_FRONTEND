@@ -32,6 +32,7 @@ import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
 import NoticeMain from './components/notice/NoticeMain';
+import MainPages from './mainPage/MainPages';
 
 function App() {
     const dispatch = useDispatch();
@@ -98,7 +99,7 @@ function App() {
                 }
                 <div>
                     <Routes>
-                        <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
+                        <Route path="/" element={<MainPages onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
                             <Route path="login" element={<Login />} />
                             <Route path="find-pwd" element={<FindPwd />} />
