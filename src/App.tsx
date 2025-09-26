@@ -89,7 +89,7 @@ function App() {
                 </div>
                 </>
                 }
-                <div className='flex-auto min-w-fit overflow-auto ml-56 pr-20'>
+                <div >
                     <Routes>
                         <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
