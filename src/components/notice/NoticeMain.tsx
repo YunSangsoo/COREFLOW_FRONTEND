@@ -131,7 +131,13 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(notice.enrollDate).toLocaleDateString()}
                                         </td>
-                                    </tr>))) : <div>공지가 없습니다.</div>
+                                    </tr>
+                                    ))) : 
+                                    <tr className="text-center">
+                                        <td colSpan={4} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            공지가 없습니다.
+                                        </td>
+                                    </tr>
                             }
                         </tbody>
                     </table>

@@ -32,7 +32,6 @@ import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
 import NoticeMain from './components/notice/NoticeMain';
-import AttendanceMember2 from './pages/member_attendance/AttendanceMember copy';
 
 
 function App() {

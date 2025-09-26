@@ -20,8 +20,8 @@ export default function NoticeFileModal({ files, onClose }: NoticeFileModalProps
         <div className="p-4">
           {files.length > 0 ? (
             <ul>
-              {files.map((file) => (
-                <li key={file.imageCode} className="my-2 border-b last:border-b-0">
+              {files.map((file, index) => (
+                <li key={`${file.imageCode}-${index}`} className="my-2 border-b last:border-b-0">
                   <a download={file.originName} className="file-link block p-2 text-blue-600 hover:text-blue-800"
                     href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}>
                     {file.originName}
