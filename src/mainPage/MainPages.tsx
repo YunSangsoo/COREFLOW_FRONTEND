@@ -45,6 +45,7 @@ import {
 
 import Header from "../components/Header";
 import { menuItems, type MenuItem } from "../types/menuItems";
+import NoticeDetail from "../components/notice/NoticeDetail";
 
 type FCEvent = {
   id: string;
@@ -200,16 +201,32 @@ export default function MainPages({ onChatClick }: Props) {
     members: "/members",
     rooms: "/rooms",
     policies: "/cpolicies",
+    noticeDetail: (id: number | string) => `/notices/${id}`,
+    approvalDetail: (id: number | string) => `/approvals/${id}`, // 예: /approvals/:id
   } as const;
   const goCalendar = () => navigate(PATH.calendar);
   const goApprovalsRoot = () => navigate(PATH.approvals);
   const goMembers = () => navigate(PATH.members);
   const goRooms = () => navigate(PATH.rooms);
   const goPolicies = () => navigate(PATH.policies);
+  const handleApprovalClick = (approvalId: number) => {
+    navigate(`/approvals/${approvalId}`)
+  }
 
   const [noticeOpen, setNoticeOpen] = useState(false);
   const openNotice = () => setNoticeOpen(true);
   const closeNotice = () => setNoticeOpen(false);
+  const [noticeDetailOpen, setNoticeDetailOpen] = useState(false);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
+  const openNoticeDetail = (notiId: number) => {
+    setSelectedNoticeId(notiId);
+    setNoticeDetailOpen(true);
+  }
+
+  const closeNoticeDetail = () => {
+    setSelectedNoticeId(null);
+    setNoticeDetailOpen(false);
+  }
 
   const [chatOpen, setChatOpen] = useState(false);
   const openChatLocal = () => setChatOpen(true);
@@ -384,7 +401,7 @@ export default function MainPages({ onChatClick }: Props) {
                     <TableRow key={i}><TableCell colSpan={5}><Skeleton height={24} /></TableCell></TableRow>
                   ))}
                   {!loading && notices.map(n => (
-                    <TableRow key={n.noticeId} hover>
+                    <TableRow key={n.noticeId} hover onClick={() => openNoticeDetail(n.noticeId)}>
                       <TableCell><MuiLink underline="hover" component="button">{n.title}</MuiLink></TableCell>
                       <TableCell>{dayjs(n.createdAt).format("YYYY/MM/DD")}</TableCell>
                       <TableCell>{n.writerName ?? "-"}</TableCell>
@@ -431,7 +448,7 @@ export default function MainPages({ onChatClick }: Props) {
                     <TableRow key={i}><TableCell colSpan={4}><Skeleton height={24} /></TableCell></TableRow>
                   ))}
                   {!loading && approvals.map(a => (
-                    <TableRow key={a.approvalId} hover>
+                    <TableRow key={a.approvalId} hover onClick={() => handleApprovalClick(a.approvalId)}>
                       <TableCell><MuiLink component="button" underline="hover">{a.title}</MuiLink></TableCell>
                       <TableCell><Chip size="small" label={a.status} sx={{ borderRadius: 1, bgcolor: "grey.200" }} /></TableCell>
                       <TableCell>{a.writerName ?? "-"}</TableCell>
@@ -544,6 +561,9 @@ export default function MainPages({ onChatClick }: Props) {
 
       {/* 공지 전체보기 모달 */}
       {noticeOpen && <NoticeMain onClose={closeNotice} />}
+
+      {/* 공지 상세보기 모달 */}
+      {noticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail} />)}
     </>
   );
 }
