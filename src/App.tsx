@@ -32,6 +32,7 @@ import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
 import NoticeMain from './components/notice/NoticeMain';
+import AttendanceMember2 from './pages/member_attendance/AttendanceMember copy';
 
 
 function App() {
@@ -134,7 +135,7 @@ function App() {
                         <Route path='/attendance'>
                             <Route path="member" element={
                                 <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_HR']}>
-                                    <AttendanceMember />
+                                    <AttendanceMember/>
                                 </ProtectedRoute>
                             } />
                             <Route path="personal" element={<AttendancePersonal />} />

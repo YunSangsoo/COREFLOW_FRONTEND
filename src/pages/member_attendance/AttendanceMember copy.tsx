@@ -10,7 +10,7 @@ import AttDate from "../../components/member_attendance/AttDate";
 import { vacType } from "../../api/attendanceApi";
 import Pagination from "../../components/Approval/Pagination";
 
-export default function AttendanceMember() {
+export default function AttendanceMember2() {
     const queryClient = useQueryClient();
     const [searchName, setSearchName] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +19,7 @@ export default function AttendanceMember() {
     const [vacTypeList, setVacTypeList] = useState<number | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 10;
+    const ITEMS_PER_PAGE = 15;
 
     const { data: attData, isLoading, isError, error } = useQuery<Attendance[]>({
         queryKey: ['memAtt', currentDate.format('YYYY-MM-DD'), selectMember?.userNo],
@@ -51,7 +51,7 @@ export default function AttendanceMember() {
 
     const handleSelectMember = (member: MemberChoice) => {
         setSearchName(member.userName);
-        setSearchQuery('');
+        setSearchQuery(member.userName);
         setSelectMember(member);
         setCurrentPage(1);
     }
@@ -73,7 +73,7 @@ export default function AttendanceMember() {
             vacCode
         })
     }
-    
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (listRef.current && !listRef.current.contains(e.target as Node)) {
@@ -96,47 +96,47 @@ export default function AttendanceMember() {
 
     return (
         <div className="max-w-6xl mx-auto p-8 lg:p-12 min-h-screen">
-            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">근태 관리</h1>
-
-
-            <div className="flex flex-col lg:flex-row gap-8">
-                <div className="lg:w-64"><AttSideBar /></div>
-
-                <div className="flex-1 min-w-0">
-                    <div className="relative">
-                        <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
-                            <div className="bg-gray-50 p-6 flex flex-col sm:flex-row items-center gap-4">
-                                
-                                <label htmlFor="search-member" className="font-semibold text-gray-700 w-full sm:w-auto sm:text-left text-center">사원명 검색</label>
-                                <div className="flex flex-1 w-full gap-2 items-stretch">
-                                    <input
-                                        id="search-member"
-                                        onChange={(e) => setSearchName(e.target.value)}
-                                        value={searchName}
-                                        type="text"
-                                        placeholder="사원명을 입력하세요"
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    />
-                                    <button
-                                        onClick={handleSearch}
-                                        className="px-6 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
-                                        검색
-                                    </button>
-                                    <button
-                                        onClick={handleReset}
-                                        className="px-6 py-2 bg-gray-800 text-white font-bold text-sm rounded-lg shadow-md hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
-                                        초기화
-                                    </button>
+                    <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">근태 관리</h1>
+        
+        
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        <div className="lg:w-64"><AttSideBar /></div>
+        
+                        <div className="flex-1 min-w-0">
+                            <div className="relative">
+                                <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
+                                    <div className="bg-gray-50 p-6 flex flex-col sm:flex-row items-center gap-4">
+                                        
+                                        <label htmlFor="search-member" className="font-semibold text-gray-700 w-full sm:w-auto sm:text-left text-center">사원명 검색</label>
+                                        <div className="flex flex-1 w-full gap-2 items-stretch">
+                                            <input
+                                                id="search-member"
+                                                onChange={(e) => setSearchName(e.target.value)}
+                                                value={searchName}
+                                                type="text"
+                                                placeholder="사원명을 입력하세요"
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                            />
+                                            <button
+                                                onClick={handleSearch}
+                                                className="px-6 py-2 bg-blue-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                                검색
+                                            </button>
+                                            <button
+                                                onClick={handleReset}
+                                                className="px-6 py-2 bg-gray-800 text-white font-bold text-sm rounded-lg shadow-md hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                                초기화
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                                {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
                             </div>
-                        </div>
-                        {searchQuery && <SearchMember searchName={searchQuery} onSelectMember={handleSelectMember} />}
-                    </div>
-
-                    <div className="bg-white shadow-lg rounded-xl border border-gray-200">
-                        <div className="p-4 bg-gray-50 border-b border-gray-200">
-                            <AttDate selectDate={currentDate} onDateChange={setCurrentDate} />
-                        </div>
+        
+                            <div className="bg-white shadow-lg rounded-xl border border-gray-200">
+                                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                                    <AttDate selectDate={currentDate} onDateChange={setCurrentDate} />
+                                </div>
 
                         <div className="flex flex-wrap items-center justify-start bg-white shadow-lg rounded-xl max-w-2xl lg:max-w-full">
                             <table className="min-w-full text-sm divide-y divide-gray-200">
@@ -152,7 +152,7 @@ export default function AttendanceMember() {
                                         <th className="w-20 p-3 text-center text-xs font-bold uppercase tracking-wider text-blue-700">비고</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody>
                                     {
                                         currentAttendance && currentAttendance.length > 0 ? (
                                             currentAttendance.map((data, index) => (
@@ -173,22 +173,17 @@ export default function AttendanceMember() {
                                                                 className="inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-full shadow-sm cursor-pointer whitespace-nowrap transition-colors bg-blue-100 text-blue-800 ring-1 ring-blue-400">{data.vacName}
                                                             </button>
                                                             {vacTypeList === data.attId && (
-                                                                <div className="absolute top-0 right-full mr-2 w-40 bg-white border border-gray-300 rounded-md shadow-xl z-20 overflow-hidden">
-                                                                    <div ref={listRef} className="max-h-40 overflow-y-auto">
-                                                                        {vacData && vacData.length > 0 ? (
+                                                                <div ref={listRef} className="absolute top-0 left-full ml-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                                                    <div className="max-h-40 overflow-y-auto">
+                                                                        {vacData && vacData.length > 0 && (
                                                                             <ul>
                                                                                 {vacData.map((vac) => (
-                                                                                    <li key={vac.vacCode} onClick={(e) => {
-                                                                                            e.stopPropagation()
-                                                                                            handleVacSelect(data.attId, vac.vacCode)                                                                                            
-                                                                                        }}
-                                                                                        className="p-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer transition-colors border-b last:border-b-0">
+                                                                                    <li key={vac.vacCode} onClick={() => handleVacSelect(data.attId, vac.vacCode)}
+                                                                                        className="p-2 hover:bg-gray-100 cursor-pointer">
                                                                                         {vac.vacName}
                                                                                     </li>
                                                                                 ))}
                                                                             </ul>
-                                                                        ) : (
-                                                                            <div className="p-2 text-center text-xs text-gray-500">휴가 구분이 없습니다.</div>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -199,9 +194,7 @@ export default function AttendanceMember() {
                                             ))
                                         ) :
                                             <tr>
-                                                <td colSpan={8} className="text-center p-12 text-lg text-gray-500 bg-white">
-                                                    근태 기록이 없습니다.
-                                                </td>
+                                                <td colSpan={8} className="p-4 text-center text-gray-500">근태 기록이 없습니다.</td>
                                             </tr>
                                     }
                                 </tbody>

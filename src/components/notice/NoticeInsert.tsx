@@ -167,7 +167,7 @@ export default function NoticeInsert({ initData, onClose }: NoticeInsertProps) {
                             </svg>
                         </button>
                     </div>
-
+                    
                     <div className="p-6">
                         <div className="space-y-4">
                             <div className="flex items-center">

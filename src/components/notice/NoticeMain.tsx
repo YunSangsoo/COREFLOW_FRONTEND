@@ -104,7 +104,7 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                         <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
                     </div>
                 </div>
-                <div className="border border-gray-200 rounded-md overflow-hidden overflow-y-auto max-h-[400px]">
+                <div className="flex flex-wrap items-center justify-start gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
