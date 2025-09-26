@@ -8,6 +8,10 @@ export type CalendarVisibilityItem = {
   name: string;
   color?: string;
   checked: boolean;
+  /** [추가] 내 권한(있으면 BUSY_ONLY 처리에 사용, 없으면 무시) */
+  role?: CalendarDefaultRole | "OWNER";
+  /** [추가] 기본 권한(있으면 BUSY_ONLY 처리에 사용, 없으면 무시) */
+  defaultRole?: CalendarDefaultRole;
 };
 
 export type Label = {
