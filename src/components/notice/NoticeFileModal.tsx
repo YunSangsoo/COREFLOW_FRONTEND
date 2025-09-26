@@ -1,12 +1,12 @@
 import type { customFile } from "../../types/type";
 
-interface NoticeFileModalProps{
-    files:customFile[];
-    onClose:() => void;
+interface NoticeFileModalProps {
+  files: customFile[];
+  onClose: () => void;
 }
 
-export default function NoticeFileModal({files, onClose}:NoticeFileModalProps){
-    return (
+export default function NoticeFileModal({ files, onClose }: NoticeFileModalProps) {
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
       <div className="w-11/12 max-w-lg overflow-hidden rounded-lg bg-white shadow-xl md:w-full">
         <div className="flex items-center justify-between border-b p-4">
@@ -20,12 +20,12 @@ export default function NoticeFileModal({files, onClose}:NoticeFileModalProps){
         <div className="p-4">
           {files.length > 0 ? (
             <ul>
-              {files.map((file) => (
-                <li key={file.imageCode} className="my-2 border-b last:border-b-0">
-                    <a download={file.originName} className="file-link block p-2 text-blue-600 hover:text-blue-800"
-                        href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}>
-                        {file.originName}
-                    </a>
+              {files.map((file, index) => (
+                <li key={`${file.imageCode}-${index}`} className="my-2 border-b last:border-b-0">
+                  <a download={file.originName} className="file-link block p-2 text-blue-600 hover:text-blue-800"
+                    href={`${import.meta.env.VITE_API_BASE_URL}/download/${file.imageCode}/${file.changeName}`}>
+                    {file.originName}
+                  </a>
                 </li>
               ))}
             </ul>

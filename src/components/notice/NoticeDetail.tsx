@@ -38,7 +38,6 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
         queryFn: () => notiDetail(notiId),
         enabled: notiId != null
     })
-    console.log(data?.files);
     const deleteMutation = useMutation({
         mutationFn: (notiId: number) => notiDelete(notiId),
         onSuccess: () => {
@@ -52,7 +51,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
     })
 
     const handleDeleteClick = () => {
-        if(window.confirm('공지를 삭제하시겠습니까?')){
+        if (window.confirm('공지를 삭제하시겠습니까?')) {
             deleteMutation.mutate(notiId);
         }
     }
@@ -78,9 +77,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                     <div className="flex items-center space-x-2 col-span-2">
                         <span className="font-bold mb-5 text-gray-700">제목 :
                             {data?.essential === 'T' && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    필독
-                                </span>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">필독</span>
                             )}
                             {data?.title}
                         </span>
@@ -89,21 +86,19 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                         <span className="font-bold text-gray-700">작성자 : {data?.userName} |</span>
                         <span className="font-bold text-gray-700">부서 : {data?.depName} |</span>
                         <span className="font-bold text-gray-700">직위 : {data?.posName} |</span>
-
                         {
                             data.updateDate ?
                                 <span className="font-bold text-gray-700">수정일 : {new Date(data.updateDate).toLocaleDateString()}</span>
                                 :
                                 <span className="font-bold text-gray-700">작성일 : {new Date(data.enrollDate).toLocaleDateString()}</span>
                         }
-
                     </div>
                 </div>
 
                 <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border border-gray-200 min-h-[150px]">
                     <p className="text-gray-800 whitespace-pre-wrap">{data?.content}</p>
                 </div>
-                    
+
                 {data.files && data.files.length > 0 && (
                     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 flex justify-between items-center">
                         <span className="font-bold text-gray-700">첨부파일 ({data.files.length}개)</span>
@@ -118,8 +113,8 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
                     </div>
                 )}
             </div>
-            {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert}/>}
-            {isNoticeFileOpen && <NoticeFileModal files={data.files ?? []} onClose={CloseNoticeFile}/>}
+            {isNoticeInsertOpen && <NoticeInsert initData={data} onClose={closeNoticeInsert} />}
+            {isNoticeFileOpen && <NoticeFileModal files={data.files ?? []} onClose={CloseNoticeFile} />}
         </div>
     );
 }

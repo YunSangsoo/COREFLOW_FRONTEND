@@ -19,7 +19,7 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
 
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
-    
+
     const openNoticeInsert = () => {
         setIsNoticeInsertOpen(true);
     }
@@ -75,7 +75,7 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
     const indexOfFirstNotice = indexOfLastNotice - ITEMS_PER_PAGE;
     const currentNotice = noticeList?.slice(indexOfFirstNotice, indexOfLastNotice);
     const totalPages = noticeList && Math.ceil(noticeList.length / ITEMS_PER_PAGE) || 0;
-    
+
     return (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-4xl p-6 border border-black">
@@ -104,7 +104,7 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                         <button onClick={openNoticeInsert} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">등록</button>
                     </div>
                 </div>
-                <div className="border border-gray-200 rounded-md overflow-hidden overflow-y-auto max-h-[400px]">
+                <div className="flex flex-wrap items-center justify-start gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
@@ -115,28 +115,34 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                                {currentNotice && currentNotice.length > 0 ? (
+                            {currentNotice && currentNotice.length > 0 ? (
                                 currentNotice.map((notice, index) => (
-                                <tr key={notice.notiId} onDoubleClick={() => openNoticeDetail(notice.notiId)} className="hover:bg-gray-100 cursor-pointer">
-                                    <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {notice.essential === 'T' && (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
-                                                필독
-                                            </span>)
-                                        }
-                                        {notice.title}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(notice.enrollDate).toLocaleDateString()}
-                                    </td>
-                                </tr>))) : <div>공지가 없습니다.</div>
+                                    <tr key={notice.notiId} onDoubleClick={() => openNoticeDetail(notice.notiId)} className="hover:bg-gray-100 cursor-pointer">
+                                        <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{notice.userName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {notice.essential === 'T' && (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
+                                                    필독
+                                                </span>)
+                                            }
+                                            {notice.title}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {new Date(notice.enrollDate).toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                    ))) : 
+                                    <tr className="text-center">
+                                        <td colSpan={4} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            공지가 없습니다.
+                                        </td>
+                                    </tr>
                             }
                         </tbody>
                     </table>
                 </div>
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
             {isNoticeInsertOpen && <NoticeInsert onClose={closeNoticeInsert} />}
             {isNoticeDetailOpen && selectedNoticeId !== null && (<NoticeDetail notiId={selectedNoticeId} onClose={closeNoticeDetail} />)}

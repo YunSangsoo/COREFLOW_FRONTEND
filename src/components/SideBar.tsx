@@ -17,10 +17,11 @@ import AttButton from './AttButton';
 
 // onChatClick 함수를 props로 받도록 인터페이스를 정의합니다.
 interface SidebarProps {
-    onChatClick: () => void;
+  onChatClick: () => void;
+  onNoticeClick: () => void;
 }
 
-const Sidebar = ({ onChatClick }: SidebarProps) => {
+const Sidebar = ({ onChatClick, onNoticeClick}: SidebarProps) => {
     const [isAttendanceOpen, setIsAttendanceOpen] = useState(false);
     const [isApprovalOpen, setIsApprovalOpen] = useState(false);
     const totalUnreadCount = useSelector(selectTotalUnreadCount);
@@ -44,8 +45,6 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
             navigate('/auth/login'); // 로그인 페이지로 리디렉션
         }
     };
-
-
 
     // 출퇴근 기록용 날짜 상태
     const [selectYear, setSelectYear] = useState(dayjs().year());
@@ -174,6 +173,11 @@ const Sidebar = ({ onChatClick }: SidebarProps) => {
                     </li>
                     <li className="px-4">
                         <Link to="/cpolicies" className="block py-2 px-3 rounded hover:bg-gray-700" style={{ color: "white" }}>회사 규정</Link>
+                    </li>
+                    <li className="px-4">
+                        <div onClick={onNoticeClick} className="block py-2 px-3 rounded hover:bg-gray-700 cursor-pointer" style={{ color: "white" }}>
+                            공지
+                        </div>
                     </li>
                     <li className="px-4">
                         <div onClick={onChatClick} className="block py-2 px-3 rounded hover:bg-gray-700 cursor-pointer" style={{ color: "white" }}>

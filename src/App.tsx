@@ -31,16 +31,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Unauthorized from './components/Unauthorized';
 import CalendarPage from './pages/calendar/CalendarPage';
 import RoomsPage from './pages/rooms/RoomsPage';
-import MainPages from './mainPage/MainPages';
 import NoticeMain from './components/notice/NoticeMain';
-
 
 function App() {
     const dispatch = useDispatch();
     const location = useLocation();
     const isAuthPage = location.pathname.startsWith('/auth');
     const isMainPage = location.pathname === '/';
-    const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
     
     useEffect(() => {
         api.post("/auth/refresh")
@@ -52,20 +49,20 @@ function App() {
             })
     }, [dispatch])
 
-    
+
     const auth = useSelector((state: RootState) => state.auth);
     useEffect(() => {
-      if (auth.accessToken) {
-        console.log("Attempting to connect WebSocket...");
-        connectWebSocket();
-      } else {
-        console.log("Disconnecting WebSocket...");
-        disconnectWebSocket();
-      }
+        if (auth.accessToken) {
+            console.log("Attempting to connect WebSocket...");
+            connectWebSocket();
+        } else {
+            console.log("Disconnecting WebSocket...");
+            disconnectWebSocket();
+        }
 
-      return () => {
-        disconnectWebSocket();
-      }
+        return () => {
+            disconnectWebSocket();
+        }
     }, [auth.accessToken]);
 
     //어떤 페이지에서든 채팅을 구현하기 위해 App페이지에서 변수를 관리함
@@ -79,73 +76,85 @@ function App() {
         }
     };
 
+    const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+    const handleToggleNotice = () => {
+        if (auth.accessToken) {
+            setIsNoticeOpen(!isNoticeOpen);
+        } else {
+            console.error("공지 기능은 로그인이 필요합니다.");
+            alert("공지를 이용하려면 먼저 로그인해주세요.");
+        }
+    };
+
     return (
         <>
-        <div className="container">
-                {!isMainPage && !isAuthPage && 
-                <> 
-                <div className='w-56 shrink-0'>
-                    <Sidebar onChatClick={handleToggleChat} />
-                </div>
-                </>
+            <div className="container">
+                {!isMainPage && !isAuthPage &&
+                    <>
+                        <div className='w-56 shrink-0'>
+                            <Sidebar onNoticeClick={handleToggleNotice} onChatClick={handleToggleChat} />
+                        </div>
+                    </>
                 }
-                <div >
+                <div>
                     <Routes>
-                        <Route path="/" element={<MainPages onChatClick={handleToggleChat} />} />
+                        <Route path="/" element={<MainPage onNoticeClick={handleToggleNotice} onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
                             <Route path="login" element={<Login />} />
-                            <Route path="find-pwd" element={<FindPwd/>}/>
+                            <Route path="find-pwd" element={<FindPwd />} />
                         </Route>
-                        <Route path="/mypage" element={<Mypage/>}/>
+                        <Route path="/mypage" element={<Mypage />} />
                         <Route path="/cpolicies">
-                            <Route path="" element={<CompanyPolicyMain/>} />
-                            <Route path=":policyNo" element={<CompanyPolicyMain/>} />
+                            <Route path="" element={<CompanyPolicyMain />} />
+                            <Route path=":policyNo" element={<CompanyPolicyMain />} />
                         </Route>
                         <Route path="/admin/cpolicies">
-                            <Route path="" element={<CompanyPolicyMainAdmin/>} />
-                            <Route path=":policyNo" element={<CompanyPolicyMainAdmin/>} />
+                            <Route path="" element={<CompanyPolicyMainAdmin />} />
+                            <Route path=":policyNo" element={<CompanyPolicyMainAdmin />} />
                         </Route>
                         <Route>
-                            <Route path='/calendar' element={<CalendarPage/>}/>
-                            <Route path='/rooms' element={<RoomsPage/>}/>
+                            <Route path='/calendar' element={<CalendarPage />} />
+                            <Route path='/rooms' element={<RoomsPage />} />
                         </Route>
-                            <Route path='/members' element={
-                                <ProtectedRoute>
-                                    <MemberMain/>
+                        <Route path='/members' element={
+                            <ProtectedRoute>
+                                <MemberMain />
+                            </ProtectedRoute>
+                        } />
+                        <Route path='/vacation'>
+                            <Route path='info' element={<VacationInfo />} />
+                            <Route path='member' element={
+                                <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_HR']}>
+                                    <VacationMember />
                                 </ProtectedRoute>
-                                }/>
-                            <Route path='/vacation'>
-                                <Route path='info' element={<VacationInfo/>}/>
-                                <Route path='member' element={
-                                    <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
-                                        <VacationMember/>
-                                    </ProtectedRoute>
-                                    }/>
-                                <Route path='personal' element={<VacationPersonal/>}/>
-                            </Route>
+                            } />
+                            <Route path='personal' element={<VacationPersonal />} />
+                        </Route>
                         <Route path='/attendance'>
                             <Route path="member" element={
-                                <ProtectedRoute requiredRoles={['ROLE_ADMIN','ROLE_HR']}>
+                                <ProtectedRoute requiredRoles={['ROLE_ADMIN', 'ROLE_HR']}>
                                     <AttendanceMember/>
                                 </ProtectedRoute>
-                            }/>
-                            <Route path="personal" element={<AttendancePersonal/>}/>
+                            } />
+                            <Route path="personal" element={<AttendancePersonal />} />
                         </Route>
-                        <Route path="/organization" element={<Organization/>}/>
+                        <Route path="/organization" element={<Organization />} />
                         <Route path='/approvals'>
                             <Route path="my-documents" element={<DocumentTable />} />
                             <Route path="received" element={<ReceivedDocumentTable />} />
                             <Route path="processed" element={<ProcessedDocumentTable />} />
                             <Route path="new" element={<ApprovalForm />} />
                             <Route path=":id" element={<DocumentDetailPage />} />
-                            <Route path='cc-documents' element={<CcDocumentTable/>}/>
+                            <Route path='cc-documents' element={<CcDocumentTable />} />
                         </Route>
-                        <Route path='/unAuthorized' element={<Unauthorized/>}/>
+                        <Route path='/unAuthorized' element={<Unauthorized />} />
                     </Routes>
-            {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
-            {isChatOpen && <ChatManager onClose={handleToggleChat} />}
+
+                    {isNoticeOpen && <NoticeMain onClose={handleToggleNotice} />}
+                    {/* isChatOpen 상태가 true일 때만 ChatManager를 렌더링 */}
+                    {isChatOpen && <ChatManager onClose={handleToggleChat} />}
+                </div>
             </div>
-        </div>
         </>
     )
 }

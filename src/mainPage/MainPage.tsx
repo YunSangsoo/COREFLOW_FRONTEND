@@ -10,10 +10,11 @@ import Header from "../components/Header";
 import { selectTotalUnreadCount } from "../features/chatSlice";
 
 interface MainPageProps {
+    onNoticeClick: () => void;
     onChatClick: () => void;
 }
 
-export default function MainPage({ onChatClick }: MainPageProps) {
+export default function MainPage({ onNoticeClick, onChatClick }: MainPageProps) {
     const auth = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -25,7 +26,7 @@ export default function MainPage({ onChatClick }: MainPageProps) {
             onChatClick();
         }
         if ( item.action === 'notice') {
-            openNoticeModal();
+            onNoticeClick();
         }
         if (item.subItems) {
             setOpenCard(openCard === item.name ? null : item.name);
@@ -34,7 +35,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
     };
 
     const [openCard, setOpenCard] = useState<string | null>('');
-    const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
     const totalUnreadCount = useSelector(selectTotalUnreadCount);
 
     const handleLogout = () => {
@@ -43,16 +43,7 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                 dispatch(logout());
                 navigate("/");
             })
-    };
-
-    const openNoticeModal = () => {
-        setIsNoticeMainOpen(true);
-    }
-
-    const closeNoticeModal = () => {
-        setIsNoticeMainOpen(false);
-    }
-
+    }; 
     return (
         <>
             <div className="fixed top-0 left-0 w-screen flex flex-col justify-between bg-gray-800 text-white h-32">
@@ -112,7 +103,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
                 ))}
                 </div>
             </div>
-            {isNoticeMainOpen && <NoticeMain onClose={closeNoticeModal}/>}
         </>
     )
 }
