@@ -81,10 +81,10 @@ export default function Mypage() {
     const totalPages = Math.max(1, Math.ceil(vacations.length / rowsPerPage));
 
     return (
-        <div className="flex max-w-screen max-h-screen gap-y-4 pt-20">
+        <div className="flex max-w-screen min-w-4/5 max-h-screen min-h-[90vh] gap-y-4 pt-20">
             <div className="flex w-full h-full">
                 {/* 정보 수정 */}
-                <div className="bg-white shadow-gray-600 shadow-xs rounded p-4 mr-4 min-w-md">
+                <div className="bg-white shadow-[3px_3px_3px_3px_rgba(75,85,99,0.8)] rounded p-4 gap-3 min-w-[380px] max-w-[420px] w-1/3">
                     <h1 className="text-xl font-bold mb-4">마이페이지</h1>
 
                     {/* 이름, 이메일 - 조회만 가능 */}
@@ -260,7 +260,7 @@ export default function Mypage() {
                     )}
                 </div>
                 {/* 휴가 정보 */}
-                <div className="bg-white shadow-gray-600 shadow-xs rounded p-4 min-w-3xl">
+                <div className="bg-white shadow-[3px_3px_3px_3px_rgba(75,85,99,0.8)] rounded p-4 gap-3 ml-5 min-w-[760px] max-w-[800px] w-2/3">
                     <div className="flex flex-col flex-shrink-0">
                         <h1 className="text-xl font-bold mb-4">휴가</h1>
                         {/* Use conditional rendering for annual leave data */}
@@ -281,7 +281,7 @@ export default function Mypage() {
                     </div>
                     <div className="flex flex-col flex-shrink-0">
                         <h1 className="text-xl font-bold">휴가 사용 및 신청 내역</h1>
-                        <table className="min-w-80 max-w-fit text-center border-collapse table-fixed overflow-auto">
+                        <table className="min-w-80 max-w-11/12 text-center border-collapse table-fixed overflow-auto">
                             <thead className="bg-blue-200">
                                 <tr>
                                     <th className="px-4 py-2 w-1/2">기간</th>
