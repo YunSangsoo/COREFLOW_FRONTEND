@@ -41,7 +41,7 @@ function App() {
     const isAuthPage = location.pathname.startsWith('/auth');
     const isMainPage = location.pathname === '/';
     const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
-
+    
     useEffect(() => {
         api.post("/auth/refresh")
             .then(res => {
@@ -91,7 +91,7 @@ function App() {
                 }
                 <div >
                     <Routes>
-                        <Route path="/" element={<MainPage onChatClick={handleToggleChat} />} />
+                        <Route path="/" element={<MainPages onChatClick={handleToggleChat} />} />
                         <Route path="/auth">
                             <Route path="login" element={<Login />} />
                             <Route path="find-pwd" element={<FindPwd/>}/>
