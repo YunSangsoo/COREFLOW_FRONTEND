@@ -194,6 +194,7 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       // ✅ 창을 열기 전에, 해당 채팅방의 최신/상세 정보를 API로 다시 가져옵니다.
       const response = await api.get<ChatRooms>(`/chatting/room/${chatRoom.roomId}`);
       const detailedChatRoom = response.data;
+      dispatch(updateChatRoom(detailedChatRoom));
       const newWindow: WindowState = {
         id: windowId,
         title: detailedChatRoom.roomName,

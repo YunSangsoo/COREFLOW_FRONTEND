@@ -4,10 +4,10 @@ import { api } from "../api/coreflowApi";
 import type { RootState } from "../store/store"
 import { logout } from "../features/authSlice";
 import NoticeMain from "../components/notice/NoticeMain";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { menuItems } from "../types/menuItems";
 import Header from "../components/Header";
-import { selectTotalUnreadCount } from "../features/chatSlice";
+import { clearGlobalUnreadCount, selectGlobalUnreadCount } from "../features/chatSlice";
 
 interface MainPageProps {
     onChatClick: () => void;
@@ -17,25 +17,30 @@ export default function MainPage({ onChatClick }: MainPageProps) {
     const auth = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const handleCardClick = (item: any) => {
-        if (item.path) {
-            navigate(item.path);
-        }
-        if (item.action === 'chat') {
-            onChatClick();
-        }
-        if ( item.action === 'notice') {
-            openNoticeModal();
-        }
-        if (item.subItems) {
-            setOpenCard(openCard === item.name ? null : item.name);
-        }
-    // 하위 메뉴가 있는 그룹 카드는 클릭해도 아무 동작 안 하도록 설정
-    };
+
 
     const [openCard, setOpenCard] = useState<string | null>('');
     const [isNoticeMainOpen, setIsNoticeMainOpen] = useState(false);
-    const totalUnreadCount = useSelector(selectTotalUnreadCount);
+    const totalUnreadCount = useSelector(selectGlobalUnreadCount);
+
+    const handleCardClick = (item: any) => {
+    if (item.path) {
+        navigate(item.path);
+    }
+    if (item.action === 'chat') {
+        if (totalUnreadCount > 0) {
+                dispatch(clearGlobalUnreadCount());
+        }
+        onChatClick();
+    }
+    if ( item.action === 'notice') {
+        openNoticeModal();
+    }
+    if (item.subItems) {
+        setOpenCard(openCard === item.name ? null : item.name);
+    }
+// 하위 메뉴가 있는 그룹 카드는 클릭해도 아무 동작 안 하도록 설정
+    };
 
     const handleLogout = () => {
         api.post("/auth/logout")
@@ -52,7 +57,6 @@ export default function MainPage({ onChatClick }: MainPageProps) {
     const closeNoticeModal = () => {
         setIsNoticeMainOpen(false);
     }
-
     return (
         <>
             <div className="fixed top-0 left-0 w-screen flex flex-col justify-between bg-gray-800 text-white h-32">
