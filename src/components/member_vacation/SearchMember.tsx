@@ -14,29 +14,23 @@ export default function SearchMember({ searchName, onSelectMember }: SearchMembe
             const [, actualSearchTerm] = queryKey;
             return memChoice(actualSearchTerm as string);
         },
-        // 1. searchName에 값이 있을 때만 쿼리를 실행하도록 설정
         enabled: !!searchName,
     });
 
-    // 2. 데이터 로딩 중일 때 UI
     if (isLoading) {
         return <div className="py-4 text-center text-gray-500">사원 목록을 불러오는 중...</div>;
     }
 
-    // 3. 에러 발생 시 UI
     if (isError) {
         return <div className="py-4 text-center text-red-500">사원 목록을 불러오는 데 실패했습니다.</div>;
     }
 
-    // 4. API에서 받은 데이터를 기반으로 필터링
-    const filteredMembers = Array.isArray(data) ? data.filter(item => item.userName.includes(searchName)):[];
+    const filteredMembers = Array.isArray(data) ? data.filter(item => item.userName.includes(searchName)) : [];
 
-    // 5. 필터링된 결과가 없을 경우 아무것도 렌더링하지 않음
     if (filteredMembers.length === 0) {
         return null;
     }
 
-    // 6. 필터링된 결과가 있을 경우에만 테이블을 렌더링
     return (
         <div className="absolute w-full top-full left-0 z-20">
             <div className="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">

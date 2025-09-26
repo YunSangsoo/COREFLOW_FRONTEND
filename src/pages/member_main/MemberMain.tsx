@@ -59,7 +59,6 @@ export default function MemberMain() {
         queryFn: () => depDetailList(searchValues.parentDepId!),
         enabled: searchValues.parentDepId !== null
     })
-
     
     // 직위 목록 조회용 훅
     const { data: position } = useQuery<Position[]>({
@@ -158,7 +157,7 @@ export default function MemberMain() {
     if (isError) return <div>{error.message}</div>
 
     return (
-        <div className="max-w-6xl mx-auto p-8 lg:p-12 bg-gray-50 min-h-screen">
+        <div className="max-w-6xl mx-auto p-8 lg:p-12 min-h-screen">
             <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">휴가 관리</h1>
 
             <div className="flex flex-wrap items-center justify-center gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
@@ -261,15 +260,15 @@ export default function MemberMain() {
                 <table className="min-w-full divide-y divide-gray-200 text-sm text-center">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-10">NO</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">사원번호</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">사원명</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-50">이메일</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">입사일</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">소속</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">직위</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-35">전화번호</th>
-                            <th scope="col" className="px-3 py-3 font-bold text-left whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">재직상태</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-10">NO</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">사원번호</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">사원명</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-50">이메일</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-25">입사일</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">소속</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">직위</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-35">전화번호</th>
+                            <th scope="col" className="px-3 py-3 font-bold whitespace-nowrap text-xs text-gray-700 uppercase tracking-wider w-20">재직상태</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">

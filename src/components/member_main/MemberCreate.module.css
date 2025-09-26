@@ -1,0 +1,239 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 550px;
+    max-height: 95vh;
+    overflow-y: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalContent h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333333;
+    text-align: center;
+}
+
+.profileSection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.profileImage {
+    width: 90px;
+    height: 90px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid #007bff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.profileImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.plusIcon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #007bff;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.infoRow {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.infoRow span {
+    font-weight: 600;
+    color: #444444;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+}
+
+.infoRow input[type="text"],
+.infoRow input[type="email"],
+.infoRow input[type="date"],
+.infoRow select {
+    padding: 7px 10px;
+    height: 34px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background-color: #fcfcfc;
+    width: 100%;
+}
+
+.infoRow input[type="text"]:focus,
+.infoRow input[type="email"]:focus,
+.infoRow input[type="date"]:focus,
+.infoRow select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.infoRow input[readOnly] {
+    background-color: #eeeeee;
+    color: #777777;
+    cursor: default;
+}
+
+.depInputContainer {
+    position: relative;
+    width: 100%;
+}
+
+.depInputContainer input[readOnly] {
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.depTreeContainer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #c0c0c0;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 1010;
+    margin-top: 2px;
+}
+
+
+.addressSection {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.addressRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.addressRow span {
+    font-weight: 600;
+    color: #444444;
+    min-width: 60px;
+    font-size: 0.8rem;
+}
+
+.addressRow input[type="text"] {
+    flex-grow: 1;
+    padding: 7px 10px;
+    height: 34px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background-color: #fcfcfc;
+}
+
+.addressButton {
+    padding: 7px 12px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+    white-space: nowrap;
+    height: 34px;
+    font-size: 0.85rem;
+}
+
+.addressButton:hover {
+    background-color: #0056b3;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.buttonGroup button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 60px;
+}
+
+.buttonGroup button:nth-child(1) {
+    background-color: #5a6268;
+    color: white;
+}
+
+.buttonGroup button:nth-child(1):hover {
+    background-color: #4e555b;
+}
+
+.buttonGroup button:nth-child(2) {
+    background-color: #007bff;
+    color: white;
+}
+
+.buttonGroup button:nth-child(2):hover {
+    background-color: #0056b3;
+}

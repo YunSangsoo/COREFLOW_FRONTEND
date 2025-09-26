@@ -154,8 +154,6 @@ export default function NoticeInsert({ initData, onClose }: NoticeInsertProps) {
     }
     const originalImageUrl = initData?.files?.map(file => `${import.meta.env.VITE_API_BACE_URL}/images/${file.imageCode}/${file.changeName}`) ?? [];
 
-
-
     return (
         <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-opacity-50">
             <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
@@ -274,7 +272,6 @@ export default function NoticeInsert({ initData, onClose }: NoticeInsertProps) {
                                                 type="date"
                                                 name="endDate"
                                                 value={noticeForm.endDate || ''}
-
                                                 onChange={handleChange}
                                                 className="rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none"
                                             />

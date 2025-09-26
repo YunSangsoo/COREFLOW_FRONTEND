@@ -68,7 +68,6 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
         }
     }
 
-
     // 사원 데이터 수정
     const updateMutation = useMutation({
         mutationFn: (updatedMember: FormData) => memberUpdate(userNo, updatedMember), //MemberPatch
@@ -78,9 +77,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
             alert("회원 정보 수정 완료");
             onClose();
         },
-        onError: () => {
-            alert("회원 정보 수정 실패");
-        }
+        onError: () => {alert("회원 정보 수정 실패");}
     });
 
     const deleteMutation = useMutation({
@@ -90,9 +87,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
             alert('사원 삭제 완료');
             onClose();
         },
-        onError: () => {
-            alert('사원 삭제 실패');
-        }
+        onError: () => {alert('사원 삭제 실패');}
     })
 
     // 입력 필드 수정 핸들러
@@ -148,6 +143,7 @@ export default function MemberDetail({ userNo, onClose }: { userNo: number, onCl
     }
 
     const originalImageUrl = `${import.meta.env.VITE_API_BASE_URL}/images/${data?.profile.imageCode}/${data?.profile.changeName}`;
+    
     // 날짜 포맷
     const hireDateFormat = updateData?.hireDate?.split('T')[0];
     const updateDateFormat = updateData?.updateDate?.split('T')[0];

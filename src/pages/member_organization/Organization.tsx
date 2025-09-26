@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { MemberResponse } from "../../types/member"
-import { childDeptList, memberList, parentDeptList} from "../../api/organizationApi"
+import { childDeptList, memberList, parentDeptList } from "../../api/organizationApi"
 import { useState } from "react";
 import type { Department, DepartmentDetail, TreeNode } from "../../types/organization";
 import Tree from 'react-d3-tree'
@@ -10,19 +10,19 @@ export default function Organization() {
     const [childDeptId, setChildDeptId] = useState<number | null>(null);
 
     // 1. 부서 조회
-    const { data: parentDepts} = useQuery<Department[]>({
+    const { data: parentDepts } = useQuery<Department[]>({
         queryKey: ['parentDepts'],
         queryFn: parentDeptList
     })
     // 2. 부서별 팀 조회
-    const { data: childDepts} = useQuery<DepartmentDetail[]>({
+    const { data: childDepts } = useQuery<DepartmentDetail[]>({
         queryKey: ['childDepts', parentDeptId],
         queryFn: () => childDeptList(parentDeptId!),
         enabled: !!parentDeptId
     })
 
     // 3. 팀별 사원 조회
-    const { data: members }= useQuery<MemberResponse[]>({
+    const { data: members } = useQuery<MemberResponse[]>({
         queryKey: ['members', childDeptId],
         queryFn: () => memberList(childDeptId!),
         enabled: !!childDeptId
@@ -44,10 +44,10 @@ export default function Organization() {
 
     const transformDataToTree = (): TreeNode => {
         if (!parentDepts) {
-            return { name: "데이터 없음", attributes: {id:0, type: "회사" }, children: [] };
+            return { name: "데이터 없음", attributes: { id: 0, type: "회사" }, children: [] };
         }
 
-        const departmentNodes:TreeNode[] = parentDepts.map(parentDept => {
+        const departmentNodes: TreeNode[] = parentDepts.map(parentDept => {
             const childrenNodes: TreeNode[] = (childDepts || [])
                 .filter(child => child.parentId === parentDept.depId)
                 .map(childDept => {
@@ -55,49 +55,46 @@ export default function Organization() {
                         members.map(member => ({
                             name: member.userName,
                             attributes: {
-                                id:member.userNo,
+                                id: member.userNo,
                                 type: '사원',
                                 posName: member.posName,
                             },
                             children: []
                         })) : [];
-
                     return {
                         name: childDept.depName,
                         attributes: {
-                            id:childDept.depId,
+                            id: childDept.depId,
                             type: '상세부서',
                         },
                         children: memberNodes
                     }
                 })
-            
             return {
                 name: parentDept.depName,
                 attributes: {
-                    id:parentDept.depId,
+                    id: parentDept.depId,
                     type: '부서',
                 },
                 children: childrenNodes
             }
         })
 
-        const companyRootNode:TreeNode={
-            name:"KH정보교육원",
-            attributes:{
-                id:0,
-                type:"회사"
+        const companyRootNode: TreeNode = {
+            name: "KH정보교육원",
+            attributes: {
+                id: 0,
+                type: "회사"
             },
-            children:departmentNodes
+            children: departmentNodes
         }
-        
         return companyRootNode;
     }
     const treeData: TreeNode = transformDataToTree();
 
-    return(
+    return (
         <div id="treeWrapper" style={{ width: '100vw', height: '100vh' }}>
-            <Tree data={treeData} translate={{ x: 600, y: 150 }} orientation="vertical" onNodeClick={onNodeClick}/>
+            <Tree data={treeData} translate={{ x: 600, y: 150 }} orientation="vertical" onNodeClick={onNodeClick} />
         </div>
     )
 }
