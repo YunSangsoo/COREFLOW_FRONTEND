@@ -211,7 +211,7 @@ export const ChatRoomModal = ({ chatRooms, users, position, onClose, onUsersUpda
 
         pickedUsers.forEach(user =>{
             stompClient.publish({
-            destination: `/app/chat/enter/${chatRooms.roomId}`,
+            destination: `/api/chat/enter/${chatRooms.roomId}`,
             body: JSON.stringify({
               userNo : user.userNo,
               userName : user.userName,
