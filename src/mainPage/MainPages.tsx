@@ -401,7 +401,9 @@ export default function MainPages({ onChatClick }: Props) {
                     <TableRow key={i}><TableCell colSpan={5}><Skeleton height={24} /></TableCell></TableRow>
                   ))}
                   {!loading && notices.map(n => (
+
                     <TableRow key={n.noticeId} hover onClick={() => openNoticeDetail(n.noticeId)}>
+
                       <TableCell><MuiLink underline="hover" component="button">{n.title}</MuiLink></TableCell>
                       <TableCell>{dayjs(n.createdAt).format("YYYY/MM/DD")}</TableCell>
                       <TableCell>{n.writerName ?? "-"}</TableCell>
