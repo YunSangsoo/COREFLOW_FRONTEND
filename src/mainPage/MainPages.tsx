@@ -389,26 +389,27 @@ export default function MainPages({ onChatClick }: Props) {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ "& th": { fontWeight: 700, bgcolor: "grey.50" } }}>
+                    <TableCell>No</TableCell>
+                    <TableCell>작성자</TableCell>
                     <TableCell sx={{ width: "60%" }}>제목</TableCell>
                     <TableCell>작성일</TableCell>
-                    <TableCell>작성자</TableCell>
-                    <TableCell align="center">조회</TableCell>
-                    <TableCell align="center">첨부</TableCell>
+                    {/* <TableCell align="center">조회</TableCell>
+                    <TableCell align="center">첨부</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {loading && [...Array(4)].map((_, i) => (
                     <TableRow key={i}><TableCell colSpan={5}><Skeleton height={24} /></TableCell></TableRow>
                   ))}
-                  {!loading && notices.map(n => (
+                  {!loading && notices.map((n,i) => (
 
                     <TableRow key={n.noticeId} hover onClick={() => openNoticeDetail(n.noticeId)}>
-
+                      <TableCell align="center">{i+1}</TableCell>
+                      <TableCell>{n.writerName ?? "-"}</TableCell>
                       <TableCell><MuiLink underline="hover" component="button">{n.title}</MuiLink></TableCell>
                       <TableCell>{dayjs(n.createdAt).format("YYYY/MM/DD")}</TableCell>
-                      <TableCell>{n.writerName ?? "-"}</TableCell>
-                      <TableCell align="center">{n.views ?? "-"}</TableCell>
-                      <TableCell align="center">{n.hasAttachment ? "📎" : ""}</TableCell>
+                      {/* <TableCell align="center">{n.views ?? "-"}</TableCell>
+                      <TableCell align="center">{n.hasAttachment ? "📎" : ""}</TableCell> */}
                     </TableRow>
                   ))}
                   {!loading && notices.length === 0 && (
