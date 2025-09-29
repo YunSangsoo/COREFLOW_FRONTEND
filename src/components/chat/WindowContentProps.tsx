@@ -31,6 +31,8 @@ interface WindowContentProps {
     handleStartVideoCall: (partner: chatProfile) => void;
     registerSignalHandler: (partnerNo: number, handler: (signal: SignalMessage) => void) => void;
     unregisterSignalHandler: (partnerNo: number) => void;
+    handleAcceptCall: (call: SignalMessage) => void;
+    handleDeclineCall: (call: SignalMessage) => void;
 
 }
 
@@ -58,7 +60,34 @@ export const WindowContent = (props: WindowContentProps) => {
     handleStartVideoCall,
     registerSignalHandler,
     unregisterSignalHandler,
+    handleAcceptCall,
+    handleDeclineCall,
   } = props;
+
+    if (window.incomingCallData) {
+      const call = window.incomingCallData;
+      return (
+          <div className="flex flex-col items-center justify-center h-full p-4 bg-gray-100">
+              <p className="font-semibold text-center text-gray-800">
+                  영상통화 요청이 왔습니다.
+              </p>
+              <div className="flex justify-center mt-4 space-x-4">
+                  <button 
+                      onClick={() => handleDeclineCall(call)} 
+                      className="px-4 py-2 font-bold text-white bg-red-500 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75"
+                  >
+                      거절
+                  </button>
+                  <button 
+                      onClick={() => handleAcceptCall(call)} 
+                      className="px-4 py-2 font-bold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
+                  >
+                      수락
+                  </button>
+              </div>
+          </div>
+      );
+  }
 
   if (window.id === 'chat-menu') {
     return <ChatMenu

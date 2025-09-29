@@ -50,6 +50,7 @@ export interface WindowState {
   width : number;
   height : number;
   initialData?: any; // ✅ 통화 제안(offer) 등 일회성 초기 데이터를 전달하기 위한 속성
+  incomingCallData?: SignalMessage;
 }
 
 export interface ChatManagerProps {

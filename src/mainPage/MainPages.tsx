@@ -286,7 +286,8 @@ export default function MainPages({ onChatClick }: Props) {
   return (
     <>
       {/* 헤더 */}
-      <div ref={headerRef} className="fixed top-0 left-0 right-0 bg-gray-800 text-white flow-root" style={{ zIndex: 1000 }}>
+      <div ref={headerRef} className="fixed top-0 left-0 right-0 bg-gray-800 text-white flow-root" style={{ zIndex: 0 }}>
+      {/* style={{ zIndex: 0 } */}
         <p className="px-4 py-2 font-bold text-5xl leading-tight m-0">CoreFlow</p>
         {/* {accessToken && <Header />} */}
         <Header />

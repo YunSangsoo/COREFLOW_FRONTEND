@@ -76,11 +76,19 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
       profileUser: partner,
       initialData: callToAccept.data, // ✅ 파라미터로 받은 통화의 offer 정보를 사용
     };
-    setWindows(prev => [...prev, newWindow]);
+    // setWindows의 함수형 업데이트를 사용하여 한번에 처리
+    setWindows(prevWindows => {
+        // 1. 이전 창 목록에서 '수신 전화' 창을 먼저 제거합니다.
+        const windowsWithoutCall = prevWindows.filter(win => win.id !== `call-${callToAccept.from}`);
+
+        // 2. 제거된 목록에 새로운 '화상채팅' 창을 추가합니다.
+        return [...windowsWithoutCall, newWindow];
+    });
+
     setNextZIndex(prev => prev + 1);
 
     // ✅ 2. 처리한 통화 요청을 수신 목록 배열에서 제거합니다.
-    setIncomingCalls(prev => prev.filter(call => call.from !== callToAccept.from));
+    // setIncomingCalls(prev => prev.filter(call => call.from !== callToAccept.from));
   };
 
   const handleStartVideoCall = (partner: chatProfile) => {
@@ -105,7 +113,9 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
 
   const handleDeclineCall = (callToDecline: SignalMessage) => {
     alert(`[${callToDecline.from}]님의 전화를 거절합니다.`);
-    setIncomingCalls(prev => prev.filter(call => call.from !== callToDecline.from));
+    //setIncomingCalls(prev => prev.filter(call => call.from !== callToDecline.from));
+
+    handleCloseWindow(`call-${callToDecline.from}`);
   };
   
   const handleNewMessage = (room: ChatRooms, message: ChatMessage) => {
@@ -411,7 +421,34 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
         switch (signal.type) {
           case 'offer':
             // 전화 제안이 오면 수신 목록에 추가
-            setIncomingCalls(prev => [...prev, signal]);
+
+            const callerProfile = allUsers.find(user => user.userNo === signal.from);
+                    if (!callerProfile) return;
+
+            // ✅ 2. 새로운 '수신 전화' 창 객체 생성
+            const windowId = `call-${signal.from}`;
+            const newCallWindow: WindowState = {
+                id: windowId,
+                title: `${callerProfile.userName}님에게서 영상통화`,
+                zIndex: nextZIndex, // 항상 최상단에 보이도록 높은 zIndex 부여
+                position: { top: initialTop, left: initialLeft },
+                width: 300,
+                height: 150,
+                incomingCallData: signal, // ✅ 창 내부에 signal 정보 전달
+            };
+
+            // ✅ 3. windows 상태에 새로운 창 추가
+            
+            setWindows(prev => {
+                        // 이미 같은 전화 창이 있는지 확인 (중복 방지)
+                        if (prev.some(win => win.id === windowId)) return prev;
+                        return [...prev, newCallWindow];
+                    });
+            setNextZIndex(prev => prev + 1);
+
+            break;
+
+            //setIncomingCalls(prev => [...prev, signal]);
             break;
           case 'answer':
           case 'ice':
@@ -483,12 +520,13 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
                 handleStartVideoCall={handleStartVideoCall}
                 registerSignalHandler={registerSignalHandler}
                 unregisterSignalHandler={unregisterSignalHandler}
+                handleAcceptCall={handleAcceptCall}
+                handleDeclineCall={handleDeclineCall}
               />
             </FloatingWindow>
           ))}
         </DndContext>
-      </div >
-      <div className="fixed top-0 left-0 border-black ">
+      {/* <div>
         {incomingCalls.map(call => (
           <div key={call.from} className=" bg-white p-4 rounded-lg shadow-xl">
             <p className="font-semibold">영상통화 요청이 왔습니다.</p>
@@ -508,7 +546,8 @@ const ChatManager = ({ onClose }: ChatManagerProps) => {
             </div>
           </div>
         ))}
-        </div>
+        </div> */}
+      </div >
     </>
   );
 };
