@@ -26,9 +26,10 @@
 }
 
 .modalContent h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 15px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    
     padding-bottom: 8px;
     border-bottom: 1px solid #e0e0e0;
     color: #333333;
@@ -98,6 +99,8 @@
 }
 
 .infoRow input[type="text"],
+.infoRow input[type="email"],
+.infoRow input[type="date"],
 .infoRow select {
     padding: 7px 10px;
     height: 34px;
@@ -109,6 +112,8 @@
 }
 
 .infoRow input[type="text"]:focus,
+.infoRow input[type="email"]:focus,
+.infoRow input[type="date"]:focus,
 .infoRow select:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
@@ -171,7 +176,7 @@
 .addressRow input[type="text"] {
     flex-grow: 1;
     padding: 7px 10px;
-    height: 32px;
+    height: 34px;
     border: 1px solid #dcdcdc;
     border-radius: 4px;
     font-size: 0.85rem;
@@ -188,7 +193,7 @@
     transition: background-color 0.2s;
     font-weight: 500;
     white-space: nowrap;
-    height: 32px;
+    height: 34px;
     font-size: 0.85rem;
 }
 
@@ -216,55 +221,19 @@
 }
 
 .buttonGroup button:nth-child(1) {
-    background-color:#5a6268;
+    background-color: #5a6268;
     color: white;
 }
 
 .buttonGroup button:nth-child(1):hover {
-    background-color: #0056b3;
+    background-color: #4e555b;
 }
 
 .buttonGroup button:nth-child(2) {
-    background-color: #5a6268;
+    background-color: #007bff;
     color: white;
 }
 
 .buttonGroup button:nth-child(2):hover {
     background-color: #0056b3;
-}
-
-.buttonGroup button:nth-child(3) {
-    background-color:  #5a6268;
-    color: white;
-}
-
-.buttonGroup button:nth-child(3):hover {
-    background-color: #0056b3;
-}
-
-@media (max-width: 600px) {
-    .modalContent {
-        max-width: 95%;
-        padding: 15px;
-    }
-    .infoGrid {
-        grid-template-columns: 1fr;
-    }
-    .addressRow {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .addressRow span {
-        margin-bottom: 3px;
-    }
-    .addressRow input[type="text"] {
-        width: 100%;
-        margin-bottom: 5px;
-    }
-    .addressButton {
-        width: 100%;
-    }
-    .buttonGroup {
-        justify-content: space-between;
-    }
 }

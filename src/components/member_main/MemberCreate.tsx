@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { posList, memberCreate } from '../../api/memberApi';
 import type { Position } from '../../types/member';
 import DepartmentMap from './DepartmentMap';
-import styles from './MemberDetail.module.css';
+import styles from './MemberCreate.module.css';
 
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
