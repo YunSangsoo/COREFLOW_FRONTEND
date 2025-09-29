@@ -6,8 +6,13 @@ import {
 } from "@mui/material";
 
 type Department = { depId: number; depName: string; parentId?: number | null };
-type Member = { userNo: number; userName: string; email?: string; depId?: number };
-
+ type Member = {
+   userNo: number;
+   userName?: string;   // ← 옵셔널
+   name?: string;       // ← 백엔드가 name으로 줄 때 대비
+   email?: string;
+   depId?: number;
+ };
 export default function PeoplePickerDialog({
   open, mode, departments, members, selected, blockedUserNos = [],
   loadingMembers,
@@ -97,6 +102,7 @@ export default function PeoplePickerDialog({
               </Box>
               <List dense disablePadding sx={{ maxHeight: 400, overflow: "auto" }}>
                 {members.map((m) => {
+                  const displayName = m.userName ?? m.name ?? "";
                   const checked = selectedSet.has(m.userNo);
                   const disabled = isDisabledToSelect(m.userNo, checked);
                   return (
@@ -113,7 +119,8 @@ export default function PeoplePickerDialog({
                         disabled={disabled}
                       />
                       <ListItemText
-                        primary={`${m.userName}${m.email ? ` (${m.email})` : ""}`}
+                        // primary={`${m.userName}${m.email ? ` (${m.email})` : ""}`}
+                        primary={`${displayName}${m.email ? ` (${m.email})` : ""}`}
                         secondary={
                           disabled ? blockedReason : (m.depId ? `DEP:${m.depId}` : undefined)
                         }

@@ -38,6 +38,7 @@ import {
   updateCalendar as updateCalendarMeta,
   deleteCalendar as deleteCalendarApi,
   updateCalendar,
+  searchMembersForSharePicker,
 } from "../../api/calendarApi";
 import { fetchLabels } from "../../api/labelApi";
 
@@ -169,6 +170,49 @@ export default function CalendarPage() {
   const [pickSelectedMembers, setPickSelectedMembers] = useState<Member[]>([]);
   const [loadingDepts, setLoadingDepts] = useState(false);
   const [loadingMembers, setLoadingMembers] = useState(false);
+
+  useEffect(() => {
+  if (!pickOpen) return;
+  let alive = true;
+  (async () => {
+    try {
+      setLoadingDepts(true);
+      const deps = await fetchDepartments();
+      if (!alive) return;
+      setPickDepartments(deps);
+    } finally {
+      if (alive) setLoadingDepts(false);
+    }
+  })();
+  return () => { alive = false; };
+}, [pickOpen]);
+
+// 🔹 모달 열림/검색어/선택부서 변화에 따라 사원 목록 로딩
+useEffect(() => {
+  if (!pickOpen) return;
+  let alive = true;
+  (async () => {
+    try {
+      setLoadingMembers(true);
+      const list = await searchMembersForSharePicker(
+        pickQuery.trim(),
+        50,
+        pickDeptId == null ? undefined : pickDeptId
+      );
+      if (!alive) return;
+      setPickMembers(list.map(m => ({
+        userNo: m.userNo,
+        userName: (m as any).userName ?? m.name,
+        name: m.name,
+        email: (m as any).email,
+        depId: m.depId
+      })));
+    } finally {
+      if (alive) setLoadingMembers(false);
+    }
+  })();
+  return () => { alive = false; };
+}, [pickOpen, pickQuery, pickDeptId]);
 
   const styles = {
     button: { border: "1px solid #d0d7de", padding: "6px 10px", borderRadius: 8, cursor: "pointer", fontSize: 14, background: "#fff" } as React.CSSProperties,
