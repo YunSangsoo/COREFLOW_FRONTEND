@@ -158,7 +158,7 @@ export default function MemberMain() {
 
     return (
         <div className="max-w-6xl mx-auto p-8 lg:p-12 min-h-screen">
-            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">휴가 관리</h1>
+            <h1 className="text-3xl font-extrabold text-gray-800 mb-8 border-b pb-2">사원 관리</h1>
 
             <div className="flex flex-wrap items-center justify-center gap-5 p-6 mb-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md">
                 <div className="flex items-center gap-3">
