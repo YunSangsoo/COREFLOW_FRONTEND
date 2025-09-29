@@ -12,6 +12,7 @@ import { notiList } from "./noticeApi";
 import type { NoticeResponse, SearchParams } from "../types/notice";
 
 export type NoticeItem = {
+  essential:string;
   noticeId: number;
   title: string;
   writerName?: string;
@@ -124,6 +125,7 @@ export async function fetchNotices(limit = 8, params?: SearchParams): Promise<No
   const list = (await notiList(params ?? {})) as NoticeResponse[];
 
   const mapped: NoticeItem[] = list.map((n) => ({
+    essential:String(n.essential),
     noticeId: Number(n.notiId),
     title: String(n.title ?? ""),
     writerName: n.userName ?? undefined,

@@ -317,7 +317,7 @@ export default function NoticeInsert({ initData, onClose }: NoticeInsertProps) {
                                         />
                                         <span className="text-sm font-medium">파일 선택</span>
                                     </label>
-                                    <span className="font-bold text-gray-700">첨부파일 ({initData?.files?.length ?? 0}개)</span>
+                                    <span className="font-bold text-gray-700">첨부파일({initData?.files?.length ?? 0}개)</span>
                                 </div>
                                 <button onClick={OpenNoticeFile} className="text-blue-600 hover:underline">
                                     파일 목록 보기

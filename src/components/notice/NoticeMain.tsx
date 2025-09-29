@@ -47,12 +47,12 @@ export default function NoticeMain({ onClose }: NoticeMainProps) {
         searchType: "title",
         keyword: "",
     });
-
+    
     const { data: noticeList } = useQuery<NoticeResponse[]>({
         queryKey: ['notices', searchParams],
         queryFn: () => notiList(searchParams)
     })
-
+    
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target;
         setInputParams(prev => ({

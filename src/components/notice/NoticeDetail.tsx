@@ -38,6 +38,7 @@ export default function NoticeDetail({ notiId, onClose }: NoticeDetailProps) {
         queryFn: () => notiDetail(notiId),
         enabled: notiId != null
     })
+    
     const deleteMutation = useMutation({
         mutationFn: (notiId: number) => notiDelete(notiId),
         onSuccess: () => {

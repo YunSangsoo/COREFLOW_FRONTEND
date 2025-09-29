@@ -406,7 +406,11 @@ export default function MainPages({ onChatClick }: Props) {
                     <TableRow key={n.noticeId} hover onClick={() => openNoticeDetail(n.noticeId)}>
                       <TableCell align="center">{i+1}</TableCell>
                       <TableCell>{n.writerName ?? "-"}</TableCell>
-                      <TableCell><MuiLink underline="hover" component="button">{n.title}</MuiLink></TableCell>
+                      <TableCell><MuiLink underline="hover" component="button">
+                        {n.essential === 'T' && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">필독</span>
+                            )}
+                        {n.title}</MuiLink></TableCell>
                       <TableCell>{dayjs(n.createdAt).format("YYYY/MM/DD")}</TableCell>
                       {/* <TableCell align="center">{n.views ?? "-"}</TableCell>
                       <TableCell align="center">{n.hasAttachment ? "📎" : ""}</TableCell> */}
