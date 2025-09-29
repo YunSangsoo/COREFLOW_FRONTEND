@@ -283,12 +283,9 @@ const toStr = (...vals: any[]): string => {
 };
 
 export async function searchMembersForSharePicker(
-  query = "",
-  limit = 30,
-  depId?: number
+  query = "", limit = 30, depId?: number
 ): Promise<MemberLite[]> {
-  // 엔드포인트는 현재 쓰는 걸 유지
-  const r = await api.get("/CalendarMembers", { params: { query, limit, depId } });
+  const r = await api.get("/calendar/members", { params: { query, limit, depId } });
   const raw = (unwrap<any[]>(r) ?? []) as any[];
 
   return raw
@@ -296,18 +293,24 @@ export async function searchMembersForSharePicker(
       const userNo = num(m.userNo ?? m.USER_NO ?? m.id ?? m.USER_ID);
       if (!Number.isFinite(userNo)) return null;
 
+      const userName = String(
+        m.userName ?? m.USER_NAME ?? m.name ?? m.NAME ?? ""
+      );
+
       return {
         userNo,
-        // 서버가 userName/NAME/name 중 무엇을 주든 표준 name으로 치환
-        name: String(m.name ?? m.userName ?? m.USER_NAME ?? m.NAME ?? ""),
+        // ★ PeoplePicker가 userName을 보더라도 보이고,
+        //   다른 곳에서 name만 보더라도 보이도록 둘 다 채움
+        userName,
+        name: userName,
         email: m.email ?? m.EMAIL ?? undefined,
         depId: num(m.depId ?? m.DEP_ID) ?? undefined,
         posId: num(m.posId ?? m.POS_ID) ?? undefined,
         depName: m.depName ?? m.DEP_NAME ?? undefined,
         posName: m.posName ?? m.POS_NAME ?? undefined,
-      } as MemberLite;
+      } as MemberLite & { userName: string };
     })
-    .filter((x): x is MemberLite => !!x && x.name.length > 0);
+    .filter((x): x is MemberLite & { userName: string } => !!x && x.userName.length > 0);
 }
 
 // ✅ 부서 트리
@@ -317,7 +320,7 @@ export async function fetchDeptChildren(parentId?: number | null): Promise<DeptN
 
   // 1순위: 실제 운영에서 가장 일반적인 엔드포인트
   try {
-    const r = await api.get("/CalendarDepartments", { params });
+    const r = await api.get("/calendar/org/departments", { params });
     const raw = pickArray(r);
     if (raw.length) {
       return raw
@@ -614,16 +617,18 @@ export async function deleteEventType(typeId: number): Promise<void> {
 }
 
 /** 멤버 검색 (이름/이메일 부분검색) */
-export async function searchMembers(query = "", limit = 30, depId?: number): Promise<Member[]> {
-  const r = await api.get("/CalendarMembers", { params: { query, limit, depId } });
+export async function searchMembers(
+  query = "", limit = 30, depId?: number
+): Promise<Member[]> {
+  const r = await api.get("/calendar/members", { params: { query, limit, depId } }); // ← 경로 통일
   const raw = unwrap<any[]>(r) ?? [];
   return raw.map((m) => ({
-    userNo: num(m.userNo ?? m.USER_NO),
-    userName: String(m.userName ?? m.USER_NAME ?? ""),
-    email: m.email ?? m.EMAIL,
-    depId: num(m.depId ?? m.DEP_ID ?? 0) || undefined,
-    posId: num(m.posId ?? m.POS_ID ?? 0) || undefined,
-  }));
+    userNo: num(m.userNo ?? m.USER_NO ?? m.id ?? m.USER_ID),
+    userName: String(m.userName ?? m.name ?? m.USER_NAME ?? m.NAME ?? ""), // ← name fallback
+    email: m.email ?? m.EMAIL ?? undefined,
+    depId: num(m.depId ?? m.DEP_ID) ?? undefined,
+    posId: num(m.posId ?? m.POS_ID) ?? undefined,
+  })).filter(x => Number.isFinite(x.userNo) && x.userName.length > 0);
 }
 
 
