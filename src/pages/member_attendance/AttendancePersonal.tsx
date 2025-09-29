@@ -7,8 +7,12 @@ import type { LoginUser } from "../../types/vacation";
 import VacDate from "../../components/member_vacation/VacDate";
 import { loginUser } from "../../api/vacationApi";
 import { loginUserAttendance } from "../../api/attendanceApi";
+import Pagination from "../../components/Approval/Pagination";
 
 export default function AttendancePersonal() {
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     // 연도 상태 관리용 훅
     const [selectYear, setSelectYear] = useState(dayjs().year());
@@ -19,6 +23,7 @@ export default function AttendancePersonal() {
         setSelectYear(year);
         if (month !== undefined) {
             setSelectMonth(month);
+            setCurrentPage(1);
         }
     }
 
@@ -34,6 +39,11 @@ export default function AttendancePersonal() {
         queryFn: () => loginUserAttendance(selectYear, selectMonth)
     });
 
+    const indexOfLastAttendance = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstAttendance = indexOfLastAttendance - ITEMS_PER_PAGE;
+    const currentAttendance = loginUserAtt?.slice(indexOfFirstAttendance, indexOfLastAttendance);
+    const totalPages = loginUserAtt && Math.ceil(loginUserAtt.length / ITEMS_PER_PAGE) || 0;
+    
     if (isLoading) return <div>Loading...</div>
     if (isError) return <div>{error.message}</div>
 
@@ -88,8 +98,8 @@ export default function AttendancePersonal() {
                                 </thead>
                                 <tbody>
                                     {
-                                        loginUserAtt && loginUserAtt.length > 0 ? (
-                                            loginUserAtt.map((data, index) => (
+                                        currentAttendance && currentAttendance.length > 0 ? (
+                                            currentAttendance.map((data, index) => (
                                                 <tr className="border-b border-gray-200 hover:bg-gray-50 transition duration-150" key={data.attId}>
                                                     <td className="w-12 p-2 border-r border-gray-200 text-center text-gray-700">{index + 1}</td>
                                                     <td className="w-20 p-2 border-r border-gray-200 text-center font-medium">{data.attDate}</td>
@@ -112,6 +122,11 @@ export default function AttendancePersonal() {
                             </table>
                         </div>
                     </div>
+                    {totalPages > 1 && (
+                                            <div className="mt-8 flex justify-center">
+                                                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                            </div>
+                                        )}
                 </div>
             </div>
         </div>
